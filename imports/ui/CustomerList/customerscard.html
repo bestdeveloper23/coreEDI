@@ -1,0 +1,328 @@
+<template name="customerscard">
+  <div>
+    <div class="fullScreenSpin" style="display:none;">
+      <div class="spinner"></div>
+    </div>
+    <!-- {{#if record}} -->
+    <div style="margin: 16px;">
+      <div class="row">
+        <div class="col-12 col-md-4">
+          <h2 class="text-dark mb-0">Customer Card
+          </h2>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 col-md-12 col-lg-12 displayInfo" id="displayInfo" style="padding-top: 8px; width: 100%;">
+          <div class="card shadow mb-4 cardSizing">
+            <div class="card-body text-nowrap">
+              <div>
+                <ul class="nav nav-tabs nav-fill">
+                  <li class="nav-item" style="cursor: pointer;">
+                    <a class="nav-link mainTab customerTab active" role="tab" data-toggle="tab" data-target="#tab-1"
+                      data-id="tab-1">
+                      Customer Details
+                    </a>
+                  </li>
+                  <li class="nav-item" style="cursor: pointer;">
+                    <a class="nav-link mainTab connectionTab" role="tab" data-toggle="tab" data-target="#tab-2"
+                      data-id="tab-2">
+                      Connections Pannel
+                    </a>
+                  </li>
+                  <li class="nav-item" style="cursor: pointer;">
+                    <a class="nav-link mainTab transactionPanelTab" role="tab" data-toggle="tab" data-target="#tab-3"
+                      data-id="tab-3">
+                      Transactions Pannel
+                    </a>
+                  </li>
+                  <li class="nav-item" style="cursor: pointer;"><a class="nav-link addvs1usertab" role="tab"
+                      data-toggle="tab" data-target="#tab-4" data-id="tab-4">CoreEDI User Login</a></li>
+                </ul>
+                <div class="tab-content">
+                  <div class="tab-pane active border rounded-0 tab-Customer" role="tabpanel" id="tab-1"
+                    style="background-color: #ededed; border-color: #ededed #00a3d3 #00a3d3 #00a3d3 !important;">
+                    <!--                      {{#if equals currentTab "tab-1"}}-->
+                    <div class="row d-xl-flex flex-column justify-content-xl-center" style="margin: 12px;">
+                      <div class="col">
+                        <div class="row">
+                          <div class="form-group col-md-2" style="padding-left: 4px;">
+                            <label>Company Name</label>
+                            <input type="text" class="form-control" id="edtCustomerCompany" name="edtCustomerCompany"
+                              value="{{record.company}}">
+                          </div>
+                          <div class="form-group col-md-2" style="padding-left:4px;">
+                            <label>Customer Email</label>
+                            <input type="text" class="form-control" id="edtCustomerEmail" name="edtCustomerEmail"
+                              value="{{record.email}}">
+                          </div>
+                          <div class="form-group flex-grow-1" style="padding-right: 8px;"><label class="text-nowrap">First
+                              Name</label><input type="text" class="form-control" id="edtFirstName" name="edtFirstName"
+                              value="{{record.firstname}}">
+                          </div>
+                          <div class="form-group flex-grow-1" style="padding-right: 4px; padding-left:4px;"><label
+                              class="text-nowrap">Middle
+                              Name</label><input type="text" class="form-control" id="edtMiddleName"
+                              name="edtMiddleName" value="{{record.middlename}}"></div>
+                          <div class="form-group flex-grow-1" style="padding-right: 8px; padding-left:8px;"><label
+                              class="text-nowrap">Last
+                              Name</label><input type="text" class="form-control" id="edtLastName" name="edtLastName"
+                              value="{{record.lastname}}">
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col d-xl-flex flex-row align-items-xl-start" style="padding: 0;">
+                            <div class="form-group flex-grow-1" style="margin: 4px;padding-right:4px;"><label
+                                class="text-nowrap">Phone</label><input type="text" class="form-control"
+                                id="edtCustomerPhone" name="edtCustomerPhone" value="{{record.phone}}">
+                            </div>
+                            <div class="form-group flex-grow-1" style="margin: 4px; padding-right: 4px;"><label
+                                class="text-nowrap">Mobile</label><input type="text" class="form-control"
+                                id="edtCustomerMobile" name="edtCustomerMobile" value="{{record.mobile}}">
+                            </div>
+                            <div class="form-group flex-grow-1" style="margin: 4px;padding-left:4px;"><label
+                                class="text-nowrap">Fax</label><input type="text" class="form-control"
+                                id="edtCustomerFax" name="edtCustomerFax" value="{{record.fax}}"></div>
+                            <div class="form-group col-md-3" style="margin: 4px; padding-left: 4px;padding-right :4px;">
+                              <label class="text-nowrap">Skype ID</label>
+                              <input type="text" class="form-control" id="edtCustomerSkypeID" name="edtCustomerSkypeID"
+                                value="{{record.skype}}">
+                            </div>
+                            <div class="form-group col-md-3" style="margin: 4px;padding-left :4px;padding-right:4px;">
+                              <label class="text-nowrap">Website</label>
+                              <input type="text" class="form-control" id="edtCustomerWebsite" name="edtCustomerWebsite"
+                                value="{{record.website}}">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!--                      {{/if}}-->
+                  </div>
+                  <div class="tab-pane border rounded-0 tab-Connection" role="tabpanel" id="tab-2"
+                    style="background-color: #ededed; border-color: #ededed #00a3d3 #00a3d3 #00a3d3 !important;">
+                    <div class="row" style="max-width: 100%!important; margin: 12px;">
+                      <!-- <div class="col-12 row d-xl-flex flex-column justify-content-xl-center" style="margin: 12px;"> -->
+                        <style>
+                          tbody tr:nth-of-type(odd) {
+                            background-color: white;
+                          }
+                        </style>
+                        {{>datatablelist
+                        tableclass="tblConnectionListInTab"
+                        tablename="tblConnectionListInTab"
+                        indexeddbname = 'TConnectionList'
+                        tableheaderrecords = tableheaderrecords
+                        isselection = true
+                        exportfilename = 'Connection List'
+                        datahandler = datahandler
+                        exdatahandler = exDataHandler
+                        searchAPI = searchAPI
+                        orderby = '[[ 1, "asc" ]]'
+                        }}
+                      <!-- </div> -->
+                      <!-- <div class="row-2" style="margin-top: 50px;">
+                        <div class="row" style="padding: 10px; justify-content: center;"><button
+                            class="btn btn-success btn-frequency" style=" width: 100%;" id="setFrequency"
+                            type="button"><i class="fa fa-send" style="margin-right: 5px;"></i>Set Frequency</button>
+                        </div>
+                        <div class="row" style="padding: 10px; justify-content: center"><button
+                            class="btn btn-success btnSave btn-auto-update hover-text1" style="width: 100%;" id="runNow"
+                            title="" type="button"><i class="fa fa-sync" style="margin-right: 5px;"></i>Run Now<span
+                              class="tooltip-text" id="left">Run Now Will Only Import Objects, from the Selected Date
+                              that have Not Already Been Imported </span></button></div>
+
+                        <div class="row" style="padding: 10px; justify-content: center"><button
+                            class="btn btn-success btnSave btn-auto-update hover-text1" style="width: 100%;"
+                            id="importAgain" type="button"><i class="fa fa-reply" style="margin-right: 5px;"></i>Import
+                            Again<span class="tooltip-text" id="left">Import Again Will Re-Import All Objects, from the
+                              Selected Date even If Already Imported.</span></button>
+                        </div>
+                        <div class="row dateTimePickerMobile" data-toggle="tooltip" data-placement="bottom"
+                          style="padding: 10px; justify-content: center" title="Date format: DD/MM/YYYY">
+                          <div class="input-group date" style="cursor: pointer;">
+                            <input type="text" class="form-control" id="edtDailyStartDate" name="edtDailyStartDate"
+                              value="{{todayDate}}" style="padding: 2px 6px" onload="getDate()">
+                            <div class="input-group-addon">
+                              <span class="glyphicon glyphicon-th" style="cursor: pointer;"></span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row" style="padding: 10px; justify-content: center"><button
+                            class="btn btn-success btnSave btn-auto-update hover-text1" style="width: 100%;"
+                            id="transActions" type="button"><i class="fas fa-hand-holding-usd faHeader"
+                              style="margin-right: 5px;"></i>Transactions</button>
+                        </div>
+                        -->
+                      <!-- </div> -->
+                    </div>
+                    <div class="row">
+                      <textarea class="form-control" style="height: 345px; margin: 12px;" rows="4" id="transNotes"
+                        name="transNotes" disabled>{{transNote}}</textarea>
+                    </div>
+                  </div>
+                  <div class="tab-pane border rounded-0 tab-Transaction" role="tabpanel" id="tab-3"
+                    style="background-color: #ededed; border-color: #ededed #00a3d3 #00a3d3 #00a3d3 !important;">
+                    <div class="row">
+                      <div class="col-10 row d-xl-flex flex-column justify-content-xl-center" style="margin: 12px;">
+                        <style>
+                          tbody tr:nth-of-type(odd) {
+                            background-color: white;
+                          }
+                        </style>
+                        {{>datatablelist
+                        tableclass="tblTransactionListInTab"
+                        tablename="tblTransactionListInTab"
+                        indexeddbname = 'TTransactionList'
+                        tableheaderrecords = tableheaderrecordsfortransactions
+                        isselection = true
+                        exportfilename = 'Transaction List'
+                        datahandler = datahandler1
+                        exdatahandler = exDataHandler1
+                        searchAPI = searchAPI
+                        orderby = '[[ 1, "asc" ]]'
+                        }}
+                      </div>
+                      <div class="row-2" style="margin-top: 50px;">
+                        <div class="row" style="padding: 10px; justify-content: center;"><button
+                            class="btn btn-success btn-frequency" style=" width: 100%;" id="setFrequency"
+                            type="button"><i class="fa fa-send" style="margin-right: 5px;"></i>Set Frequency</button>
+                        </div>
+                        <div class="row" style="padding: 10px; justify-content: center"><button
+                            class="btn btn-success btnSave btn-auto-update hover-text1" style="width: 100%;" id="runNow"
+                            title="" type="button"><i class="fa fa-sync" style="margin-right: 5px;"></i>Run Now<span
+                              class="tooltip-text" id="left">Run Now Will Only Import Objects, from the Selected Date
+                              that have Not Already Been Imported </span></button></div>
+
+                        <div class="row" style="padding: 10px; justify-content: center"><button
+                            class="btn btn-success btnSave btn-auto-update hover-text1" style="width: 100%;"
+                            id="importAgain" type="button"><i class="fa fa-reply" style="margin-right: 5px;"></i>Import
+                            Again<span class="tooltip-text" id="left">Import Again Will Re-Import All Objects, from the
+                              Selected Date even If Already Imported.</span></button>
+                        </div>
+                        <div class="row dateTimePickerMobile" data-toggle="tooltip" data-placement="bottom"
+                          style="padding: 10px; justify-content: center" title="Date format: DD/MM/YYYY">
+                          <div class="input-group date" style="cursor: pointer;">
+                            <input type="text" class="form-control" id="edtDailyStartDate" name="edtDailyStartDate"
+                              value="{{todayDate}}" style="padding: 2px 6px" onload="getDate()">
+                            <div class="input-group-addon">
+                              <span class="glyphicon glyphicon-th" style="cursor: pointer;"></span>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- <div class="row" style="padding: 10px; justify-content: center"><button
+                            class="btn btn-success btnSave btn-auto-update hover-text1" style="width: 100%;"
+                            id="transActions" type="button"><i class="fas fa-hand-holding-usd faHeader"
+                              style="margin-right: 5px;"></i>Transactions</button>
+                        </div> -->
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-10 row d-xl-flex flex-column justify-content-xl-center" style="margin: 12px;"
+                        id="re-rendering-table">
+                        <style>
+                          tbody tr:nth-of-type(odd) {
+                            background-color: white;
+                          }
+                        </style>
+                        <div id="re-rendering-table-content">
+                          {{>datatablelist
+                          tableclass="tblTransactionListInTabDetail"
+                          tablename="tblTransactionListInTabDetail"
+                          indexeddbname = 'TTransactionDetailList'
+                          tableheaderrecords = tableheaderrecordsfortransactionsdetail
+                          isselection = true
+                          exportfilename = 'Transaction Detail List'
+                          datahandler = datahandler2
+                          exdatahandler = exDataHandler2
+                          searchAPI = searchAPI
+                          orderby = '[[ 1, "asc" ]]'
+                          seltransactionId = seltransactionId
+                          }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="tab-pane border rounded-0" role="tabpanel" id="tab-4"
+                    style="border-color: #ededed #00a3d3 #00a3d3 #00a3d3 !important; background-color: #ededed;">
+                    <div class="row no-gutters d-xl-flex flex-column justify-content-xl-start" style="margin: 12px;">
+                      <div class="col d-xl-flex align-items-xl-start" style="width: 40%;">
+                        <div class="form-group flex-grow-1" style="margin: 4px;padding-right:4px;">
+                          <label>Username or Email</label>
+                          <!-- <input type="text" class="form-control" name="logonName"
+                            id="EmpEmailAddress" value="{{record.LogonName}}"
+                            style="display:none!important;"> -->
+                          <input type="text" class="form-control" name="logonName" id="logonName"
+                            value="{{record.logon_name}}">
+                        </div>
+                        <div class="form-group flex-grow-1" style="margin: 4px;">
+                          <label>Password</label>
+                          <div style="width: 100%">
+                            <div style="width: 85%; float: left;">
+                              <!-- <input type="text" class="form-control" name="logonPasswrod"
+                                id="logonPasswrod" value="{{record.LogonPasswrod}}"
+                                style="display:none!important;"> -->
+                              <input type="password" class="form-control" id="logonPassword" name="logonPassword"
+                                value="{{record.logon_password}}">
+                            </div>
+                            <div style="width: 15%; float: left;">
+                              <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"
+                                style="color: #00a3d3; margin-top: 10px; margin-left: 4px;"></span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <script>
+                        $(".toggle-password").click(function () {
+                          $(this).toggleClass("fa-eye fa-eye-slash");
+                          var passwordSecret = $("#cloudEmpUserPassword");
+
+                          if (passwordSecret.attr("type") == "password") {
+                            passwordSecret.attr("type", "text");
+                          } else {
+                            passwordSecret.attr("type", "password");
+                          }
+                        });
+                      </script>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-xl-flex justify-content-end align-items-xl-center" style="margin: 16px 0px 0px 0px;">
+                  <div>
+                    <button class="btn btn-success btnSave btn-auto-save" id="saveCustomer" type="button" style="margin-right: 16px;"><i
+                        class="fa fa-save" style="margin-right: 5px;"></i>Save</button>
+                    <button class="btn btn-success btnSave btn-auto-update" style="display: none; margin-right: 16px;" id="updateCustomer"
+                      type="button"><i class="fa fa-save" style="margin-right: 5px;"></i>Update</button>
+
+                    <button class="btn btn-danger btnDelete" type="button" data-toggle="modal" style="margin-right: 16px;"><i
+                        class="fas fa-trash-alt" style="margin-right: 5px;"></i> Delete</button>
+                    <button class="btn btn-secondary btnBack" type="button"><i class="fa fa-close"
+                        style="margin-right: 5px;"></i>Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{> _frequencyModal selConnectionId=selConnectionId modalTitle="Frequency"}}
+        {{> _transactionModal}}
+      </div>
+    </div>
+    <!-- {{/if}} -->
+  </div>
+  <style>
+    .dataTables_wrapper {
+      min-height: 10vh !important;
+    }
+  </style>
+  <script>
+    modalDraggable();
+    function getDate() {
+      var today = new Date();
+
+      document.getElementById("edtDailyStartDate").value = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+
+
+    }
+  </script>
+</template>

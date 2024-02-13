@@ -1,0 +1,129 @@
+
+.results tr[visible='false'],
+.no-result {
+  display: none;
+}
+
+.results tr[visible='true'] {
+  display: table-row;
+}
+
+.counter {
+  padding: 8px;
+  color: #ccc;
+}
+
+.sideSearch {
+  /*width: 200px;*/
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.cardB {
+  /* max-height: 700px; */
+  overflow-y: auto;
+}
+
+.cardB420 {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.rowB {
+  overflow-x: auto;
+}
+
+.nav-tabs .nav-link.active {
+  color: rgb(0, 163, 211) !important;
+  background-color: #EDEDED !important;
+  border-color: #00a3d3 #00a3d3 #ededed #00a3d3 !important;
+}
+
+.nav-tabs .nav-link {
+  background-color: #fff !important;
+  border-color: #00a3d3 !important;
+}
+
+@media only screen and (max-width: 600px) {
+  .sideSearch {
+    width: auto;
+  }
+}
+
+#btnView {
+  display: none;
+}
+
+@media screen and (min-width: 1025px) {
+  .viewList {
+    display: none;
+  }
+
+  .displayList {
+    height: 115vh;
+  }
+
+  .customerCardParent {
+    height: 100%;
+  }
+}
+
+  .currentSelect {
+    background-color: rgba(78, 115, 223, 0.31)!important;
+}
+
+@media screen and (max-width: 450px) {
+  .sideSearch {
+    height: 400px !important;
+    overflow-y: scroll;
+  }
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+@media only screen and (max-width: 1920px) {
+
+  .tab-1 {
+    width: 100%;
+  }
+
+  .tab-3 {
+    width: 100%;
+  }
+}
+
+@media only screen and (max-width: 1600px) {
+
+
+  .tab-1 {
+    width: 100%;
+  }
+
+  .tab-3 {
+    width: 100%;
+  }
+}
+
+@media only screen and (max-width: 1536px) {
+
+  .tab-1 {
+    width: 100%;
+  }
+
+  .tab-3 {
+    width: 100%;
+  }
+}
+
+@media only screen and (max-width: 1367px) {
+
+  .tab-1 {
+    width: 100%;
+  }
+
+  .tab-3 {
+    width: 100%;
+  }
+}

@@ -1,0 +1,275 @@
+.login-dark,
+.signup-dark {
+  height: 100vh !important;
+  background-image: url('assets/img/CoreEDIBackground.jpeg') !important;
+  background-size: cover;
+  height: 100vh;
+}
+
+.login-form{
+  background-color: rgba(255, 255, 255, 0.78) !important;
+  width: 360px !important;
+  max-width: 360px;
+  filter: saturate(100%);
+}
+.signup-form{
+  background-color: rgba(255, 255, 255, 0.78) !important;
+  width: 360px !important;
+  max-width: 360px;
+  filter: saturate(100%);
+}
+
+.login-dark form .btn-primary,
+.signup-dark form .btn-primary {
+  width: 100% !important;
+}
+
+.custom-checkbox input {
+  display: inline-block;
+}
+
+.field-icon {
+  float: right !important;
+}
+
+.login-form div.custom-control,
+.login-form div,
+.signup-form div.custom-control,
+.signup-form div {
+  display: block !important;
+  float: right !important;
+}
+
+.field-icon {
+  float: right;
+  margin-left: -25px;
+  margin-top: -25px;
+  position: relative;
+  z-index: 2;
+  color: #00a3d3;
+}
+
+.vs1brand {
+  width: 100% !important;
+}
+
+#sidebar.top .sidebar-header {
+  width: 140px;
+}
+
+a {
+  cursor: pointer;
+}
+
+.transferOption {
+  margin-top: 10px;
+  padding: 15px;
+  border: double gray 4px;
+  border-radius: 5px;
+}
+
+#whatTransfer {
+  border-right: solid gray 1px;
+}
+
+.btnFilter {
+  margin-left: 8px!important;
+  margin-top: 10px!important;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  position: absolute;
+  z-index: 2;
+  color: white;
+  font-size: 14px;
+  background-color: #192733;
+  border-radius: 10px;
+  padding: 10px 15px 10px 15px;
+}
+
+/* .tooltip-text::before {
+  content: "";
+  position: absolute;
+  transform: rotate(45deg);
+  background-color: #192733;
+  padding: 5px;
+  z-index: 1;
+} */
+
+.hover-text1:hover .tooltip-text {
+  visibility: visible;
+}
+
+#top {
+  top: -40px;
+  left: -50%;
+}
+
+#top::before {
+  top: 80%;
+  left: 45%;
+}
+
+#bottom {
+  top: 25px;
+  left: -50%;
+}
+
+#bottom::before {
+  top: -5%;
+  left: 45%;
+}
+
+#left {
+  top: -8px;
+  right: 120%;
+}
+
+#left::before {
+  top: 35%;
+  left: 94%;
+}
+
+#right {
+  top: -8px;
+  left: 120%;
+}
+
+#right::before {
+  top: 35%;
+  left: -2%;
+}
+
+.hover-text1 {
+  position: relative;
+  text-align: center;
+}
+
+.toggle {
+    --width: 100px;
+    --height: calc(var(--width) / 3);
+    position: relative;
+    display: inline-block;
+    width: var(--width);
+    height: var(--height);
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+
+.toggle input {
+    display: none;
+}
+
+.toggle .labels {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 14px;
+    font-family: sans-serif;
+    transition: all 0.4s ease-in-out;
+    overflow: hidden;
+}
+
+.toggle .labels::after {
+    content: attr(data-off);
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    color: white;
+    background-color: #00a3d3;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+    transition: all 0.4s ease-in-out;
+}
+
+.toggle .labels::before {
+    content: attr(data-on);
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: calc(var(--width) * -1);
+    height: 100%;
+    width: 100%;
+    color: white;
+    background-color: #1cc88a;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.4);
+    transition: all 0.4s ease-in-out;
+}
+
+.toggle input:checked~.labels::after {
+    transform: translateX(var(--width));
+}
+
+.toggle input:checked~.labels::before {
+    transform: translateX(var(--width));
+}
+
+.currentSelect {
+  background-color: rgba(78, 115, 223, 0.31) !important;
+}
+
+.ui-datepicker-prev span {
+  background-image: url(../img/left-squared.png) !important;
+  background-position: 0px 0px !important;
+  background-size: contain !important;
+}
+.ui-datepicker-next span {
+  background-image: url(../img/right-squared.png) !important;
+  background-position: 0px 0px !important;
+  background-size: contain !important;
+}
+
+.ui-widget-header {
+  border: 1px solid #ddd;
+  background: #e9e9e9!important;
+  background-image: none!important;
+  color: #333;
+  font-weight: 700;
+}
+.custom-switch {
+  margin-top: 10px!important;
+}
+.btnNav  {
+  margin-left: 15px!important;
+}
+.vs1LastButtonMargin {
+  margin: 15px!important;
+}
+.coreediButtonMargin {
+  margin: 15px!important;
+}
+#magento_enabled_toggle {
+  margin-top: 0px!important;
+}
+
+.custom-switch>#trueerp_enabled {
+  margin-top: 0px!important;
+}
+
+.magento_enable .custom-switch {
+  margin-top: 0px!important;
+  margin-left: 10px!important;
+}
+
+.erp_enabled .custom-switch {
+  margin-top: 0px!important;
+}
+
+#productModal .modal-dialog-centered {
+  max-width: 95vw!important;
+}
+
+.filterHelpModal {
+  max-height: 70vh;
+  overflow-y: auto;
+}

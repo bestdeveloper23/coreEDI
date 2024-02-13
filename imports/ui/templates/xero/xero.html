@@ -1,0 +1,148 @@
+<template name="xerocard">
+  <div class="row">
+      <div class="col d-xl-flex align-items-xl-start" style="padding: 0;">
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap">Client Key</label>
+              <input type="text" class="form-control" id="xero_token_name"
+                  name="edtFirstName" value="{{record.token_name}}">
+          </div>
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap" style="padding: 12px"></label>
+              {{> toggle_button
+              className="chkGlobalSettings"
+              id="xero_enabled_toggle"
+              width="131px"
+              for="xero_enabled_toggle"
+              displayName="Enabled"
+              isChecked=record.enabled
+              }}
+          </div>
+      </div>
+  </div>
+  <div class="row">
+      <div class="col d-xl-flex align-items-xl-start" style="padding: 0;">
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap">Grant Type</label>
+              <input type="text" class="form-control" id="xero_grant_type"
+                  name="edtFirstName" value="{{record.grant_type}}">
+          </div>
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap">Callback URL</label>
+              <input type="text" class="form-control" id="xero_callback_url"
+                  name="edtFirstName" value="{{record.callback_url}}">
+          </div>
+      </div>
+  </div>
+  <div class="row">
+      <div class="col d-xl-flex align-items-xl-start" style="padding: 0;">
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap">Auth URL</label>
+              <input type="text" class="form-control" id="xero_auth_url"
+                  name="edtFirstName" value="{{record.auth_url}}">
+          </div>
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap">Access Token URL</label>
+              <input type="text" class="form-control" id="xero_access_token_url"
+                  name="edtFirstName" value="{{record.access_token_url}}">
+          </div>
+      </div>
+  </div>
+  <div class="row">
+      <div class="col d-xl-flex align-items-xl-start" style="padding: 0;">
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap">Client ID</label>
+              <input type="text" class="form-control edtClientID" id="xero_client_id"
+                  name="edtFirstName" value="{{record.client_id}}">
+          </div>
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap">Client Secret</label>
+              <input type="text" class="form-control" id="xero_client_secret"
+                  name="edtFirstName" value="{{record.client_secret}}">
+          </div>
+      </div>
+  </div>
+  <div class="row">
+      <div class="col d-xl-flex align-items-xl-start" style="padding: 0;">
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap">Scope</label>
+              <input type="text" class="form-control" id="xero_scope"
+                  name="edtFirstName" value="{{record.scope}}">
+          </div>
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap">State</label>
+              <input type="text" class="form-control" id="xero_state"
+                  name="edtFirstName" value="{{record.state}}">
+          </div>
+      </div>
+  </div>
+  <div class="row">
+      <div class="col d-xl-flex align-items-xl-start" style="padding: 0;">
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap">Client Authentication</label>
+              <input type="text" class="form-control"
+                  id="xero_client_authentication" name="edtFirstName"
+                  value="{{record.client_authentication}}">
+          </div>
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap">Access Token</label>
+              <input type="text" class="form-control" id="xero_access_token"
+                  name="edtFirstName" value="{{record.access_token}}">
+          </div>
+      </div>
+  </div>
+  <div class="row">
+      <div class="col d-xl-flex align-items-xl-start" style="padding: 0;">
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap">Refresh Token</label>
+              <input type="text" class="form-control" id="xero_refresh_token"
+                  name="edtFirstName" value="{{record.refresh_token}}">
+          </div>
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap">Base URL</label>
+              <input type="text" class="form-control" id="xero_base_url"
+                  name="edtFirstName" value="{{record.base_url}}">
+          </div>
+      </div>
+  </div>
+  <div class="row">
+      <div class="col d-xl-flex align-items-xl-start col-6" style="padding: 0;">
+          <div class="form-group flex-grow-1" style="margin: 4px;">
+              <label class="text-nowrap">Connection ID</label>
+              <input type="text" class="form-control" id="xero_connection_id"
+                  name="edtFirstName" value="{{record.connection_id}}">
+          </div>
+      </div>
+  </div>
+  <div class="d-xl-flex justify-content-between align-items-xl-center"
+      style="margin: 16px 0px 0px 0px;">
+      <div>
+          <button class="btn btn-success btnTestMagento btn-auto-testMagento"
+              id="testMagento" type="button"><i class="fa fa-play"
+                  style="margin-right: 5px;"></i>Test {{idxRecord}}</button>
+
+    <button class="btn btn-success btn-frequency setFrequency"  id="setFrequency{{idxRecord}}"
+        type="button"><i class="fa fa-send" style="margin-right: 5px;"></i>Set Frequency</button>
+
+
+    <button class="btn btn-success btnSave btn-auto-update hover-text1 runNow"  id="runNow{{idxRecord}}"
+        title="" type="button"><i class="fa fa-sync" style="margin-right: 5px;"></i>Run Now<span
+          class="tooltip-text" id="left">Run Now Will Only Import Objects, from the Selected Date
+          that have Not Already Been Imported </span></button>
+      </div>
+      <div>
+          <button class="btn btn-success btnSave btn-auto-save" id="saveMagento"
+              type="button"><i class="fa fa-save"
+                  style="margin-right: 5px;"></i>Save</button>
+          <button class="btn btn-success btnUpdate btn-auto-update"
+              style="display: none;" id="updateMagento" type="button"><i
+                  class="fa fa-save"
+                  style="margin-right: 5px;"></i>Update</button>
+          <button class="btn btn-danger btnDelete" type="button"
+              data-toggle="modal"><i class="fas fa-trash-alt"
+                  style="margin-right: 5px;"></i> Delete</button>
+          <button class="btn btn-secondary btnBack" type="button"><i
+                  class="fa fa-close"
+                  style="margin-right: 5px;"></i>Cancel</button>
+      </div>
+  </div>
+</template>

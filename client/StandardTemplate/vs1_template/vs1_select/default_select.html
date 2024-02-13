@@ -1,0 +1,27 @@
+<!-- Default Select -->
+<!-- Params
+  label
+  name
+  type
+  id
+  classes
+  value?
+  options?
+-->
+<template name="default_select">
+    <!-- <style>
+        .form-control {
+            -webkit-appearance: menulist;  /* For Chrome and Safari */
+            appearance: menulist;  /* Standard syntax for most modern browsers */
+        }
+    </style> -->
+    <div class="form-group">
+        {{#if label}}<label>{{label}}</label>{{/if}}
+        <select type="{{type}}" class="form-control {{classes}}" id="{{id}}" name="{{name}}"
+                style="background-color:rgb(255, 255, 255); cursor: pointer;">
+            {{#each option in options}}
+                <option value="{{option.value}}" headerfield="{{option.headerfield}}" disabled="{{option.disabled}}" selected="{{option.selected}}">{{option.name}}</option>
+            {{/each}}
+        </select>
+    </div>
+</template>

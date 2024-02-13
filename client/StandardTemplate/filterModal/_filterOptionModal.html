@@ -1,0 +1,151 @@
+<template name="_filterOptionModal" style="z-index: 99999;">
+    <div class="modal fade" id="_filterOptionModal" tabindex="-1" role="dialog" aria-labelledby="filterOptionModal"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="z-index: 99999;">
+            <div class="modal-content">
+                <div class="modal-header filterHelpModal" style="display: flex; max-height: 13vh; cursor: move;">
+                    <div style="width: 43%; ">
+                        <h3 style="margin-bottom: 0px;">Product Filter</h3>
+                    </div>
+                    <div style="font-size: smaller; color: #1cc88a;">
+                        Filter - With This Form Open, Click on List to Load the First Selection.<br>Click on a Different
+                        Data Selection to Load Second Selection And So On.
+                    </div>
+                </div>
+                <!-- <div class="card-header d-flex align-items-center justify-content-between py-3">
+                    <h5 class="modal-title m-0 font-weight-bold" id="frequencyLabel">Product Filter
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div> -->
+                <div class="modal-body filterHelpModal" style="background-color: #EDEDED;">
+                    <div style="padding: 8px 10px; width: 100%;">
+                        {{#each item in rowsData}}
+                        <div class="row align-items-end first-section">
+                            <!-- <div class="col-1 col-md-1"> -->
+                            <button type="button" class="btn btn-danger btn-rounded btn-sm removeRowBtn"
+                                style="margin-bottom: 24px;"><i class="fa fa-remove"></i>
+                            </button>
+                            <!-- </div> -->
+                            <div class="col-5 col-md-4">
+                                <div class="form-group">
+                                    <input type="text" class="form-control tableDataValue"
+                                        id="tableDataInput_{{@index}}" value="{{item.filterName}}">
+
+                                    <!-- {{>vs1___dropdown
+                                    data=item.filterName
+                                    type='search'
+                                    id='tableDataInput_{{@index}}'
+                                    class="form-control tableDataValue"
+                                    name='tableDataValue'
+                                    placeholder="{{placeholderValue}}"
+                                    }} -->
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="form-group selectContainer" id="selectContainer_{{@index}}">
+                                    {{> default_select
+                                    type="search"
+                                    id="edtSelectOption"
+                                    classes="edtSelectOption"
+                                    name="edtSelectOption"
+                                    options=switchRuleOptions
+                                    }}
+                                </div>
+                            </div>
+                            <div class="col-5 col-md-4">
+                                <div class="form-group">
+                                    <input type="text" class="form-control filterValue"
+                                        :style="{{filterValueDisplayStyle}}" id="filterValueInput_{{@index}}"
+                                        placeholder="Value..." value="{{item.value}}">
+                                </div>
+                            </div>
+                        </div>
+                        {{/each}}
+                        {{#if flagePresent}}
+                        <div class="row align-items-end first-section">
+                            <button type="button" class="btn btn-danger btn-rounded btn-sm inputValRemove"
+                                style="margin-bottom: 24px;"><i class="fa fa-remove"></i>
+                            </button>
+                            <div class="col-5 col-md-4">
+                                <div class="form-group">
+                                    <input type="text" class="form-control tableDataValue" id="tableDataInput"
+                                        placeholder="{{placeholderValue}}">
+                                    <!-- {{>vs1___dropdown
+                                    data=''
+                                    type='search'
+                                    id='tableDataInput'
+                                    class='tableDataValue'
+                                    name='tableDataValue'
+                                    placeholder="{{placeholderValue}}"
+                                    }} -->
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="form-group defaultSelectOption">
+                                    <select name="defaultSelectValue" class="form-control defaultSelectValue">
+                                        <option disabled="true" selected="true" value="selected">Select</option>
+                                        <option value="like">Or</option>
+                                        <option value="=">And</option>
+                                        <option value=">">Greater Than</option>
+                                        <option value="<">Less Than</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-5 col-md-4">
+                                <div class="form-group">
+                                    <input type="text" class="form-control filterValue" id="filterValueInput"
+                                        placeholder="Value..." value="">
+                                </div>
+                            </div>
+
+                        </div>
+                        {{/if}}
+                        <div class="row align-items-end first-section">
+                            <button type="button" class="btn btn-danger btn-rounded btn-sm"
+                                style="margin-bottom: 24px; visibility: hidden;"><i class="fa fa-remove"></i>
+                            </button>
+                            <div class="col-12 col-lg-7" style="padding: 0;">
+                                <div class="row" style="padding-left: 20px;">
+                                    <div class="form-group" style="margin-left: 4px; width: 80%">
+                                        <button type="button" class="btn btn-primary btnAddNewCategory">
+                                            <i class="fa fa-plus" style="margin-right: 5px;"></i>New
+                                            Line</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-2" style="padding: 0;">
+                                <div class="row" style="padding-left: 20px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: #EDEDED; display: flex; justify-content: center;">
+                    {{#if appliedFlag}}
+                    <button class="btn btn-primary btnFilterApplied" type="button" disabled><i class="fa fa-check"
+                            style="margin-right: 5px;"></i>Applied</button>
+                    <button class="btn btn-warning btnFilterReset" type="button"><i class="la la-lightbulb-o"
+                            style="margin-right: 5px;"></i>Reset Filter</button>
+                    {{else}}
+                    <button class="btn btn-success btnFilterApply" type="button"><i class="fa fa-check"
+                            style="margin-right: 5px;"></i>Apply</button>
+                    {{/if}}
+                    <button class="btn btn-primary btnSaveFilter" type="button"><i class="fa fa-save"
+                            style="margin-right: 5px;"></i>Save Filter</button>
+                    <button class="btn btn-secondary filterModalClose" data-dismiss="modal" type="button"
+                        autocomplete="off"><i class="fa fa-close" style="margin-right: 5px;"></i>Close</button>
+                </div>
+            </div>
+        </div>
+
+        {{>_productModal}}
+    </div>
+    <script>
+        $(".modal").draggable({
+            handle: ".modal-header"
+        });
+        modalDraggable();
+    </script>
+</template>

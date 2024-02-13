@@ -1,0 +1,57 @@
+<template name="_transactionModal">
+    <div class="modal fade" id="transactionModal" tabindex="-1" role="dialog" aria-labelledby="transactionModal"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header ui-draggable-handle">
+                    <h5 class="modal-title" id="transactionLabel">Transactions</h5>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true" style="font-size: 32px;">×</span>
+                    </button>
+
+                </div>
+                <div class="modal-body">
+                    <div class="tab-pane border rounded-0 tab-Connection" role="tabpanel" id="tab-2"
+                        style="background-color: #ededed; border-color: #ededed #00a3d3 #00a3d3 #00a3d3 !important;">
+                        <div class="row">
+                            <div class="col-12 row d-xl-flex flex-column justify-content-xl-center"
+                                style="margin-left: 1px; margin-top: 15px;">
+                                <style>
+                                    tbody tr:nth-of-type(odd) {
+                                        background-color: white;
+                                        cursor: pointer;
+                                    }
+
+                                    .currentSelect {
+                                        background-color: rgba(78, 115, 223, 0.31) !important;
+                                    }
+                                </style>
+                                <!-- <button id="btnNewConnection" name="btnNewConnection" class="btn btn-primary coreediButtonMargin" type="button" ><i class="icon ion-plus" style="padding-right: 5px;"></i>New Connection</button> -->
+                                <!-- {{tableheaderrecords}} -->
+
+                                {{>datatablelist
+                                tableclass="tblTransactionsById"
+                                tablename="tblTransactionsById"
+                                tableheaderrecords = tableheaderrecords
+                                exportfilename = 'Transaction List'
+                                datahandler = datahandler
+                                selectedId = selConnectionId
+                                orderby = '[[ 1, "asc" ]]'
+                                }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <textarea class="form-control" style="height: 345px; margin: 12px;" rows="4" id="transNotes"
+                                name="transNotes">{{transNote}}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer ui-draggable-handle">
+                    <button type="button" class="btn btn-secondary btnCancelFrequency" data-dismiss="modal"><i
+                            class="fa fa-close" style="margin-right: 5px;"></i>Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

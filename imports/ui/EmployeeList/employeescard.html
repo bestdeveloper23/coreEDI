@@ -1,0 +1,451 @@
+<template name="employeescard">
+  <style>
+    .results tr[visible='false'],
+    .no-result {
+      display: none;
+    }
+
+    .results tr[visible='true'] {
+      display: table-row;
+    }
+
+    .counter {
+      padding: 8px;
+      color: #ccc;
+    }
+
+    .sideSearch {
+      /*width: 200px;*/
+      overflow-x: hidden;
+      overflow-y: hidden;
+    }
+
+    .cardB {
+      /* max-height: 700px; */
+      overflow-y: auto;
+    }
+
+    .cardB420 {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .rowB {
+      overflow-x: auto;
+    }
+
+    .nav-tabs .nav-link.active {
+      color: rgb(0, 163, 211) !important;
+      background-color: #EDEDED !important;
+      border-color: #00a3d3 #00a3d3 #ededed #00a3d3 !important;
+    }
+
+    .nav-tabs .nav-link {
+      background-color: #fff !important;
+      border-color: #00a3d3 !important;
+    }
+
+    @media only screen and (max-width: 600px) {
+      .sideSearch {
+        width: auto;
+      }
+    }
+
+    #btnView {
+      display: none;
+    }
+
+    @media screen and (min-width: 1025px) {
+      .viewList {
+        display: none;
+      }
+
+      .displayList {
+        height: 115vh;
+      }
+
+      .customerCardParent {
+        height: 100%;
+      }
+    }
+
+    .currentSelect {
+      background-color: #ededed99;
+      color: #00a3d3;
+    }
+
+    @media screen and (max-width: 450px) {
+      .sideSearch {
+        height: 400px !important;
+        overflow-y: scroll;
+      }
+    }
+  </style>
+  <div>
+    <div class="fullScreenSpin" style="display:none;">
+      <div class="spinner"></div>
+    </div>
+    <!-- {{#if record}} -->
+    <div style="margin: 16px;">
+      <div class="row">
+        <div class="col-12 col-md-4">
+          <h2 class="text-dark mb-0">Employee Card
+          </h2>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 col-md-12 col-lg-12 displayInfo" id="displayInfo" style="padding-top: 8px; width: 100%;">
+          <div class="card shadow mb-4 cardSizing">
+            <div class="card-body text-nowrap">
+              <div>
+                <ul class="nav nav-tabs nav-fill">
+                  <li class="nav-item" style="cursor: pointer;">
+                    <a class="nav-link mainTab customerTab active" role="tab" data-toggle="tab" data-target="#tab-1"
+                      data-id="tab-1">
+                      Employee Details
+                    </a>
+                  </li>
+                </ul>
+                <div class="tab-content">
+                  <!-- {{#if equals currentTab 'tab-1'}} -->
+                  <div class="tab-pane active border rounded-0 tab-Customer" role="tabpanel" id="tab-1"
+                    style="background-color: #ededed; border-color: #ededed #00a3d3 #00a3d3 #00a3d3 !important;">
+                    <style>
+                      .table-responsive {
+                        overflow-x: auto;
+                      }
+
+                      @media only screen and (max-width: 1920px) {
+
+                        .tab-1 {
+                          width: 100%;
+                        }
+
+                        .tab-3 {
+                          width: 100%;
+                        }
+                      }
+
+                      @media only screen and (max-width: 1600px) {
+
+
+                        .tab-1 {
+                          width: 100%;
+                        }
+
+                        .tab-3 {
+                          width: 100%;
+                        }
+                      }
+
+                      @media only screen and (max-width: 1536px) {
+
+                        .tab-1 {
+                          width: 100%;
+                        }
+
+                        .tab-3 {
+                          width: 100%;
+                        }
+                      }
+
+                      @media only screen and (max-width: 1367px) {
+
+                        .tab-1 {
+                          width: 100%;
+                        }
+
+                        .tab-3 {
+                          width: 100%;
+                        }
+                      }
+                    </style>
+                    <div class="row d-xl-flex flex-column justify-content-xl-center" style="margin: 12px;">
+                      <div class="col">
+                        <div class="row">
+                          <div class="form-group col-md-3" style="padding-left: 4px;">
+                            <label>Employee Name</label>
+                            <input type="text" class="form-control" id="edtEmployeeName" name="edtEmployeeName"
+                              value="{{record.fullename}}">
+                          </div>
+                          <div class="form-group col-md-4" style="padding-left:4px;">
+                            <label>Employee Email</label>
+                            <input type="text" class="form-control" id="edtEmployeeEmail" name="edtEmployeeEmail"
+                              value="{{record.email}}">
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col d-xl-flex align-items-xl-start" style="padding: 0;">
+                            <div class="col-6 col-md-1" style="padding: 0px 0px;">
+                              <div class="form-group flex-grow-1" style="margin: 4px;"><label class="text-nowrap">Title
+                                </label><input type="text" class="form-control" id="edtTitleName" name="edtFirstName"
+                                  value="{{record.firstname}}">
+                              </div>
+                            </div>
+                            <div class="form-group flex-grow-1" style="margin: 4px;"><label class="text-nowrap">First
+                                Name</label><input type="text" class="form-control" id="edtFirstName"
+                                name="edtFirstName" value="{{record.firstname}}">
+                            </div>
+                            <div class="form-group flex-grow-1" style="margin: 4px;padding-left:4px;"><label
+                                class="text-nowrap">Middle
+                                Name</label><input type="text" class="form-control" id="edtMiddleName"
+                                name="edtMiddleName" value="{{record.middlename}}"></div>
+                            <div class="form-group flex-grow-1" style="margin: 4px; padding-left:4px;"><label
+                                class="text-nowrap">Last
+                                Name</label><input type="text" class="form-control" id="edtLastName" name="edtLastName"
+                                value="{{record.lastname}}">
+                            </div>
+                            <div class="form-group flex-grow-1" style="margin: 4px; padding-left:4px;"><label
+                                class="text-nowrap">Suffix</label><input type="text" class="form-control" id="edtSuffix"
+                                name="edtSuffix" value="{{record.suffix}}">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col d-xl-flex flex-row align-items-xl-start" style="padding: 0;">
+                            <div class="form-group flex-grow-1" style="margin: 4px;padding-right:4px;"><label
+                                class="text-nowrap">Phone</label><input type="text" class="form-control"
+                                id="edtEmployeePhone" name="edtEmployeePhone" value="{{record.phone}}">
+                            </div>
+                            <div class="form-group flex-grow-1" style="margin: 4px;"><label
+                                class="text-nowrap">Mobile</label><input type="text" class="form-control"
+                                id="edtEmployeeMobile" name="edtEmployeeMobile" value="{{record.mobile}}">
+                            </div>
+                            <div class="form-group flex-grow-1" style="margin: 4px;padding-left:4px;"><label
+                                class="text-nowrap">Fax</label><input type="text" class="form-control"
+                                id="edtEmployeeFax" name="edtEmployeeFax" value="{{record.fax}}"></div>
+                            <div class="form-group flex-grow-1" style="margin: 4px;padding-left:4px;">
+                              <label class="text-nowrap">Skype ID</label>
+                              <input type="text" class="form-control" id="edtEmployeeSkypeID" name="edtEmployeeSkypeID"
+                                value="{{record.skype}}">
+                            </div>
+                            <div class="form-group flex-grow-1" style="margin: 4px;padding-left:4px;">
+                              <label class="text-nowrap">Gender</label>
+                              <select class="form-control" id="edtGender" name="edtGender" style="cursor: pointer;">
+                                {{#if equals record.gender "male"}}
+                                <option value="male" selected>Male</option>
+                                <option value="female">Female</option>
+                                {{else}}
+                                <option value="male">Male</option>
+                                <option value="female" selected>Female</option>
+                                {{/if}}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                        <!--                      <div class="row">-->
+                        <!--                        <div class="col d-xl-flex flex-row align-items-xl-start" style="padding: 0;">-->
+                        <!--                          <div class="form-group col-md-3" style="margin: 4px; padding-left: 0px;padding-right :4px;">-->
+                        <!--                            <label class="text-nowrap">Skype ID</label>-->
+                        <!--                            <input type="text" class="form-control" id="edtEmployeeSkypeID" name="edtEmployeeSkypeID"-->
+                        <!--                              value="{{record.skype}}">-->
+                        <!--                          </div>-->
+                        <!--                          <div class="form-group col-md-3" style="margin: 4px;padding-left :4px;padding-right:4px;">-->
+                        <!--                            <label class="text-nowrap">Gender</label>-->
+                        <!--                           <select class="form-control" id="edtGender" name="edtGender" style="cursor: pointer;">-->
+                        <!--                               {{#if equals record.gender "male"}}-->
+                        <!--                                   <option value="male" selected>Male</option>-->
+                        <!--                                   <option value="female">Female</option>-->
+                        <!--                               {{else}}-->
+                        <!--                                   <option value="male">Male</option>-->
+                        <!--                                   <option value="female" selected>Female</option>-->
+                        <!--                               {{/if}}-->
+                        <!--                           </select>-->
+                        <!--                          </div>-->
+                        <!--                          &lt;!&ndash; <div class="form-group col-md-3" style="margin: 4px;padding-left :4px;padding-right:4px;">-->
+                        <!--                            <label class="text-nowrap">Employee ID</label>-->
+                        <!--                            <input type="text" disabled class="form-control" id="edtID" name="edtID" value="{{record.id}}">-->
+                        <!--                          </div> &ndash;&gt;-->
+                        <!--                        </div>-->
+                        <!--                      </div>-->
+                        <div class="row">
+                          <div class="col-6 d-xl-flex flex-row align-items-xl-start" style="padding: 0;">
+                            <div class="form-group col-12" style="margin: 4px; padding-left: 0px">
+                              <label>Notes</label><textarea class="form-control" style="height: 116px;" rows="4"
+                                id="txaNotes" name="txaNotes">{{record.notes}}</textarea>
+                            </div>
+                          </div>
+                          <div class="row no-gutters d-xl-flex flex-column justify-content-xl-start" style="">
+                            <div class="col d-xl-flex align-items-xl-end">
+                              <div class="form-group flex-grow-1" style="margin: 4px; display:none!important;">
+                                <label>Employee Name</label>
+                                <input type="text" class="form-control" id="cloudEmpName" name="cloudEmpName"
+                                  value="{{itemrecord.EmployeeName}}" readonly>
+                                <input type="text" class="form-control" id="erpEmpID" name="erpEmpID"
+                                  value="{{itemrecord.empID}}" style="display:none!important;" readonly>
+                                <input type="hidden" class="form-control" name="cloudEmpID" id="cloudEmpID"
+                                  value="{{#each cloudUserDetails}}{{_id}}{{/each}}" readonly>
+                              </div>
+                              <div class="form-group flex-grow-1" style="margin: 4px; display:none!important;">
+                                <label>Logon Name</label>
+                                <input type="text" class="form-control" id="cloudEmpLogonName" name="cloudEmpLogonName"
+                                  value="{{itemrecord.LogonName}}" disabled>
+                              </div>
+                            </div>
+                            <div class="col d-xl-flex align-items-xl-start" style="width: 100%;">
+                              <div class="form-group flex-grow-1" style="margin: 4px;padding-right:4px;">
+                                <label>Username or Email</label>
+                                <input type="text" class="form-control" name="cloudCheckEmpEmailAddress"
+                                  id="cloudCheckEmpEmailAddress" value="{{itemrecord.LogonName}}"
+                                  style="display:none!important;">
+                                <input type="text" class="form-control" name="cloudEmpEmailAddress"
+                                  id="cloudEmpEmailAddress" value="{{itemrecord.LogonName}}">
+                              </div>
+                              <div class="form-group flex-grow-1" style="margin: 4px;">
+                                <label>Password</label>
+                                <div style="width: 100%">
+                                  <div style="width: 85%; float: left;">
+                                    <input type="text" class="form-control" name="cloudCheckEmpUserPassword"
+                                      id="cloudCheckEmpUserPassword" value="{{itemrecord.PasswordHash}}"
+                                      style="display:none!important;">
+                                    <input type="password" class="form-control" id="cloudEmpUserPassword"
+                                      name="cloudEmpUserPassword" value="{{itemrecord.PasswordHash}}"
+                                      autocomplete="new-password">
+                                  </div>
+                                  <div style="width: 15%; float: left;">
+                                    <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"
+                                      style="color: #00a3d3; margin-top: 10px; margin-left: 4px;"></span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <script>
+                              $(".toggle-password").click(function () {
+                                $(this).toggleClass("fa-eye fa-eye-slash");
+                                var passwordSecret = $("#cloudEmpUserPassword");
+
+                                if (passwordSecret.attr("type") == "password") {
+                                  passwordSecret.attr("type", "text");
+                                } else {
+                                  passwordSecret.attr("type", "password");
+                                }
+                              });
+                            </script>
+                          </div>
+                        </div>
+                        <div class="row">
+
+                        </div>
+                      </div>
+                      <!--                    <div class="col" style="padding: 4px;margin-top: 16px;">-->
+                      <!--                      <div>-->
+                      <!--                        <ul class="nav nav-tabs nav-justified">-->
+                      <!--                          <li class="nav-item" style="cursor: pointer;"><a class="nav-link" role="tab" data-toggle="tab"-->
+                      <!--                              data-target="#tab-5">Notes</a></li>-->
+                      <!--                          <li class="nav-item" style="cursor: pointer;"><a class="nav-link addvs1usertab" role="tab"-->
+                      <!--                              data-toggle="tab" data-target="#tab-11">VS1 User-->
+                      <!--                              Login</a></li>-->
+                      <!--                        </ul>-->
+                      <!--                        <div class="tab-content">-->
+
+                      <!--                          <div class="tab-pane border rounded-0" role="tabpanel" id="tab-5"-->
+                      <!--                            style="border-color: #ededed #00a3d3 #00a3d3 #00a3d3 !important; ">-->
+                      <!--                            <div class="row no-gutters" style="margin: 12px;">-->
+                      <!--                              <div class="col-12">-->
+                      <!--                                <div class="form-group" style="margin: 4px;">-->
+                      <!--                                  <label>Notes</label><textarea class="form-control" style="height: 116px;" rows="4"-->
+                      <!--                                    id="txaNotes" name="txaNotes">{{record.notes}}</textarea>-->
+                      <!--                                </div>-->
+                      <!--                              </div>-->
+                      <!--                            </div>-->
+                      <!--                          </div>-->
+
+                      <!--                          <div class="tab-pane border rounded-0" role="tabpanel" id="tab-11"-->
+                      <!--                            style="border-color: #ededed #00a3d3 #00a3d3 #00a3d3 !important; ">-->
+                      <!--                            <div class="row no-gutters d-xl-flex flex-column justify-content-xl-start"-->
+                      <!--                              style="margin: 12px;">-->
+                      <!--                              <div class="col d-xl-flex align-items-xl-end">-->
+                      <!--                                <div class="form-group flex-grow-1" style="margin: 4px; display:none!important;">-->
+                      <!--                                  <label>Employee Name</label>-->
+                      <!--                                  <input type="text" class="form-control" id="cloudEmpName" name="cloudEmpName"-->
+                      <!--                                    value="{{itemrecord.EmployeeName}}" readonly>-->
+                      <!--                                  <input type="text" class="form-control" id="erpEmpID" name="erpEmpID"-->
+                      <!--                                    value="{{itemrecord.empID}}" style="display:none!important;" readonly>-->
+                      <!--                                  <input type="hidden" class="form-control" name="cloudEmpID" id="cloudEmpID"-->
+                      <!--                                    value="{{#each cloudUserDetails}}{{_id}}{{/each}}" readonly>-->
+                      <!--                                </div>-->
+                      <!--                                <div class="form-group flex-grow-1" style="margin: 4px; display:none!important;">-->
+                      <!--                                  <label>Logon Name</label>-->
+                      <!--                                  <input type="text" class="form-control" id="cloudEmpLogonName"-->
+                      <!--                                    name="cloudEmpLogonName" value="{{itemrecord.LogonName}}" disabled>-->
+                      <!--                                </div>-->
+                      <!--                              </div>-->
+                      <!--                              <div class="col d-xl-flex align-items-xl-start" style="width: 50%;">-->
+                      <!--                                <div class="form-group flex-grow-1" style="margin: 4px;padding-right:4px;">-->
+                      <!--                                  <label>Username or Email</label>-->
+                      <!--                                  <input type="text" class="form-control" name="cloudCheckEmpEmailAddress"-->
+                      <!--                                    id="cloudCheckEmpEmailAddress" value="{{itemrecord.LogonName}}"-->
+                      <!--                                    style="display:none!important;">-->
+                      <!--                                  <input type="text" class="form-control" name="cloudEmpEmailAddress"-->
+                      <!--                                    id="cloudEmpEmailAddress" value="{{itemrecord.LogonName}}">-->
+                      <!--                                </div>-->
+                      <!--                                <div class="form-group flex-grow-1" style="margin: 4px;">-->
+                      <!--                                  <label>Password</label>-->
+                      <!--                                  <div style="width: 100%">-->
+                      <!--                                    <div style="width: 85%; float: left;">-->
+                      <!--                                      <input type="text" class="form-control" name="cloudCheckEmpUserPassword"-->
+                      <!--                                        id="cloudCheckEmpUserPassword" value="{{itemrecord.PasswordHash}}"-->
+                      <!--                                        style="display:none!important;">-->
+                      <!--                                      <input type="password" class="form-control" id="cloudEmpUserPassword"-->
+                      <!--                                        name="cloudEmpUserPassword" value="{{itemrecord.PasswordHash}}"-->
+                      <!--                                        autocomplete="new-password">-->
+                      <!--                                    </div>-->
+                      <!--                                    <div style="width: 15%; float: left;">-->
+                      <!--                                      <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"-->
+                      <!--                                        style="color: #00a3d3; margin-top: 10px; margin-left: 4px;"></span>-->
+                      <!--                                    </div>-->
+                      <!--                                  </div>-->
+                      <!--                                </div>-->
+                      <!--                              </div>-->
+
+                      <!--                              <script>-->
+                      <!--                                $(".toggle-password").click(function () {-->
+                      <!--                                  $(this).toggleClass("fa-eye fa-eye-slash");-->
+                      <!--                                  var passwordSecret = $("#cloudEmpUserPassword");-->
+
+                      <!--                                  if (passwordSecret.attr("type") == "password") {-->
+                      <!--                                    passwordSecret.attr("type", "text");-->
+                      <!--                                  } else {-->
+                      <!--                                    passwordSecret.attr("type", "password");-->
+                      <!--                                  }-->
+                      <!--                                });-->
+                      <!--                              </script>-->
+                      <!--                            </div>-->
+                      <!--                          </div>-->
+                      <!--                        </div>-->
+                      <!--                      </div>-->
+                      <!--                    </div>-->
+                      <div class="d-xl-flex justify-content-end align-items-xl-center"
+                        style="margin: 16px 0px 0px 0px;">
+                        <div>
+                          <button class="btn btn-success" id="saveEmployee" type="button" style="margin-right: 16px;"><i class="fa fa-save"
+                              style="margin-right: 5px;"></i>Save</button>
+                          <button class="btn btn-success" style="display: none; margin-right: 16px;" id="updateEmployee" type="button"><i
+                              class="fa fa-save" style="margin-right: 5px;"></i>Update</button>
+
+                          <button class="btn btn-danger" id="deleteEmployee" type="button" data-toggle="modal" style="margin-right: 16px;"><i
+                              class="fas fa-trash-alt" style="margin-right: 5px;"></i> Delete</button>
+                          <button class="btn btn-secondary btnBack" type="button"><i class="fa fa-close"
+                              style="margin-right: 5px;"></i>Cancel</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- {{/if}} -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- {{/if}} -->
+  </div>
+
+
+  <script>
+    // modalDraggable();
+  </script>
+</template>

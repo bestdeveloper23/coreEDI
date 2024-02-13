@@ -1,0 +1,12 @@
+<template name="export_import_print_display_button">
+  <style media="screen">
+    .hiddenButton {
+      display: none;
+    }
+  </style>
+  <button class="btn btnNav btn-primary export float-right coreediButtonMargin exportbtn {{Export}}" type="button"
+    id="exportbtn" name="exportbtn"><i class="fas fa-file-export" style="padding-right: 5px;"></i>Export</button>
+  <button class="btn btnNav btn-primary printConfirm float-right coreediButtonMargin {{Print}}" type="button"><i
+      class="fa fa-print" style="padding-right: 5px;"></i>Print</button>
+  <button class="btn btnNav btn-primary btnOpenSettings float-right vs1LastButtonMargin {{DisplaySettings}}" type="button" href="#{{displayHref}}"><i class="icon ion-android-more-horizontal"></i></button>
+</template>

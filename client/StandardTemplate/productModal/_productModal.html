@@ -1,0 +1,51 @@
+<template name="_productModal">
+    <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModal"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="display: flex; align-items: center;">
+                    <h4>Product List</h4>
+                    <div class="col d-xl-flex justify-content-xl-end align-items-xl-start">
+                        {{> export_import_print_display_button hideImport=true tablename=tablename }}
+                    </div>
+                    {{> formCloseButton }}
+                </div>
+                <div class="modal-body" style="max-height: 75vh; overflow-y: auto;" >
+                    <div class="card-body p-1 rounded">
+                        <style>
+                            tbody tr:nth-of-type(odd) {
+                                background-color: white;
+                                cursor: pointer;
+                            }
+
+                            .currentSelect {
+                                background-color: rgba(78, 115, 223, 0.31) !important;
+                            }
+                        </style>
+
+                        {{>datatablelist
+                        tableclass="tblProducts"
+                        tablename="tblProducts"
+                        tableheaderrecords = tableheaderrecords
+                        exportfilename = 'Transaction List'
+                        apiName = apiFunction
+                        apiParams = apiParams
+                        datahandler = datahandler
+                        selectedId = selConnectionId
+                        showPlusButton = true
+                        showPlusButtonDataTarget = "newProductModal"
+                        showPlusButtonClass = "btnNewProduct"
+                        showCameraButton = true
+                        showModalID="#newProductModal"
+                        orderby = '[[ 1, "asc" ]]'
+                        }}
+                    </div>
+                </div>
+                <div class="modal-footer ui-draggable-handle">
+                    <button type="button" class="btn btn-secondary btnCancelFrequency" data-dismiss="modal"><i
+                            class="fa fa-close" style="margin-right: 5px;"></i>Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

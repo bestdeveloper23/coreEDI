@@ -1,0 +1,11 @@
+<template name="formCloseButton">
+    {{#if id}}
+        <button type="button" class="close {{extraClass}}" id="{{id}}" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true" style="font-size: 32px;">&times;</span>
+        </button>
+    {{else}}
+        <button type="button" class="close {{extraClass}}" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true" style="font-size: 32px;">&times;</span>
+        </button>
+    {{/if}}
+</template>

@@ -1,0 +1,206 @@
+<template name="zohocard">
+  <div class="row">
+    <div class="col d-xl-flex align-items-xl-start" style="padding: 0">
+      <div class="form-group flex-grow-1" style="margin: 4px">
+        <label class="text-nowrap">Client ID</label>
+        <input
+          type="text"
+          class="form-control zoho_client_id"
+          id="zoho_client_id"
+          name="zoho_client_id"
+          value="{{record.client_id}}"
+        />
+      </div>
+      <div class="form-group flex-grow-1" style="margin: 4px">
+        <label class="text-nowrap">Client Secret</label>
+        <input
+          type="text"
+          class="form-control zoho_client_secret"
+          id="zoho_client_secret"
+          name="zoho_client_secret"
+          value="{{record.client_secret}}"
+        />
+      </div>
+      <div class="form-group flex-grow-1" style="margin: 4px">
+        <label class="text-nowrap" style="padding: 12px"></label>
+        {{> toggle_button className="chkGlobalSettings" id="zoho_enabled"
+        width="131px" for="zoho_enabled" displayName="Enabled"
+        isChecked=record.enabled }}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col d-xl-flex align-items-xl-start row" style="padding: 0">
+      <div
+        class="form-group flex-grow-1"
+        style="margin: 4px; padding-left: 4px"
+      >
+        <label class="text-nowrap">Access Token</label>
+        <input
+          type="text"
+          class="form-control zoho_authorization_code"
+          id="zoho_authorization_code"
+          name="zoho_authorization_code"
+          value="{{record.authorization_code}}"
+        />
+        
+        <button class="btn btn-success" id="getZohoCode" type="button" style="margin-top: 15px">Get Token</button>
+      </div>
+    </div>
+  </div>
+  <div class="row transferOption">
+    <div class="col-12 col-lg-4" id="whatTransfer">
+      <h5 class="mb-4">Type of Transfer</h5>
+      {{> toggle_button className="chkGlobalSettings mt-3"
+      id="erp_sales_orders2magento" width="80px" for="erp_sales_orders2magento"
+      displayName="TrueERP Sales Orders" labelclass=' ' isChecked=true }} {{>
+      toggle_button className="chkGlobalSettings mt-3"
+      id="erp_customers2magento" width="80px" for="erp_customers2magento"
+      displayName="TrueERP Customers" labelclass=' ' isChecked=false }} {{>
+      toggle_button className="chkGlobalSettings mt-3" id="erp_products2zoho"
+      width="80px" for="erp_products2zoho" displayName="TrueERP Products"
+      labelclass=' ' isChecked=false }} {{> toggle_button
+      className="chkGlobalSettings mt-3" id="erp_quotoes2zoho" width="80px"
+      for="erp_quotoes2zoho" displayName="TrueERP Quotoes" labelclass=' '
+      isChecked=false }}
+    </div>
+    <div
+      class="col-12 col-lg-4"
+      style="padding: 0; border-right: solid gray 1px"
+    >
+      <div class="row" style="padding-left: 20px">
+        <div
+          class="form-group"
+          style="margin-left: 4px; padding-left: 4px; width: 80%"
+        >
+          <label class="text-nowrap">
+            <h5 style="margin-bottom: 8px">Identifier</h5>
+          </label>
+          <select
+            class="form-control"
+            id="zoho_cIdentify"
+            name="cIdentify"
+            style="cursor: pointer"
+          >
+            {{#if equals record.customer_identified_by 0}}
+            <option value="0" selected>Email</option>
+            <option value="1">CustomerID</option>
+            {{else}}
+            <option value="0">Email</option>
+            <option value="1" selected>CustomerID</option>
+            {{/if}}
+          </select>
+        </div>
+        <div
+          class="form-group"
+          style="margin-left: 4px; padding-left: 4px; width: 80%"
+        >
+          <select
+            class="form-control"
+            id="zoho_pName"
+            name="pName"
+            style="cursor: pointer"
+          >
+            {{#if equals record.product_name 0}}
+            <option value="0" selected>Product Id</option>
+            <option value="1">Print Name</option>
+            {{else}}
+            <option value="0">Product Id</option>
+            <option value="1" selected>Print Name</option>
+            {{/if}}
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4" style="padding: 0">
+      <div
+        class="form-group"
+        style="margin-left: 4px; padding-left: 4px; width: 100%"
+      >
+        <h5 style="margin-bottom: 8px; margin-left: 10px; text-align: left">
+          Product Filter:
+        </h5>
+        <!-- <div style="align-items: center;"> -->
+        <button
+          class="btn btn-primary btnFilter"
+          id="btnFilterOption"
+          type="button"
+        >
+          <i class="fa fa-filter" style="margin-right: 5px"></i>Filter Options
+        </button>
+        <!-- </div> -->
+      </div>
+    </div>
+    <!-- <div class="col-2 d-xl-flex align-items-xl-start" style="padding: 0;">
+          <div class="form-group flex-grow-1"
+              style="margin: 4px;padding-left:4px;">
+              <label class="text-nowrap">Sync Page Size</label>
+              <input type="text" class="form-control"
+                  id="magento_sync_page_size" name="edtMiddleName"
+                  value="{{record.synch_page_size}}">
+          </div>
+      </div> -->
+  </div>
+  <div
+    class="d-xl-flex justify-content-between align-items-xl-center"
+    style="margin: 16px 0px 0px 0px"
+  >
+    <div>
+      <button
+        class="btn btn-success btnTestMagento btn-auto-testZoho"
+        id="testZoho"
+        type="button"
+      >
+        <i class="fa fa-play" style="margin-right: 5px"></i>Test {{idxRecord}}
+      </button>
+      <button
+        class="btn btn-success btn-frequency setFrequency"
+        id="setFrequency{{idxRecord}}"
+        type="button"
+      >
+        <i class="fa fa-send" style="margin-right: 5px"></i>Set Frequency
+      </button>
+
+      <button
+        class="btn btn-success btnSave btn-auto-update hover-text1 runNow"
+        id="runNow{{idxRecord}}"
+        title=""
+        type="button"
+      >
+        <i class="fa fa-sync" style="margin-right: 5px"></i>Run Now<span
+          class="tooltip-text"
+          id="left"
+          >Run Now Will Only Import Objects, from the Selected Date that have
+          Not Already Been Imported
+        </span>
+      </button>
+    </div>
+    <div>
+      <button
+        class="btn btn-success btnSave btn-auto-save"
+        id="saveZoho"
+        type="button"
+      >
+        <i class="fa fa-save" style="margin-right: 5px"></i>Save
+      </button>
+      <button
+        class="btn btn-success btnUpdate btn-auto-update"
+        style="display: none"
+        id="updateZoho"
+        type="button"
+      >
+        <i class="fa fa-save" style="margin-right: 5px"></i>Update
+      </button>
+      <button
+        class="btn btn-danger btnDelete"
+        type="button"
+        data-toggle="modal"
+      >
+        <i class="fas fa-trash-alt" style="margin-right: 5px"></i> Delete
+      </button>
+      <button class="btn btn-secondary btnBack" type="button">
+        <i class="fa fa-close" style="margin-right: 5px"></i>Cancel
+      </button>
+    </div>
+  </div>
+</template>
