@@ -1,4 +1,4 @@
 node_modules/
-./config/config.js
+config/config.js
 coreedi_start.bat
 .vscode
