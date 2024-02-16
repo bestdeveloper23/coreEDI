@@ -526,6 +526,15 @@
                                                     name="edtMiddleName" value="{{record.base_url}}">
                                             </div>
                                         </div>
+                                        {{ #if equals connection "Zoho" }}
+                                        <div class="row">
+                                            <div class="form-group col-md-12">
+                                                <label class="text-nowrap">Zoho CRM access_token</label>
+                                                <input type="text" class="form-control" id="zoho2erp_access_token"
+                                                    name="edtMiddleName">
+                                            </div>
+                                        </div>
+                                        {{ /if}}
                                         {{ #if equals connection "Magento" }}
                                         <div class="row transferOption">
                                             <div class="col-12 col-lg-4" id="whatTransfer">
@@ -698,36 +707,36 @@
                                                 <h5 class="mb-4">Type of Transfer</h5>
                                                 {{> toggle_button
                                                 className="chkGlobalSettings mt-3"
-                                                id="zoho_quotes2magento"
+                                                id="zoho_quotes2trueerp"
                                                 width="80px"
-                                                for="zoho_quotes2magento"
+                                                for="zoho_quotes2trueerp"
                                                 displayName="ZOHO Quotes"
                                                 labelclass=' '
                                                 isChecked=true
                                                 }}
                                                 {{> toggle_button
                                                 className="chkGlobalSettings mt-3"
-                                                id="zoho_sales_orders2magento"
+                                                id="zoho_sales_orders2trueerp"
                                                 width="80px"
-                                                for="zoho_sales_orders2magento"
+                                                for="zoho_sales_orders2trueerp"
                                                 displayName="ZOHO Sales Orders"
                                                 labelclass=' '
                                                 isChecked=false
                                                 }}
                                                 {{> toggle_button
                                                 className="chkGlobalSettings mt-3"
-                                                id="zoho_leads_prospects2magento"
+                                                id="zoho_leads_prospects2trueerp"
                                                 width="80px"
-                                                for="zoho_leads_prospects2magento"
+                                                for="zoho_leads_prospects2trueerp"
                                                 displayName="ZOHO Leads to Prospects"
                                                 labelclass=' '
                                                 isChecked=false
                                                 }}
                                                 {{> toggle_button
                                                 className="chkGlobalSettings mt-3"
-                                                id="zoho_contract_customers2magento"
+                                                id="zoho_contacts_customers2trueerp"
                                                 width="80px"
-                                                for="zoho_contract_customers2magento"
+                                                for="zoho_contacts_customers2trueerp"
                                                 displayName="ZOHO Contacts to Customers"
                                                 labelclass=' '
                                                 isChecked=false
@@ -984,6 +993,10 @@
                                                 <button class="btn btn-success btnTestERP btn-auto-testERP"
                                                     id="btnTestERP" type="button"><i class="fa fa-play"
                                                         style="margin-right: 5px;"></i>Test TrueERP</button>
+
+                                                        <button class="btn btn-success btnRunERP btn-auto-RunERP"
+                                                    id="btnRunERP" type="button"><i class="fa fa-sync"
+                                                        style="margin-right: 5px;"></i>Run Now</button>
                                             </div>
                                             <div>
                                                 <button class="btn btn-success btnSave btn-auto-save" id="saveTrueERP"

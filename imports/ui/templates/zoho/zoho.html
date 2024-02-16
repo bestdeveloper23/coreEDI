@@ -23,9 +23,27 @@
       </div>
       <div class="form-group flex-grow-1" style="margin: 4px">
         <label class="text-nowrap" style="padding: 12px"></label>
-        {{> toggle_button className="chkGlobalSettings" id="zoho_enabled"
-        width="131px" for="zoho_enabled" displayName="Enabled"
+        {{> toggle_button className="chkGlobalSettings" id="zoho_enabled_toggle"
+        width="131px" for="zoho_enabled_toggle" displayName="Enabled"
         isChecked=record.enabled }}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col d-xl-flex align-items-xl-start row" style="padding: 0">
+      <div
+        class="form-group flex-grow-1"
+        style="margin: 4px; padding-left: 4px"
+      >
+        <label class="text-nowrap">Rediect URI</label>
+        <input
+          type="text"
+          class="form-control zoho_redirect_uri"
+          placeholder="The access_token is included in this link"
+          id="zoho_redirect_uri"
+          name="zoho_redirect_uri"
+          value="{{record.redirect_uri}}"
+        />
       </div>
     </div>
   </div>
@@ -38,10 +56,11 @@
         <label class="text-nowrap">Access Token</label>
         <input
           type="text"
-          class="form-control zoho_authorization_code"
-          id="zoho_authorization_code"
-          name="zoho_authorization_code"
-          value="{{record.authorization_code}}"
+          class="form-control zoho_access_token"
+          id="zoho_access_token"
+          name="zoho_access_token"
+          placeholder="The access_token expires in 1 hour"
+          value="{{record.access_token}}"
         />
         
         <button class="btn btn-success" id="getZohoCode" type="button" style="margin-top: 15px">Get Token</button>
@@ -52,10 +71,10 @@
     <div class="col-12 col-lg-4" id="whatTransfer">
       <h5 class="mb-4">Type of Transfer</h5>
       {{> toggle_button className="chkGlobalSettings mt-3"
-      id="erp_sales_orders2magento" width="80px" for="erp_sales_orders2magento"
+      id="erp_sales_orders2zoho" width="80px" for="erp_sales_orders2zoho"
       displayName="TrueERP Sales Orders" labelclass=' ' isChecked=true }} {{>
       toggle_button className="chkGlobalSettings mt-3"
-      id="erp_customers2magento" width="80px" for="erp_customers2magento"
+      id="erp_customers2zoho" width="80px" for="erp_customers2zoho"
       displayName="TrueERP Customers" labelclass=' ' isChecked=false }} {{>
       toggle_button className="chkGlobalSettings mt-3" id="erp_products2zoho"
       width="80px" for="erp_products2zoho" displayName="TrueERP Products"

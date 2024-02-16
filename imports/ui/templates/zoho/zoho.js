@@ -37,22 +37,6 @@ Template.zohocard.events({
 
     const authorizationUrl = `https://accounts.zoho.com/oauth/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}&response_type=token`;
     window.location.href = authorizationUrl;
-    // fetch("/api/getZohoAccessToken", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify(zohoData),
-    // })
-    //   .then((response) => {response.json(); console.log(response)})
-    //   .then(async (result) => {
-    //     console.log(result)
-    //     window.location.href = result.data.authorizationUrl;
-    //     if (result == "success") {
-    //       swal("", "Zoho Successfully Updated", "success");
-    //     }
-    //   })
-    //   .catch((error) => console.log(error));
   },
 });
 
