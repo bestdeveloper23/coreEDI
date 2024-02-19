@@ -1,7 +1,8 @@
 import { Meteor } from 'meteor/meteor';
 import { HTTP } from 'meteor/http';
 import pool from '../../imports/api/dbConection.js';
-
+import { JsonRoutes } from 'meteor/simple:json-routes';
+const axios = require('axios').default;
 
 Meteor.methods({
     'getZoho': function () {
@@ -103,7 +104,7 @@ Meteor.methods({
         })
     },
     
-    'getZohoAccessToken': function ({tempAccount: tempAccount}) {
+    'getAccessToken': function ({tempAccount: tempAccount}) {
         console.log(tempAccount);
         return new Promise((resolve, reject) => {
             const Zoho = require('zoho-api');
@@ -272,23 +273,299 @@ Meteor.methods({
                 });
         });
     },
-
-
-    'getAccessToken'(postData) {
-        try {
-          const response = HTTP.call('POST', 'https://accounts.zoho.com/oauth/v2/token', {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            data: postData,
-          });
-    
-          // Return the access token from the response
-          return response.data.access_token;
-        } catch (error) {
-          // Handle any errors that occur during the HTTP call
-          console.log(error);
-          throw new Meteor.Error('access-token-error', 'Error obtaining access token');
-        }
-      },
 });
+
+Meteor.startup(() => {
+    JsonRoutes.add("POST", "/api/getZohoAccessTokens", async function (req, res) {
+        console.log(req.body);
+        await axios({
+          method: "POST",
+          url: "https://accounts.zoho.com/oauth/v2/token",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          data: {
+            client_id: req.body.client_id,
+            client_secret: req.body.client_secret,
+            code: req.body.authorization_code,
+            redirect_uri: req.body.redirect_uri,
+            grant_type: "authorization_code",
+          },
+        })
+          .then((response) => {
+            console.log(response);
+            return JsonRoutes.sendResult(res, {
+              data: response.data,
+            });
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            return JsonRoutes.sendResult(res, {
+              code: "500",
+              data: error.response ? error.response.data : "Internal server error",
+            });
+          });
+      });
+    
+      JsonRoutes.add("GET", "/api/getZohoCustomers", async function (req, res) {
+    
+        await axios({
+          method: "GET",
+          url: "https://www.zohoapis.com/crm/v2/Contacts",
+          headers: {
+            Authorization: `Zoho-oauthtoken ${req.body.auth}`,
+            "Content-Type": "application/json",
+          },
+          data: JSON.stringify({
+            data: req.body.data,
+          }),
+        })
+          .then((result) => {
+            JsonRoutes.sendResult(res, {
+              code: "200",
+              data: result.data,
+              success: true,
+            });
+          })
+          .catch((error) => {
+            return JsonRoutes.sendResult(res, {
+              code: "500",
+              data: error.response.data,
+            });
+          });
+      });
+    
+      JsonRoutes.add("POST", "/api/updateZohoCustomers", async function (req, res) {
+        
+          await axios({
+            method: "POST",
+            url: "https://www.zohoapis.com/crm/v2/Contacts/upsert",
+            headers: {
+              Authorization: `Zoho-oauthtoken ${req.body.auth}`,
+              "Content-Type": "application/json",
+            },
+            data: JSON.stringify({
+              data: req.body.data,
+            }),
+          })
+            .then((result) => {
+              JsonRoutes.sendResult(res, {
+                code: "200",
+                data: result.data,
+                success: true,
+              });
+            })
+            .catch((error) => {
+              return JsonRoutes.sendResult(res, {
+                code: "500",
+                data: error.response.data,
+              });
+            });
+      });
+    
+      JsonRoutes.add("GET", "/api/getZohoProducts", async function (req, res) {
+        await axios({
+          method: "GET",
+          url: "https://www.zohoapis.com/crm/v2/Products",
+          headers: {
+            Authorization: `Zoho-oauthtoken ${req.body.auth}`,
+            "Content-Type": "application/json",
+          },
+        })
+          .then((result) => {
+            JsonRoutes.sendResult(res, {
+              code: "200",
+              data: result.data,
+            });
+          })
+          .catch((error) => {
+            return JsonRoutes.sendResult(res, {
+              code: "500",
+              data: error,
+            });
+          });
+      });
+    
+      JsonRoutes.add("GET", "/api/getZohoProduct", async function (req, res) {
+        const productName = req.body.data.productName;
+        const productCode = req.body.data.productCode;
+        const requestBody = {
+          criteria: `(Product_Name:equals:'${productName}') AND (Product_Code:equals:'${productCode}')`,
+        };
+        await axios({
+          method: "GET",
+          url: "https://www.zohoapis.com/crm/v2/Products/search",
+          headers: {
+            Authorization: `Zoho-oauthtoken ${req.body.auth}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        })
+          .then((result) => {
+            JsonRoutes.sendResult(res, {
+              code: "200",
+              data: result.data,
+            });
+          })
+          .catch((error) => {
+            return JsonRoutes.sendResult(res, {
+              code: "500",
+              data: error,
+            });
+          });
+      });
+    
+      JsonRoutes.add("POST", "/api/updateZohoProducts", async function (req, res) {
+        await axios({
+          method: "POST",
+          url: "https://www.zohoapis.com/crm/v2/Products/upsert",
+          headers: {
+            Authorization: `Zoho-oauthtoken ${req.body.auth}`,
+            "Content-Type": "application/json",
+          },
+          data: JSON.stringify({
+            data: req.body.data,
+          }),
+        })
+          .then((result) => {
+            JsonRoutes.sendResult(res, {
+              code: "200",
+              data: result.data,
+              success: true,
+            });
+          })
+          .catch((error) => {
+            return JsonRoutes.sendResult(res, {
+              code: "500",
+              data: error.response.data,
+            });
+          });
+      });
+    
+      JsonRoutes.add("POST", "/api/getZohoOrders", async function (req, res) {
+        await axios({
+          method: "GET",
+          url: "https://www.zohoapis.com/crm/v2/Sales_Orders",
+          headers: {
+            Authorization: `Zoho-oauthtoken ${req.body.auth}`,
+            "Content-Type": "application/json",
+          },
+        })
+          .then((result) => {
+            JsonRoutes.sendResult(res, {
+              code: "200",
+              data: result.data,
+            });
+          })
+          .catch((error) => {
+            return JsonRoutes.sendResult(res, {
+              code: "500",
+              data: error,
+            });
+          });
+      });
+    
+      JsonRoutes.add("POST", "/api/updateZohoOrders", async function (req, res) {
+        await axios({
+          method: "POST",
+          url: "https://www.zohoapis.com/crm/v2/Sales_Orders/upsert",
+          headers: {
+            Authorization: `Zoho-oauthtoken ${req.body.auth}`,
+            "Content-Type": "application/json",
+          },
+          data: JSON.stringify({
+            data: req.body.data,
+          }),
+        })
+          .then((result) => {
+            JsonRoutes.sendResult(res, {
+              data: result.data,
+            });
+          })
+          .catch((error) => {
+            return JsonRoutes.sendResult(res, {
+              code: "500",
+              data: error.response.data,
+            });
+          });
+      });
+    
+      
+      JsonRoutes.add("POST", "/api/getZohoQuotes", async function (req, res) {
+        await axios({
+          method: "GET",
+          url: "https://www.zohoapis.com/crm/v2/Quotes",
+          headers: {
+            Authorization: `Zoho-oauthtoken ${req.body.auth}`,
+            "Content-Type": "application/json",
+          },
+        })
+          .then((result) => {
+            JsonRoutes.sendResult(res, {
+              code: "200",
+              data: result.data,
+            });
+          })
+          .catch((error) => {
+            return JsonRoutes.sendResult(res, {
+              code: "500",
+              data: error,
+            });
+          });
+      });
+    
+      JsonRoutes.add("POST", "/api/updateZohoQuotes", async function (req, res) {
+        await axios({
+          method: "POST",
+          url: "https://www.zohoapis.com/crm/v2/Quotes/upsert",
+          headers: {
+            Authorization: `Zoho-oauthtoken ${req.body.auth}`,
+            "Content-Type": "application/json",
+          },
+          data: JSON.stringify({
+            data: req.body.data,
+          }),
+        })
+          .then((result) => {
+            JsonRoutes.sendResult(res, {
+              data: result.data,
+            });
+          })
+          .catch((error) => {
+            return JsonRoutes.sendResult(res, {
+              code: "500",
+              data: error.response.data,
+            });
+          });
+      });
+    
+      JsonRoutes.add("POST", "/api/updateTrueERP", async function (req, res) {
+        const data = req.body;
+        console.log(data);
+        await axios({
+          method: "POST",
+          url: data.url,
+          headers: {
+            Username: data.Username,
+            Password: data.Password,
+            Database: data.Database,
+            "Content-Type": "application/json",
+          },
+          body: data.data,
+        })
+          .then((result) => {
+            JsonRoutes.sendResult(res, {
+              data: result.data,
+            });
+          })
+          .catch((error) => {
+            return JsonRoutes.sendResult(res, {
+              code: "500",
+              data: error,
+            });
+          });
+      });
+      
+    
+})

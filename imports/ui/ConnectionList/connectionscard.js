@@ -4661,9 +4661,6 @@ async function Zoho2TrueERP(
               templateObject.testNote.set(testNOtes);
               postData.fields.Faxnumber = resultData[i].Fax || "";
 
-              testNOtes += `Faxnumber converting ..........\n`;
-              templateObject.testNote.set(testNOtes);
-
               postData.fields.ClientName = resultData[i].Full_Name || "";
               postData.fields.ID = resultData[i].id || "";
 
