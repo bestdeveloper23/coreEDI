@@ -47,15 +47,10 @@ Template._productModal.onCreated(function () {
       "",
     ];
     $('.fullScreenSpin').css('display', 'none');
-
     return dataList;
-    
   }
 
-
-
   let headerStructure = [
-    // { index: 0, label: '#Sort Date', class:'colSortDate', active: false, display: true, width: "20" },
     {
       index: 0,
       label: "ID",
@@ -84,24 +79,24 @@ Template._productModal.onCreated(function () {
       index: 3,
       label: "Barcode",
       class: "colBarcode",
-      active: true,
-      display: true,
+      active: false,
+      display: false,
       width: "140",
     },
     {
       index: 4,
       label: "Cost Price",
       class: "colcostPrice",
-      active: true,
-      display: true,
+      active: false,
+      display: false,
       width: "110",
     },
     {
       index: 5,
       label: "Sale Price",
       class: "colsalePrice",
-      active: true,
-      display: true,
+      active: false,
+      display: false,
       width: "110",
     },
     {
@@ -109,7 +104,7 @@ Template._productModal.onCreated(function () {
       label: "Quantity",
       class: "colprdqty",
       active: false,
-      display: true,
+      display: false,
       width: "110",
     },
     {
@@ -117,7 +112,7 @@ Template._productModal.onCreated(function () {
       label: "Tax Rate",
       class: "coltaxrate",
       active: false,
-      display: true,
+      display: false,
       width: "80",
     },
     {
@@ -125,7 +120,7 @@ Template._productModal.onCreated(function () {
       label: "ExSellPrice",
       class: "colExtraSellPrice",
       active: false,
-      display: true,
+      display: false,
       width: "110",
     },
     {
@@ -133,7 +128,7 @@ Template._productModal.onCreated(function () {
       label: 'Weight',
       class: "colWeight",
       active: false,
-      display: true,
+      display: false,
       width: "55"
     },
     {
@@ -141,7 +136,7 @@ Template._productModal.onCreated(function () {
       label: 'Weight Unit',
       class: "colWeightUnit",
       active: false,
-      display: true,
+      display: false,
       width: "55"
     },
     {
@@ -149,7 +144,7 @@ Template._productModal.onCreated(function () {
       label: 'Volume',
       class: "colVolume",
       active: false,
-      display: true,
+      display: false,
       width: "55"
     },
     {
@@ -157,7 +152,7 @@ Template._productModal.onCreated(function () {
       label: 'Volume Unit',
       class: "colVolumeUnit",
       active: false,
-      display: true,
+      display: false,
       width: "55"
     },
     {
@@ -165,7 +160,7 @@ Template._productModal.onCreated(function () {
       label: "Product Desc",
       class: "colproductDesc",
       active: false,
-      display: true,
+      display: false,
       width: "500",
     },
     {

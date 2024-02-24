@@ -29,11 +29,11 @@ Template.zohocard.events({
     let zohoData = {};
     zohoData.clientid = jQuery("#zoho_client_id").val();
     zohoData.clientsecret = jQuery("#zoho_client_secret").val();
-    zohoData.redirect_uri = "http://localhost:3000";
+    zohoData.redirect_uri = jQuery("#zoho_redirect_uri").val();
     const CLIENT_ID = zohoData.clientid;
     const REDIRECT_URI = zohoData.redirect_uri;
     const RESPONSE_TYPE = 'token';
-    const SCOPE = "ZohoCRM.modules.ALL";
+    const SCOPE = "ZohoCRM.modules.ALL,ZohoCRM.settings.ALL";
 
     const authorizationUrl = `https://accounts.zoho.com/oauth/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}&response_type=token`;
     window.location.href = authorizationUrl;

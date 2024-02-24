@@ -225,19 +225,21 @@
                           }
                         </style>
                         <div id="re-rendering-table-content">
-                          {{>datatablelist
-                          tableclass="tblTransactionListInTabDetail"
-                          tablename="tblTransactionListInTabDetail"
-                          indexeddbname = 'TTransactionDetailList'
-                          tableheaderrecords = tableheaderrecordsfortransactionsdetail
-                          isselection = true
-                          exportfilename = 'Transaction Detail List'
-                          datahandler = datahandler2
-                          exdatahandler = exDataHandler2
-                          searchAPI = searchAPI
-                          orderby = '[[ 1, "asc" ]]'
-                          seltransactionId = seltransactionId
-                          }}
+                          {{#if renderTransactionDetail true}}
+                            {{>datatablelist
+                            tableclass="tblTransactionListInTabDetail"
+                            tablename="tblTransactionListInTabDetail"
+                            indexeddbname = 'TTransactionDetailList'
+                            tableheaderrecords = tableheaderrecordsfortransactionsdetail
+                            isselection = true
+                            exportfilename = 'Transaction Detail List'
+                            datahandler = datahandler2
+                            exdatahandler = exDataHandler2
+                            searchAPI = searchAPI
+                            orderby = '[[ 1, "asc" ]]'
+                            seltransactionId = seltransactionId
+                            }}
+                          {{/if}}
                         </div>
                       </div>
                     </div>

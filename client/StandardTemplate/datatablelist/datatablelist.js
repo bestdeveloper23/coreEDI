@@ -397,10 +397,10 @@ Template.datatablelist.onRendered(async function () {
                     result.map((r, index) => {
                         result[index] = {
                             "ID": r.id,
-                            "AccName": r.accounting_software,
-                            "ConnName": r.connection_software,
+                            "AccName": r.accounting_soft_name,
+                            "ConnName": r.connection_soft_name,
                             "Date": r.date,
-                            "Count": r.transaction_count
+                            "Count": r.order_num + r.uploaded_num + r.downloaded_num
                         }
                     })
                     await templateObject.displayTableData(result);

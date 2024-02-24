@@ -15,7 +15,28 @@ let cancelBtnFlag = false;
 
 Template.woocommercecard.onCreated(function () {
     const templateObject = Template.instance();
+    templateObject.transferTypes = new ReactiveVar([]);
 
+    const postData = {
+    id: FlowRouter.current().queryParams.id
+    }
+    
+    fetch('/api/transfertypesByID', {
+    method: 'POST',
+    headers: {
+    'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(postData)
+    }).then(response => response.json()).then(async (results) => {
+    let transferTypes = [];
+        $.each(results, async function (i, e) {
+        if(e.tab_id == 2){
+            transferTypes.push(e);
+        }
+    });
+    
+    await templateObject.transferTypes.set(transferTypes);
+    }).catch(error => console.log(error));
 });
 
 Template.woocommercecard.onRendered(function () {
@@ -27,11 +48,36 @@ Template.woocommercecard.rendered = () => {
 }
 
 Template.woocommercecard.events({
-
+    'click #saveWooCommerce': function () {
+    let transfer_btns = $('.transfer_tooglebtn');
+    let transfer_types = [];
+    for (let i = 0; i< transfer_btns.length; i++){
+        let transfer_type = {};
+        transfer_type_id_str = transfer_btns.eq(i).attr('id').split("_")[2];
+        transfer_type.id = parseInt(transfer_type_id_str, 10);
+        transfer_type.checked = transfer_btns.eq(i).prop('checked');
+        transfer_types.push(transfer_type)
+    }
+    fetch('/api/updatetransfertypes', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(transfer_types)
+        }).then(response => response.json()).then(async (result) => {
+        if (result == 'success')
+        swal("", 'Woocommerce Data Successfully Updated', "success");
+            
+        }).catch(error => console.log(error));
+    
+    },
 });
 
 Template.woocommercecard.helpers({
-
+    transfertypes: () => {
+        let templateObject = Template.instance();
+        return templateObject.transferTypes.get();
+    }
 });
 
 Template.registerHelper('equals', function (a, b) {

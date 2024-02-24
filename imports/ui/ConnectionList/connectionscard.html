@@ -622,24 +622,18 @@
                                             <div class="row transferOption">
                                                 <div class="col-12 col-lg-4" id="whatTransfer">
                                                     <h5 class="mb-4">Type of Transfer</h5>
+                                                    {{#each transfertype in transfertypes1}}
                                                     {{> toggle_button
-                                                    className="chkGlobalSettings mt-3"
-                                                    id="magento_invoices2magento"
-                                                    width="80px"
-                                                    for="magento_invoices2magento"
-                                                    displayName="Magento Invoices"
-                                                    labelclass=''
-                                                    isChecked=true
+                                                        className="chkGlobalSettings mt-3"
+                                                        id=transfertype.id
+                                                        for=transfertype.id
+                                                        width="80px"
+                                                        displayName=transfertype.transfer_type
+                                                        labelclass=''
+                                                        isChecked=transfertype.status
+                                                        custId="account_transfertype_"
                                                     }}
-                                                    {{> toggle_button
-                                                    className="chkGlobalSettings mt-3"
-                                                    id="magento_customers2magento"
-                                                    width="80px"
-                                                    for="magento_customers2magento"
-                                                    displayName="Magento Customers"
-                                                    labelclass=''
-                                                    isChecked=false
-                                                    }}
+                                                {{/each}}
                                                 </div>
                                                 <div class="col-12 col-lg-4"
                                                     style="padding: 0; border-right: solid gray 1px;">
@@ -1015,7 +1009,7 @@
                                             </div>
                                         </div>
                                         {{ else if equals idxRecord "WooCommerce" }}
-                                          {{> woocommercecard record=record idxRecord=idxRecord}}
+                                          {{> woocommercecard record=record idxRecord=idxRecord transfertypes = transfertypes2}}
                                         {{ else if equals idxRecord "AustraliaPOST" }}
                                               {{> auspostcard record=record idxRecord=idxRecord}}
                                         {{ else if equals idxRecord "Xero" }}

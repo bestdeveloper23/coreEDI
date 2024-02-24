@@ -32,51 +32,31 @@
   <div class="row transferOption">
       <div class="col-12 col-lg-4" id="whatTransfer">
           <h5 class="mb-4">Type of Transfer</h5>
-          {{> toggle_button
-          className="chkGlobalSettings mt-3"
-          id="erp_customers2magento"
-          width="80px"
-          for="erp_customers2magento"
-          displayName="TrueERP Customers"
-          labelclass=' '
-          isChecked=true
-          }}
-          {{> toggle_button
-          className="chkGlobalSettings mt-3"
-          id="erp_products2magento"
-          width="80px"
-          for="erp_products2magento"
-          displayName="TrueERP Products"
-          labelclass=' '
-          isChecked=false
-          }}
-          {{> toggle_button
-          className="chkGlobalSettings mt-3"
-          id="erp_product_options2magento"
-          width="80px"
-          for="erp_product_options2magento"
-          displayName="TrueERP Product Options"
-          labelclass=' '
-          isChecked=false
-          }}
-          {{> toggle_button
-          className="chkGlobalSettings mt-3"
-          id="erp_products_qty2magento"
-          width="80px"
-          for="erp_products_qty2magento"
-          displayName="TrueERP Products Qty"
-          labelclass=' '
-          isChecked=false
-          }}
-          {{> toggle_button
-          className="chkGlobalSettings mt-3"
-          id="erp_products_pictures2magento"
-          width="80px"
-          for="erp_products_pictures2magento"
-          displayName="TrueERP Products Pictures"
-          labelclass=' '
-          isChecked=false
-          }}
+          {{#each transfertype in transfertypes}}
+          {{#if transfertype.status}}
+            {{> toggle_button
+                className="chkGlobalSettings mt-3 transfer_tooglebtn"
+                id=transfertype.id
+                for=transfertype.id
+                width="80px"
+                displayName=transfertype.transfer_type
+                labelclass=''
+                isChecked=true
+                custId="connection_transfertype_"
+            }}
+            {{else}}
+            {{> toggle_button
+                className="chkGlobalSettings mt-3 transfer_tooglebtn"
+                id=transfertype.id
+                for=transfertype.id
+                width="80px"
+                displayName=transfertype.transfer_type
+                labelclass=''
+                isChecked=false
+                custId="connection_transfertype_"
+            }}
+            {{/if}}
+          {{/each}}
       </div>
       <div class="col-12 col-lg-4"
           style="padding: 0; border-right: solid gray 1px;">
@@ -89,11 +69,11 @@
                   <select class="form-control" id="magento_cIdentify"
                       name="cIdentify" style="cursor: pointer;">
                       {{#if equals record.customer_identified_by 0}}
-                      <option value="0" selected>Email</option>
-                      <option value="1">CustomerID</option>
+                      <option value="0" selected>CustomerID</option>
+                      <option value="1">Email</option>
                       {{else}}
-                      <option value="0">Email</option>
-                      <option value="1" selected>CustomerID</option>
+                      <option value="0">CustomerID</option>
+                      <option value="1" selected>Email</option>
                       {{/if}}
                   </select>
               </div>
@@ -102,11 +82,11 @@
                   <select class="form-control" id="magento_pName" name="pName"
                       style="cursor: pointer;">
                       {{#if equals record.product_name 0}}
-                      <option value="0" selected>Product Id</option>
-                      <option value="1">Print Name</option>
+                      <option value="0" selected>Print Name</option>
+                      <option value="1">Product Id</option>
                       {{else}}
-                      <option value="0">Product Id</option>
-                      <option value="1" selected>Print Name</option>
+                      <option value="0">Print Name</option>
+                      <option value="1" selected>Product Id</option>
                       {{/if}}
                   </select>
               </div>

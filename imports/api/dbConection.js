@@ -152,6 +152,49 @@ Meteor.startup(() => {
     });
   });
 
+  JsonRoutes.add('post', '/api/transfertypesByID', function (req, res) {
+    jsonParser(req, res, () => {
+      const data = req.body;
+      const query = 'SELECT * FROM transfer_types WHERE connection_id=' + data.id
+      pool.query(query, function (error, results) {
+        if (error) {
+          return JsonRoutes.sendResult(res, {
+            code: '500',
+            data: error
+          });
+        }
+        return JsonRoutes.sendResult(res, {
+          data: results
+        });
+      });
+    });
+  });
+
+  JsonRoutes.add('post', '/api/updatetransfertypes', function (req, res) {
+    jsonParser(req, res, () => {
+      const data = req.body;
+      for(let i = 0; i< data.length; i++){
+        let transfer_type = data[i]
+        let id = transfer_type.id
+        let status = 0
+        if(transfer_type.checked == true)
+          status = 1
+          const query = "UPDATE transfer_types SET status = '" + status + "'WHERE id = '" + id+ "'" 
+          pool.query(query, (error, results, fields) => {
+            if (error) {
+              return JsonRoutes.sendResult(res, {
+                code: '500',
+                data: error
+              });
+            }
+          });
+      }
+      return JsonRoutes.sendResult(res, {
+        data: 'success'
+      });
+    });
+  });
+
   JsonRoutes.add('post', '/api/employees', function (req, res) {
     jsonParser(req, res, () => {
       const query = 'SELECT * FROM employees'
@@ -189,7 +232,6 @@ Meteor.startup(() => {
   JsonRoutes.add('post', '/api/getAccSoftt', function (req, res) {
     jsonParser(req, res, () => {
       
-    console.log(req.body)
       const query = `SELECT * FROM clienttrueerp WHERE id = ${req.body.id}`;
       pool.query(query, function (error, results) {
         if (error) {
@@ -239,14 +281,22 @@ Meteor.startup(() => {
 
   JsonRoutes.add('post', '/api/transactions', function (req, res) {
     jsonParser(req, res, () => {
-      const query = 'SELECT\n' +
-        '    id,\n' +
-        '    accounting_soft,\n' +
-        '    connection_soft,\n' +
-        '    date,\n' +
-        '    COUNT(*) AS transaction_count\n' +
-        'FROM\n' +
-        '    transactions;\n'
+      const query = `SELECT
+                        t.id,
+                        s1.name AS accounting_soft_name,
+                        s2.name AS connection_soft_name,
+                        t.date,
+                        t.order_num,
+                        t.uploaded_num,
+                        t.downloaded_num
+                    FROM
+                        transactions t
+                    JOIN
+                        softwares s1 ON t.accounting_soft = s1.id
+                    JOIN
+                        softwares s2 ON t.connection_soft = s2.id
+                    GROUP BY
+                        t.id, s1.name, s2.name, t.date;`
       pool.query(query, function (error, results) {
         if (error) {
           return JsonRoutes.sendResult(res, {
@@ -281,6 +331,52 @@ Meteor.startup(() => {
         return JsonRoutes.sendResult(res, {
           data: results
         });
+      });
+    });
+  });
+
+  JsonRoutes.add('post', '/api/inserttransaction', function (req, res) {
+    jsonParser(req, res, () => {
+      const data = req.body;
+      const insertQuery = "INSERT INTO `transactions` SET accounting_soft='" + data.accounting_soft + "', connection_soft='" + data.connection_soft + "', date='" + data.date + "', order_num='" + 
+      data.order_num + "', products='" + data.products + "', products_num='" + data.product_num + "', uploaded_num='" + data.upload_num + 
+      "', downloaded_num='" + data.downloaded_num + "', connection_id='" + data.connection_id + "'";
+      pool.query(insertQuery, function (error, results) {
+        if (error) {
+          return JsonRoutes.sendResult(res, {
+            code: '500',
+            data: error
+          });
+        }
+        return JsonRoutes.sendResult(res, {
+          data: results.insertId
+        });
+      });
+    });
+  });
+
+  JsonRoutes.add('post', '/api/inserttransactionDetails', function (req, res) {
+    jsonParser(req, res, () => {
+      let transaction_details = req.body['transaction_details'];
+      let transactionId = req.body['transactionId'];
+      let detail_string = "";
+      let count = 0;
+      for(let i = 0; i< transaction_details.length; i++){
+        let transaction_detail = transaction_details[i]
+        detail_string = transaction_detail['detail_string']
+        count = transaction_detail['count']
+        const insertQuery = "INSERT INTO `transactions_detail` SET transaction_id='" + transactionId + "', detail_string='" + detail_string + "', count='" +count + "'";
+        pool.query(insertQuery, function (error, results) {
+          if (error) {
+            return JsonRoutes.sendResult(res, {
+              code: '500',
+              data: error
+            });
+          }
+        });
+      }
+      return JsonRoutes.sendResult(res, {
+        data: 'Success'
       });
     });
   });
@@ -1472,6 +1568,32 @@ Meteor.startup(() => {
         }
       })
     });
+  });
+
+  JsonRoutes.add("POST", "/api/updateTrueERP2", async function (req, res) {
+    const reqData = req.body;
+    await axios({
+      method: "POST",
+      url: `${reqData.url}`,
+      headers: {
+        Username: reqData.Username,
+        Password: reqData.Password,
+        Database: reqData.Database,
+        'Content-Type': 'application/json'
+      },
+      data: JSON.stringify(reqData.data),
+    })
+      .then((result) => {
+        JsonRoutes.sendResult(res, {
+          data: result.data,
+        });
+      })
+      .catch((error) => {
+        return JsonRoutes.sendResult(res, {
+          code: "500",
+          data: error,
+        });
+      });
   });
 })
 

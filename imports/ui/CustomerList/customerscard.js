@@ -29,6 +29,9 @@ templateObject.todayDate = new ReactiveVar(moment(new Date()).format("DD/MM/YYYY
 templateObject.selConnectionId = new ReactiveVar(-1);
 templateObject.seltransactionId = new ReactiveVar(1);
 templateObject.connectionType = new ReactiveVar("");
+templateObject.renderTransactionDetail = new ReactiveVar(true);
+templateObject.transferTypes2 = new ReactiveVar([]);
+
 var today = new Date();
 templateObject.todayDate.set(('0' + today.getDate()).slice(-2) + '/' + ('0' + (today.getMonth() + 1)).slice(-2) + '/' + today.getFullYear());
 templateObject.getDataTableList = function (data) {
@@ -76,7 +79,6 @@ data.Count || '0'
 return dataList;
 }
 templateObject.getDataTableList2 = function (data) {
-console.log("TEST", data?.Test)
 let dataList = [
 data.Detail || '',
 data.Count || '0'
@@ -416,12 +418,17 @@ Template.instance().selConnectionId.set(listData);
 // $(event.target).closest('tr').addClass('currentSelect');
 },
 
-// 'click #tblTransactionListInTab tbody td:nth-child(n)': function (event) {
-//     var listData = $(event.target).closest('tr').attr("id");
-//     Template.instance().seltransactionId.set(listData);
-//     $(event.target).closest('tr').siblings().removeClass('currentSelect');
-//     $(event.target).closest('tr').addClass('currentSelect');
-// },
+'click #tblTransactionListInTab tbody td:nth-child(n)': function (event) {
+    const templateObject = Template.instance();
+    var listData = $(event.target).closest('tr').attr("id");
+    templateObject.seltransactionId.set(listData);
+    $(event.target).closest('tr').siblings().removeClass('currentSelect');
+    $(event.target).closest('tr').addClass('currentSelect');
+    templateObject.renderTransactionDetail.set(false);
+    setTimeout(() => {
+        templateObject.renderTransactionDetail.set(true);
+    }, 200);
+},
 
 'click #transActions': function (event) {
 jQuery('#transactionModal').modal('toggle');
@@ -664,6 +671,9 @@ seltransactionId: function () {
 return Template.instance().seltransactionId.get();
 },
 
+renderTransactionDetail: function () {
+return Template.instance().renderTransactionDetail.get();
+},
 tableOptions() {
 // This helper returns the options for your datatablelist template
 return {
@@ -1534,17 +1544,17 @@ await fetch(`${tempAccount.base_url}/TProduct?select=[ProductName]="${product?.n
                           CogsAccount: "Cost of Goods Sold",
                           IncomeAccount: "Sales",
                           BuyQty1: 1,
-                          BuyQty1Cost: productFromWoo?.price,
+                          BuyQty1Cost: parseFloat(productFromWoo?.price),
                           BuyQty2: 1,
-                          BuyQty2Cost: productFromWoo?.price,
+                          BuyQty2Cost: parseFloat(productFromWoo?.price),
                           BuyQty3: 1,
-                          BuyQty3Cost: productFromWoo?.price,
+                          BuyQty3Cost: parseFloat(productFromWoo?.price),
                           SellQty1: 1,
-                          SellQty1Price: productFromWoo?.price,
+                          SellQty1Price: parseFloat(productFromWoo?.price),
                           SellQty2: 1,
-                          SellQty2Price: productFromWoo?.price,
+                          SellQty2Price: parseFloat(productFromWoo?.price),
                           SellQty3: 1,
-                          SellQty3Price: productFromWoo?.price,
+                          SellQty3Price: parseFloat(productFromWoo?.price),
                           TaxCodePurchase: "NCG",
                           TaxCodeSales: "GST",
                           UOMPurchases: "Units",
@@ -2429,7 +2439,7 @@ await onError();
 });
 }
 
-export const RunNow = (customDate, selConnectionId = '') => {
+export const RunNow = async (customDate, selConnectionId = '') => {
 Template.instance().transNote.set('');
 var templateObject = Template.instance();
 templateObject.transNote.set('');
@@ -2447,6 +2457,14 @@ let tempAccount;
 //     swal("", 'Please Select Connection Data', "error")
 //     return;
 // }
+
+let transaction_details = []
+let upload_transaction_count = 0
+let products_num = 0
+let products = []
+let download_transaction_count = 0
+let order_transaction_count = 0
+
 const postData = {
 id: selConnectionId
 };
@@ -2685,6 +2703,7 @@ fetch('/api/MagentoByID', {
                                   transNOtes += `Added a new customer to Magento.\n`;
                                   templateObject.transNote.set(transNOtes);
                               })
+
                           //getting newly added products from ERP database
                           transNOtes += `-----------------------------------------------------------\n`;
                           templateObject.transNote.set(transNOtes);
@@ -2761,6 +2780,7 @@ fetch('/api/MagentoByID', {
                                   transNOtes += `There is no newly added product.\n`;
                                   templateObject.transNote.set(transNOtes);
                               })
+
                           //Getting newly added orders from woocommerce
                           transNOtes += `-----------------------------------------------------------\n`;
                           templateObject.transNote.set(transNOtes);
@@ -2895,17 +2915,17 @@ fetch('/api/MagentoByID', {
                                                                           CogsAccount: "Cost of Goods Sold",
                                                                           IncomeAccount: "Sales",
                                                                           BuyQty1: 1,
-                                                                          BuyQty1Cost: productFromWoo?.price,
+                                                                          BuyQty1Cost: parseFloat(productFromWoo?.price),
                                                                           BuyQty2: 1,
-                                                                          BuyQty2Cost: productFromWoo?.price,
+                                                                          BuyQty2Cost: parseFloat(productFromWoo?.price),
                                                                           BuyQty3: 1,
-                                                                          BuyQty3Cost: productFromWoo?.price,
+                                                                          BuyQty3Cost: parseFloat(productFromWoo?.price),
                                                                           SellQty1: 1,
-                                                                          SellQty1Price: productFromWoo?.price,
+                                                                          SellQty1Price: parseFloat(productFromWoo?.price),
                                                                           SellQty2: 1,
-                                                                          SellQty2Price: productFromWoo?.price,
+                                                                          SellQty2Price: parseFloat(productFromWoo?.price),
                                                                           SellQty3: 1,
-                                                                          SellQty3Price: productFromWoo?.price,
+                                                                          SellQty3Price: parseFloat(productFromWoo?.price),
                                                                           TaxCodePurchase: "NCG",
                                                                           TaxCodeSales: "GST",
                                                                           UOMPurchases: "Units",
@@ -3089,429 +3109,543 @@ fetch(`/api/WooCommerceByID`, {
                               templateObject.transNote.set(transNOtes);
                           })
 
-                      transNOtes += `Last Sync Time: ${lstUpdateTime}\n`;
-                      templateObject.transNote.set(transNOtes);
-                      async function runPerFiveMinutes() {
-                          //getting newly added customer from ERP database
-                          transNOtes += `-----------------------------------------------------------\n`;
-                          templateObject.transNote.set(transNOtes);
-                          await fetch(`${tempAccount.base_url}/TCustomer?select=[MsTimeStamp]>"${lstUpdateTime}"`,
-                              {
-                                  method: 'GET',
-                                  headers: myHeaders,
-                                  redirect: 'follow'
-                              })
-                              .then(response => response.json())
-                              .then(async result => {
-                                  const newCustomersFromERP = result.tcustomer
-                                  if (newCustomersFromERP.length === 0) {
-                                      transNOtes += `There is no newly added Customer in TrueERP.\n`;
-                                      templateObject.transNote.set(transNOtes);
-                                  }
-                                  else {
-                                      transNOtes += `Found ${newCustomersFromERP.length} newly added customer(s) in TrueERP database.\n`;
-                                      templateObject.transNote.set(transNOtes);
-                                      let newCustomersFromERPCount = 0
+                        let postData1 = {
+                            id: selConnectionId
+                        }
+                        
+                        fetch('/api/transfertypesByID', {
+                            method: 'POST',
+                            headers: {
+                            'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(postData1)
+                            })
+                            .then(response => response.json())
+                            .then(async (results) => {
+                            let transferTypes2 = [];
+                            $.each(results, async function (i, e) {
+                                if(e.tab_id == 2){
+                                    transferTypes2.push(e);
+                                }
+                            });
+                            
+                            await templateObject.transferTypes2.set(transferTypes2);
+                            let transferTypes =  await templateObject.transferTypes2.get();
+                            let customer_status = false;
+                            let product_status = false;
+                            
+                            for(let i = 0; i< transferTypes.length; i++){
+                                if(transferTypes[i].transfer_type == 'TrueERP Customers' 
+                                                        && transferTypes[i].status == 1){
+                                    customer_status = true
+                                }
+                                else if(transferTypes[i].transfer_type == 'TrueERP Products' 
+                                                        && transferTypes[i].status == 1){
+                                    product_status = true
+                                }
+                            }
 
-                                      for (const newCustomerFromERP of newCustomersFromERP) {
-                                          await fetch(`${tempAccount.base_url}/TCustomer/${newCustomerFromERP.Id}`,
-                                              {
-                                                  method: 'GET',
-                                                  headers: myHeaders,
-                                                  redirect: 'follow'
-                                              })
-                                              .then(response => response.json())
-                                              .then(async result => {
-                                                  transNOtes += `Got ${++newCustomersFromERPCount} Customer data with Id: ${newCustomerFromERP.Id} and MsTimeStamp: ${newCustomerFromERP.MsTimeStamp} from TrueERP.\n`;
-                                                  templateObject.transNote.set(transNOtes);
-                                                  const bodyToAddWoocommerce = {
-                                                      email: result?.fields?.Email,
-                                                      first_name: result?.fields?.FirstName,
-                                                      last_name: result?.fields?.LastName,
-                                                      role: "customer",
-                                                      username: result?.fields?.FirstName + " " + result?.fields?.LastName,
-                                                      billing: {
-                                                          first_name: result?.fields?.FirstName,
-                                                          last_name: result?.fields?.LastName,
-                                                          company: result?.fields?.Company,
-                                                          address_1: result?.fields?.Street,
-                                                          address_2: result?.fields?.Street2,
-                                                          // city: result?.fields?.Contacts[0]?.fields?.ContactCity,
-                                                          postcode: result?.fields?.Postcode,
-                                                          country: result?.fields?.Country,
-                                                          state: result?.fields?.State,
-                                                          email: result?.fields?.Email,
-                                                          phone: result?.fields?.Phone
-                                                      },
-                                                      shipping: {
-                                                          first_name: result?.fields?.FirstName,
-                                                          last_name: result?.fields?.LastName,
-                                                          company: result?.fields?.Company,
-                                                          address_1: result?.fields?.Street,
-                                                          address_2: result?.fields?.Street2,
-                                                          // city: result?.fields?.Contacts[0]?.fields?.ContactCity,
-                                                          postcode: result?.fields?.Postcode,
-                                                          country: result?.fields?.Country,
-                                                          state: result?.fields?.State,
-                                                          phone: result?.fields?.Phone
-                                                      }
-                                                  }
-                                                  transNOtes += `(Detail) First name: ${bodyToAddWoocommerce?.first_name}, Last name: ${bodyToAddWoocommerce?.last_name}, Email: ${bodyToAddWoocommerce?.email}.\n`;
-                                                  transNOtes += `Adding ${newCustomersFromERPCount} Customer to Woocommerce.\n`;
-                                                  templateObject.transNote.set(transNOtes);
-                                                  await axios.post(`${url}/wp-json/wc/v3/customers`, bodyToAddWoocommerce, {
-                                                      headers: {
-                                                          'Authorization': `Bearer ${token}`,
-                                                      }
-                                                  })
-                                                      .then(async (response) => {
-                                                          const id = response.data.id
-                                                          if (id) {
-                                                              transNOtes += `Successfully added ${newCustomersFromERPCount} Customer to Woocommerce with ID: ${id}.\n`;
-                                                              templateObject.transNote.set(transNOtes);
-                                                          } else {
-                                                              transNOtes += `[Error] Already existing user..\n`;
-                                                              templateObject.transNote.set(transNOtes);
-                                                          }
-                                                      })
-                                                      .catch((err) => {
-                                                          transNOtes += `[Error] Already existing user..\n`;
-                                                          templateObject.transNote.set(transNOtes);
-                                                      })
+                            transNOtes += `Last Sync Time: ${lstUpdateTime}\n`;
+                            templateObject.transNote.set(transNOtes);
+                            async function runPerFiveMinutes() {
+                                if(customer_status){
+                                //getting newly added customer from ERP database
+                                transNOtes += `-----------------------------------------------------------\n`;
+                                templateObject.transNote.set(transNOtes);
+                                await fetch(`${tempAccount.base_url}/TCustomer?select=[MsTimeStamp]>"${lstUpdateTime}"`,
+                                    {
+                                        method: 'GET',
+                                        headers: myHeaders,
+                                        redirect: 'follow'
+                                    })
+                                    .then(response => response.json())
+                                    .then(async result => {
+                                        const newCustomersFromERP = result.tcustomer
 
-                                              })
-                                      }
+                                        if (newCustomersFromERP.length === 0) {
+                                            transNOtes += `There is no newly added Customer in TrueERP.\n`;
+                                            templateObject.transNote.set(transNOtes);
+                                        }
+                                        else {
+                                            transNOtes += `Found ${newCustomersFromERP.length} newly added customer(s) in TrueERP database.\n`;
+                                            templateObject.transNote.set(transNOtes);
+                                            let newCustomersFromERPCount = 0
 
-                                  }
-                              })
-                              .catch(() => {
-                                  transNOtes += `There is no newly added Customer.\n`;
-                                  templateObject.transNote.set(transNOtes);
-                              })
-                          //getting newly added products from ERP database
-                          transNOtes += `-----------------------------------------------------------\n`;
-                          templateObject.transNote.set(transNOtes);
-                          await fetch(`${tempAccount.base_url}/TProduct?select=[MsTimeStamp]>"${lstUpdateTime}"`,
-                              {
-                                  method: 'GET',
-                                  headers: myHeaders,
-                                  redirect: 'follow'
-                              })
-                              .then(response => response.json())
-                              .then(async result => {
-                                  const newProductsFromERP = result.tproduct
-                                  if (newProductsFromERP.length === 0) {
-                                      transNOtes += `There is no newly added Product in TrueERP.\n`;
-                                      templateObject.transNote.set(transNOtes);
-                                  }
-                                  else {
-                                      transNOtes += `Found ${newProductsFromERP.length} newly added product(s) in TrueERP database.\n`;
-                                      templateObject.transNote.set(transNOtes);
-                                      let newProductsFromERPCount = 0
+                                            for (const newCustomerFromERP of newCustomersFromERP) {
+                                                await fetch(`${tempAccount.base_url}/TCustomer/${newCustomerFromERP.Id}`,
+                                                    {
+                                                        method: 'GET',
+                                                        headers: myHeaders,
+                                                        redirect: 'follow'
+                                                    })
+                                                    .then(response => response.json())
+                                                    .then(async result => {
+                                                        transNOtes += `Got ${++newCustomersFromERPCount} Customer data with Id: ${newCustomerFromERP.Id} and MsTimeStamp: ${newCustomerFromERP.MsTimeStamp} from TrueERP.\n`;
+                                                        templateObject.transNote.set(transNOtes);
+                                                        const bodyToAddWoocommerce = {
+                                                            email: result?.fields?.Email,
+                                                            first_name: result?.fields?.FirstName,
+                                                            last_name: result?.fields?.LastName,
+                                                            role: "customer",
+                                                            username: result?.fields?.FirstName + " " + result?.fields?.LastName,
+                                                            billing: {
+                                                                first_name: result?.fields?.FirstName,
+                                                                last_name: result?.fields?.LastName,
+                                                                company: result?.fields?.Company,
+                                                                address_1: result?.fields?.Street,
+                                                                address_2: result?.fields?.Street2,
+                                                                // city: result?.fields?.Contacts[0]?.fields?.ContactCity,
+                                                                postcode: result?.fields?.Postcode,
+                                                                country: result?.fields?.Country,
+                                                                state: result?.fields?.State,
+                                                                email: result?.fields?.Email,
+                                                                phone: result?.fields?.Phone
+                                                            },
+                                                            shipping: {
+                                                                first_name: result?.fields?.FirstName,
+                                                                last_name: result?.fields?.LastName,
+                                                                company: result?.fields?.Company,
+                                                                address_1: result?.fields?.Street,
+                                                                address_2: result?.fields?.Street2,
+                                                                // city: result?.fields?.Contacts[0]?.fields?.ContactCity,
+                                                                postcode: result?.fields?.Postcode,
+                                                                country: result?.fields?.Country,
+                                                                state: result?.fields?.State,
+                                                                phone: result?.fields?.Phone
+                                                            }
+                                                        }
+                                                        transNOtes += `(Detail) First name: ${bodyToAddWoocommerce?.first_name}, Last name: ${bodyToAddWoocommerce?.last_name}, Email: ${bodyToAddWoocommerce?.email}.\n`;
+                                                        transNOtes += `Adding ${newCustomersFromERPCount} Customer to Woocommerce.\n`;
+                                                        templateObject.transNote.set(transNOtes);
+                                                        await axios.post(`${url}/wp-json/wc/v3/customers`, bodyToAddWoocommerce, {
+                                                            headers: {
+                                                                'Authorization': `Bearer ${token}`,
+                                                            }
+                                                        })
+                                                            .then(async (response) => {
+                                                                const id = response.data.id
+                                                                if (id) {
+                                                                    transNOtes += `Successfully added ${newCustomersFromERPCount} Customer to Woocommerce with ID: ${id}.\n`;
+                                                                    templateObject.transNote.set(transNOtes);
+                                                                } else {
+                                                                    transNOtes += `[Error] Already existing user..\n`;
+                                                                    templateObject.transNote.set(transNOtes);
+                                                                }
+                                                            })
+                                                            .catch((err) => {
+                                                                transNOtes += `[Error] Already existing user..\n`;
+                                                                templateObject.transNote.set(transNOtes);
+                                                            })
 
-                                      for (const newProductFromERP of newProductsFromERP) {
-                                          await fetch(`${tempAccount.base_url}/TProduct/${newProductFromERP.Id}`,
-                                              {
-                                                  method: 'GET',
-                                                  headers: myHeaders,
-                                                  redirect: 'follow'
-                                              })
-                                              .then(response => response.json())
-                                              .then(async result => {
-                                                  transNOtes += `Got ${++newProductsFromERPCount} Product data with Id: ${newProductFromERP.Id} and MsTimeStamp: ${newProductFromERP.MsTimeStamp} from TrueERP.\n`;
-                                                  templateObject.transNote.set(transNOtes);
-                                                  // const uomSalesName = esult?.fields?.UOMSales
-                                                  const bodyToAddWoocommerce = {
-                                                      name: result?.fields?.ProductName,
-                                                      permalink: result?.fields?.Hyperlink,
-                                                      // type: result?.fields?.ProductType,
-                                                      description: result?.fields?.SalesDescription,
-                                                      short_description: result?.fields?.SalesDescription,
-                                                      sku: result?.fields?.SKU,
-                                                      price: result?.fields?.WHOLESALEPRICE,
-                                                      total_sales: result?.fields?.SellQTY1 + result?.fields?.SellQTY2 + result?.fields?.SellQTY3,
-                                                      weight: `"${result?.fields?.NetWeightKg}"`
-                                                  }
-                                                  transNOtes += `(Detail) Product name: ${bodyToAddWoocommerce?.name}, Price: ${bodyToAddWoocommerce?.price}, Description: ${bodyToAddWoocommerce?.description}.\n`;
-                                                  transNOtes += `Adding ${newProductsFromERPCount} Product to Woocommerce.\n`;
-                                                  templateObject.transNote.set(transNOtes);
-                                                  await axios.post(`${url}/wp-json/wc/v3/products`, bodyToAddWoocommerce, {
-                                                      headers: {
-                                                          'Authorization': `Bearer ${token}`,
-                                                      }
-                                                  })
-                                                      .then(async (response) => {
-                                                          const id = response.data.id
-                                                          if (id) {
-                                                              transNOtes += `Successfully added ${newProductsFromERPCount} Product to Woocommerce with ID: ${id}.\n`;
-                                                              templateObject.transNote.set(transNOtes);
-                                                          } else {
-                                                              transNOtes += `[Error] Already existing product..\n`;
-                                                              templateObject.transNote.set(transNOtes);
-                                                          }
-                                                      })
-                                                      .catch((err) => {
-                                                          transNOtes += `[Error] Already existing product..\n`;
-                                                          templateObject.transNote.set(transNOtes);
-                                                      })
+                                                    })
+                                            }
 
-                                              })
-                                      }
+                                        }
+                                    })
+                                    .catch(() => {
+                                        transNOtes += `There is no newly added Customer.\n`;
+                                        templateObject.transNote.set(transNOtes);
+                                    })
+                                }
+                                if(product_status){
+                                //getting newly added products from ERP database
+                                transNOtes += `-----------------------------------------------------------\n`;
+                                templateObject.transNote.set(transNOtes);
+                                await fetch(`${tempAccount.base_url}/TProduct?select=[MsTimeStamp]>"${lstUpdateTime}"`,
+                                    {
+                                        method: 'GET',
+                                        headers: myHeaders,
+                                        redirect: 'follow'
+                                    })
+                                    .then(response => response.json())
+                                    .then(async result => {
+                                        const newProductsFromERP = result.tproduct
+                                        upload_transaction_count = newProductsFromERP.length
 
-                                  }
-                              })
-                              .catch(() => {
-                                  transNOtes += `There is no newly added product.\n`;
-                                  templateObject.transNote.set(transNOtes);
-                              })
-                          //Getting newly added orders from woocommerce
-                          transNOtes += `-----------------------------------------------------------\n`;
-                          templateObject.transNote.set(transNOtes);
-                          await axios.get(`${url}/wp-json/wc/v3/orders?modified_after=${lstUpdateTimeUTC}`, {
-                              headers: {
-                                  'Authorization': `Bearer ${token}`,
-                              }
-                          })
-                              .then(async (response) => {
-                                  const ordersFromWoocommerce = response.data
-                                  if (ordersFromWoocommerce.length === 0) {
-                                      transNOtes += `There is no newly added Order in the Woocommerce Website.\n`;
-                                      templateObject.transNote.set(transNOtes);
-                                  }
-                                  else {
-                                      transNOtes += `Found ${ordersFromWoocommerce.length} newly added order(s) in the Woocommerce Website.\n`;
-                                      templateObject.transNote.set(transNOtes);
-                                      let count = 0
-                                      for (const orderFromWoocommerce of ordersFromWoocommerce) {
-                                          transNOtes += `Checking ${++count} Order from the Woocommerce Website\n`;
-                                          transNOtes += `(Billing Detail) First name: ${orderFromWoocommerce?.billing?.first_name}, Last name: ${orderFromWoocommerce?.billing?.last_name}, Postcode: ${orderFromWoocommerce?.billing?.postcode}.\n`;
-                                          for (const line of orderFromWoocommerce?.line_items) {
-                                              transNOtes += `(Line Detail)    Product Id: ${line?.product_id}, Product Name: "${line?.name}", Product Price: ${line?.price}\n`;
-                                          }
-                                          // transNOtes += `Adding ${count}th Order to ERP database.\n`;
-                                          templateObject.transNote.set(transNOtes);
+                                        if (newProductsFromERP.length === 0) {
+                                            transNOtes += `There is no newly added Product in TrueERP.\n`;
+                                            templateObject.transNote.set(transNOtes);
+                                        }
+                                        else {
+                                            transNOtes += `Found ${newProductsFromERP.length} newly added product(s) in TrueERP database.\n`;
+                                            templateObject.transNote.set(transNOtes);
+                                            let newProductsFromERPCount = 0
 
-                                          //check if the customer exists and add if not
-                                          const clientName = orderFromWoocommerce?.billing?.first_name + " " + orderFromWoocommerce?.billing?.last_name
-                                          let clientId
-                                          transNOtes += `Checking Customer in the TrueERP database for ClientName : ${clientName}...\n`;
-                                          templateObject.transNote.set(transNOtes);
-                                          await fetch(`${tempAccount.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
-                                              {
-                                                  method: 'GET',
-                                                  headers: myHeaders,
-                                                  redirect: 'follow'
-                                              })
-                                              .then(response => response.json())
-                                              .then(async result => {
-                                                  if (result?.tcustomer.length > 0) {
-                                                      clientId = result?.tcustomer[0]?.Id
-                                                      transNOtes += `Found the Customer as ID : ${clientId}\n`;
-                                                      templateObject.transNote.set(transNOtes);
-                                                  } else {
-                                                      transNOtes += `Not Existing Customer, creating...\n`;
-                                                      templateObject.transNote.set(transNOtes);
-                                                      const tempCustomerDetailtoERP = {
-                                                          type: "TCustomer",
-                                                          fields: {
-                                                              ClientTypeName: "Camplist",
-                                                              ClientName: orderFromWoocommerce?.billing?.first_name + " " + orderFromWoocommerce?.billing?.last_name,
-                                                              Companyname: orderFromWoocommerce?.billing?.company,
-                                                              Email: orderFromWoocommerce?.billing?.email,
-                                                              FirstName: orderFromWoocommerce?.billing?.first_name,
-                                                              LastName: orderFromWoocommerce?.billing?.last_name,
-                                                              Phone: orderFromWoocommerce?.billing?.phone,
-                                                              Country: orderFromWoocommerce?.billing?.country,
-                                                              State: orderFromWoocommerce?.billing?.state,
-                                                              Street: orderFromWoocommerce?.billing?.address_1,
-                                                              Street2: orderFromWoocommerce?.billing?.address_2,
-                                                              Postcode: orderFromWoocommerce?.billing?.postcode
-                                                          }
-                                                      }
-                                                      await fetch(`${tempAccount.base_url}/TCustomer`,
-                                                          {
-                                                              method: 'POST',
-                                                              headers: myHeaders,
-                                                              redirect: 'follow',
-                                                              body: JSON.stringify(tempCustomerDetailtoERP)
-                                                          })
-                                                          .then(response => response.json())
-                                                          .then(async result => {
-                                                              clientId = result?.fields?.ID
-                                                              transNOtes += `Added a new customer to TrueERP database with ID : ${clientId}.\n`;
-                                                              templateObject.transNote.set(transNOtes);
-                                                          })
-                                                          .catch(error => console.log('error', error));
-                                                  }
-                                              })
-                                              .catch(() => {
-                                                  transNOtes += `Error while getting client Id from the TrueERP database.\n`;
-                                                  templateObject.transNote.set(transNOtes);
-                                              })
+                                            for (const newProductFromERP of newProductsFromERP) {
+                                                await fetch(`${tempAccount.base_url}/TProduct/${newProductFromERP.Id}`,
+                                                    {
+                                                        method: 'GET',
+                                                        headers: myHeaders,
+                                                        redirect: 'follow'
+                                                    })
+                                                    .then(response => response.json())
+                                                    .then(async result => {
+                                                        transNOtes += `Got ${++newProductsFromERPCount} Product data with Id: ${newProductFromERP.Id} and MsTimeStamp: ${newProductFromERP.MsTimeStamp} from TrueERP.\n`;
+                                                        templateObject.transNote.set(transNOtes);
+                                                        // const uomSalesName = esult?.fields?.UOMSales
+                                                        const bodyToAddWoocommerce = {
+                                                            name: result?.fields?.ProductName,
+                                                            permalink: result?.fields?.Hyperlink,
+                                                            // type: result?.fields?.ProductType,
+                                                            description: result?.fields?.SalesDescription,
+                                                            short_description: result?.fields?.SalesDescription,
+                                                            sku: result?.fields?.SKU,
+                                                            price: result?.fields?.WHOLESALEPRICE,
+                                                            total_sales: result?.fields?.SellQTY1 + result?.fields?.SellQTY2 + result?.fields?.SellQTY3,
+                                                            weight: `"${result?.fields?.NetWeightKg}"`
+                                                        }
+                                                        products.push(bodyToAddWoocommerce?.name)
+                                                  
+                                                        transNOtes += `(Detail) Product name: ${bodyToAddWoocommerce?.name}, Price: ${bodyToAddWoocommerce?.price}, Description: ${bodyToAddWoocommerce?.description}.\n`;
+                                                        transNOtes += `Adding ${newProductsFromERPCount} Product to Woocommerce.\n`;
+                                                        templateObject.transNote.set(transNOtes);
+                                                        await axios.post(`${url}/wp-json/wc/v3/products`, bodyToAddWoocommerce, {
+                                                            headers: {
+                                                                'Authorization': `Bearer ${token}`,
+                                                            }
+                                                        })
+                                                            .then(async (response) => {
+                                                                const id = response.data.id
+                                                                if (id) {
+                                                                    transNOtes += `Successfully added ${newProductsFromERPCount} Product to Woocommerce with ID: ${id}.\n`;
+                                                                    templateObject.transNote.set(transNOtes);
+                                                                } else {
+                                                                    transNOtes += `[Error] Already existing product..\n`;
+                                                                    templateObject.transNote.set(transNOtes);
+                                                                }
+                                                            })
+                                                            .catch((err) => {
+                                                                transNOtes += `[Error] Already existing product..\n`;
+                                                                templateObject.transNote.set(transNOtes);
+                                                            })
 
-                                          //check if the product exists and add if not
-                                          const productList = orderFromWoocommerce?.line_items
-                                          const productIdList = []
-                                          const productQtyList = []
-                                          transNOtes += `There are ${productList.length} products in the Invoice line.\n`;
-                                          templateObject.transNote.set(transNOtes);
+                                                    })
+                                            }
 
-                                          for (const product of productList) {
-                                              transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.name}...\n`;
-                                              templateObject.transNote.set(transNOtes);
-                                              await fetch(`${tempAccount.base_url}/TProduct?select=[ProductName]="${product?.name}"`,
-                                                  {
-                                                      method: 'GET',
-                                                      headers: myHeaders,
-                                                      redirect: 'follow'
-                                                  })
-                                                  .then(response => response.json())
-                                                  .then(async result => {
-                                                      if (result?.tproduct.length > 0) {
-                                                          const productId = result?.tproduct[0]?.Id
-                                                          transNOtes += `Found the Product as ID : ${productId}\n`;
-                                                          templateObject.transNote.set(transNOtes);
-                                                          productIdList.push(productId)
-                                                          productQtyList.push(product?.quantity)
-                                                      } else {
-                                                          transNOtes += `Not Existing Product, creating...\n`;
-                                                          templateObject.transNote.set(transNOtes);
+                                        }
+                                    })
+                                    .catch(() => {
+                                        transNOtes += `There is no newly added product.\n`;
+                                        templateObject.transNote.set(transNOtes);
+                                    })
+                                }
 
-                                                          //getting product by id from
-                                                          await axios.get(`${url}/wp-json/wc/v3/products/${product.product_id}`, {
-                                                              headers: {
-                                                                  'Authorization': `Bearer ${token}`,
-                                                              }
-                                                          })
-                                                              .then(async (response) => {
-                                                                  const productFromWoo = response.data
+                                //Getting newly added orders from woocommerce
+                                transNOtes += `-----------------------------------------------------------\n`;
+                                templateObject.transNote.set(transNOtes);
+                                await axios.get(`${url}/wp-json/wc/v3/orders?modified_after=${lstUpdateTimeUTC}`, {
+                                    headers: {
+                                        'Authorization': `Bearer ${token}`,
+                                    }
+                                })
+                                    .then(async (response) => {
+                                        const ordersFromWoocommerce = response.data
+                                        order_transaction_count  = ordersFromWoocommerce.length
+        
+                                        if (ordersFromWoocommerce.length === 0) {
+                                            transNOtes += `There is no newly added Order in the Woocommerce Website.\n`;
+                                            templateObject.transNote.set(transNOtes);
+                                        }
+                                        else {
+                                            transNOtes += `Found ${ordersFromWoocommerce.length} newly added order(s) in the Woocommerce Website.\n`;
+                                            templateObject.transNote.set(transNOtes);
+                                            let count = 0
+                                            for (const orderFromWoocommerce of ordersFromWoocommerce) {
+                                                transNOtes += `Checking ${++count} Order from the Woocommerce Website\n`;
+                                                transNOtes += `(Billing Detail) First name: ${orderFromWoocommerce?.billing?.first_name}, Last name: ${orderFromWoocommerce?.billing?.last_name}, Postcode: ${orderFromWoocommerce?.billing?.postcode}.\n`;
+                                                for (const line of orderFromWoocommerce?.line_items) {
+                                                    transNOtes += `(Line Detail)    Product Id: ${line?.product_id}, Product Name: "${line?.name}", Product Price: ${line?.price}\n`;
+                                                }
+                                                // transNOtes += `Adding ${count}th Order to ERP database.\n`;
+                                                templateObject.transNote.set(transNOtes);
 
-                                                                  const tempProductDetailtoERP = {
-                                                                      type: "TProductWeb",
-                                                                      fields:
-                                                                      {
-                                                                          ProductType: "INV",
-                                                                          ProductName: productFromWoo?.name,
-                                                                          PurchaseDescription: productFromWoo?.description,
-                                                                          SalesDescription: productFromWoo?.short_description,
-                                                                          AssetAccount: "Inventory Asset",
-                                                                          CogsAccount: "Cost of Goods Sold",
-                                                                          IncomeAccount: "Sales",
-                                                                          BuyQty1: 1,
-                                                                          BuyQty1Cost: productFromWoo?.price,
-                                                                          BuyQty2: 1,
-                                                                          BuyQty2Cost: productFromWoo?.price,
-                                                                          BuyQty3: 1,
-                                                                          BuyQty3Cost: productFromWoo?.price,
-                                                                          SellQty1: 1,
-                                                                          SellQty1Price: productFromWoo?.price,
-                                                                          SellQty2: 1,
-                                                                          SellQty2Price: productFromWoo?.price,
-                                                                          SellQty3: 1,
-                                                                          SellQty3Price: productFromWoo?.price,
-                                                                          TaxCodePurchase: "NCG",
-                                                                          TaxCodeSales: "GST",
-                                                                          UOMPurchases: "Units",
-                                                                          UOMSales: "Units"
-                                                                      }
-                                                                  }
+                                                //check if the customer exists and add if not
+                                                const clientName = orderFromWoocommerce?.billing?.first_name + " " + orderFromWoocommerce?.billing?.last_name
+                                                let clientId
+                                                transNOtes += `Checking Customer in the TrueERP database for ClientName : ${clientName}...\n`;
+                                                templateObject.transNote.set(transNOtes);
+                                                await fetch(`${tempAccount.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
+                                                    {
+                                                        method: 'GET',
+                                                        headers: myHeaders,
+                                                        redirect: 'follow'
+                                                    })
+                                                    .then(response => response.json())
+                                                    .then(async result => {
+                                                        if (result?.tcustomer.length > 0) {
+                                                            clientId = result?.tcustomer[0]?.Id
+                                                            transNOtes += `Found the Customer as ID : ${clientId}\n`;
+                                                            templateObject.transNote.set(transNOtes);
+                                                        } else {
+                                                            transNOtes += `Not Existing Customer, creating...\n`;
+                                                            templateObject.transNote.set(transNOtes);
+                                                            const tempCustomerDetailtoERP = {
+                                                                type: "TCustomer",
+                                                                fields: {
+                                                                    ClientTypeName: "Camplist",
+                                                                    ClientName: orderFromWoocommerce?.billing?.first_name + " " + orderFromWoocommerce?.billing?.last_name,
+                                                                    Companyname: orderFromWoocommerce?.billing?.company,
+                                                                    Email: orderFromWoocommerce?.billing?.email,
+                                                                    FirstName: orderFromWoocommerce?.billing?.first_name,
+                                                                    LastName: orderFromWoocommerce?.billing?.last_name,
+                                                                    Phone: orderFromWoocommerce?.billing?.phone,
+                                                                    Country: orderFromWoocommerce?.billing?.country,
+                                                                    State: orderFromWoocommerce?.billing?.state,
+                                                                    Street: orderFromWoocommerce?.billing?.address_1,
+                                                                    Street2: orderFromWoocommerce?.billing?.address_2,
+                                                                    Postcode: orderFromWoocommerce?.billing?.postcode
+                                                                }
+                                                            }
+                                                            await fetch(`${tempAccount.base_url}/TCustomer`,
+                                                                {
+                                                                    method: 'POST',
+                                                                    headers: myHeaders,
+                                                                    redirect: 'follow',
+                                                                    body: JSON.stringify(tempCustomerDetailtoERP)
+                                                                })
+                                                                .then(response => response.json())
+                                                                .then(async result => {
+                                                                    clientId = result?.fields?.ID
+                                                                    transNOtes += `Added a new customer to TrueERP database with ID : ${clientId}.\n`;
+                                                                    templateObject.transNote.set(transNOtes);
+                                                                })
+                                                                .catch(error => console.log('error', error));
+                                                        }
+                                                    })
+                                                    .catch(() => {
+                                                        transNOtes += `Error while getting client Id from the TrueERP database.\n`;
+                                                        templateObject.transNote.set(transNOtes);
+                                                    })
 
-                                                                  await fetch(`${tempAccount.base_url}/TProductWeb`,
-                                                                      {
-                                                                          method: 'POST',
-                                                                          headers: myHeaders,
-                                                                          redirect: 'follow',
-                                                                          body: JSON.stringify(tempProductDetailtoERP)
-                                                                      })
-                                                                      .then(response => response.json())
-                                                                      .then(async result => {
-                                                                          const tempProductId = result?.fields?.ID
-                                                                          transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
-                                                                          templateObject.transNote.set(transNOtes);
-                                                                          productIdList.push(tempProductId)
-                                                                          productQtyList.push(product?.quantity)
-                                                                      })
-                                                                      .catch(error => console.log('error', error));
-                                                              })
-                                                      }
-                                                      // productQtyList.push(product?.quantity)
-                                                  })
-                                                  .catch(() => {
-                                                      transNOtes += `Error while getting client Id from the TrueERP database.\n`;
-                                                      templateObject.transNote.set(transNOtes);
-                                                  })
+                                                //check if the product exists and add if not
+                                                const productList = orderFromWoocommerce?.line_items
+                                                const productIdList = []
+                                                const productQtyList = []
+                                                download_transaction_count = productList.length
+                                                transNOtes += `There are ${productList.length} products in the Invoice line.\n`;
+                                                templateObject.transNote.set(transNOtes);
 
-                                          }
+                                                for (const product of productList) {
+                                                    transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.name}...\n`;
+                                                    products.push(product?.name)
+                                                    templateObject.transNote.set(transNOtes);
+                                                    await fetch(`${tempAccount.base_url}/TProduct?select=[ProductName]="${product?.name}"`,
+                                                        {
+                                                            method: 'GET',
+                                                            headers: myHeaders,
+                                                            redirect: 'follow'
+                                                        })
+                                                        .then(response => response.json())
+                                                        .then(async result => {
+                                                            if (result?.tproduct.length > 0) {
+                                                                const productId = result?.tproduct[0]?.Id
+                                                                transNOtes += `Found the Product as ID : ${productId}\n`;
+                                                                templateObject.transNote.set(transNOtes);
+                                                                productIdList.push(productId)
+                                                                productQtyList.push(product?.quantity)
+                                                            } else {
+                                                                transNOtes += `Not Existing Product, creating...\n`;
+                                                                templateObject.transNote.set(transNOtes);
 
-                                          // create a new invoice in ERP.
-                                          const invoiceLines = []
-                                          productIdList.forEach((item, index) => {
-                                              invoiceLines.push({
-                                                  type: "TInvoiceLine",
-                                                  fields: {
-                                                      ProductID: item,
-                                                      OrderQty: productQtyList[index]
-                                                  }
-                                              })
-                                          })
-                                          if (invoiceLines.length === 0) {
-                                              continue
-                                          }
-                                          const backOrderInvoiceToERP = {
-                                              type: "TInvoiceEx",
-                                              fields: {
-                                                  CustomerID: clientId,
-                                                  Lines: invoiceLines,
-                                                  IsBackOrder: true
-                                              }
-                                          }
-                                          await fetch(`${tempAccount.base_url}/TinvoiceEx`,
-                                              {
-                                                  method: 'POST',
-                                                  headers: myHeaders,
-                                                  redirect: 'follow',
-                                                  body: JSON.stringify(backOrderInvoiceToERP)
-                                              })
-                                              .then(response => response.json())
-                                              .then(async result => {
-                                                  const addedId = result?.fields?.ID
-                                                  transNOtes += `Added a new Invoice to TrueERP database with ID: ${addedId}.\n`;
-                                                  templateObject.transNote.set(transNOtes);
-                                              })
-                                              .catch(error => console.log('error', error));
-                                      }
-                                  }
-                              })
-                              .catch(() => {
-                                  transNOtes += `There is no newly added Orders in the Woocommerce Website.\n`;
-                                  templateObject.transNote.set(transNOtes);
-                              })
+                                                                //getting product by id from
+                                                                await axios.get(`${url}/wp-json/wc/v3/products/${product.product_id}`, {
+                                                                    headers: {
+                                                                        'Authorization': `Bearer ${token}`,
+                                                                    }
+                                                                })
+                                                                    .then(async (response) => {
+                                                                        const productFromWoo = response.data
+
+                                                                        const tempProductDetailtoERP = {
+                                                                            type: "TProductWeb",
+                                                                            fields:
+                                                                            {
+                                                                                ProductType: "INV",
+                                                                                ProductName: productFromWoo?.name,
+                                                                                PurchaseDescription: productFromWoo?.description,
+                                                                                SalesDescription: productFromWoo?.short_description,
+                                                                                AssetAccount: "Inventory Asset",
+                                                                                CogsAccount: "Cost of Goods Sold",
+                                                                                IncomeAccount: "Sales",
+                                                                                BuyQty1: 1,
+                                                                                BuyQty1Cost: parseFloat(productFromWoo?.price),
+                                                                                BuyQty2: 1,
+                                                                                BuyQty2Cost: parseFloat(productFromWoo?.price),
+                                                                                BuyQty3: 1,
+                                                                                BuyQty3Cost: parseFloat(productFromWoo?.price),
+                                                                                SellQty1: 1,
+                                                                                SellQty1Price: parseFloat(productFromWoo?.price),
+                                                                                SellQty2: 1,
+                                                                                SellQty2Price: parseFloat(productFromWoo?.price),
+                                                                                SellQty3: 1,
+                                                                                SellQty3Price: parseFloat(productFromWoo?.price),
+                                                                                TaxCodePurchase: "NCG",
+                                                                                TaxCodeSales: "GST",
+                                                                                UOMPurchases: "Units",
+                                                                                UOMSales: "Units"
+                                                                            }
+                                                                        }
+
+                                                                        await fetch(`${tempAccount.base_url}/TProductWeb`,
+                                                                            {
+                                                                                method: 'POST',
+                                                                                headers: myHeaders,
+                                                                                redirect: 'follow',
+                                                                                body: JSON.stringify(tempProductDetailtoERP)
+                                                                            })
+                                                                            .then(response => response.json())
+                                                                            .then(async result => {
+                                                                                const tempProductId = result?.fields?.ID
+                                                                                transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
+                                                                                templateObject.transNote.set(transNOtes);
+                                                                                productIdList.push(tempProductId)
+                                                                                productQtyList.push(product?.quantity)
+                                                                            })
+                                                                            .catch(error => console.log('error', error));
+                                                                    })
+                                                            }
+                                                            // productQtyList.push(product?.quantity)
+                                                        })
+                                                        .catch(() => {
+                                                            transNOtes += `Error while getting client Id from the TrueERP database.\n`;
+                                                            templateObject.transNote.set(transNOtes);
+                                                        })
+
+                                                }
+
+                                                // create a new invoice in ERP.
+                                                const invoiceLines = []
+                                                productIdList.forEach((item, index) => {
+                                                    invoiceLines.push({
+                                                        type: "TInvoiceLine",
+                                                        fields: {
+                                                            ProductID: item,
+                                                            OrderQty: productQtyList[index]
+                                                        }
+                                                    })
+                                                })
+                                                if (invoiceLines.length === 0) {
+                                                    continue
+                                                }
+                                                const backOrderInvoiceToERP = {
+                                                    type: "TInvoiceEx",
+                                                    fields: {
+                                                        CustomerID: clientId,
+                                                        Lines: invoiceLines,
+                                                        IsBackOrder: true
+                                                    }
+                                                }
+                                                await fetch(`${tempAccount.base_url}/TinvoiceEx`,
+                                                    {
+                                                        method: 'POST',
+                                                        headers: myHeaders,
+                                                        redirect: 'follow',
+                                                        body: JSON.stringify(backOrderInvoiceToERP)
+                                                    })
+                                                    .then(response => response.json())
+                                                    .then(async result => {
+                                                        const addedId = result?.fields?.ID
+                                                        transNOtes += `Added a new Invoice to TrueERP database with ID: ${addedId}.\n`;
+                                                        templateObject.transNote.set(transNOtes);
+                                                    })
+                                                    .catch(error => console.log('error', error));
+                                            }
+                                        }
+                                    })
+                                    .catch(() => {
+                                        transNOtes += `There is no newly added Orders in the Woocommerce Website.\n`;
+                                        templateObject.transNote.set(transNOtes);
+                                    })
 
 
-                          //update the last sync time
-                          transNOtes += `-----------------------------------------------------------\n`;
-                          templateObject.transNote.set(transNOtes);
+                                //update the last sync time
+                                transNOtes += `-----------------------------------------------------------\n`;
+                                templateObject.transNote.set(transNOtes);
 
-                          let nowInSydney = moment().tz("Australia/Brisbane").format("YYYY-MM-DD HH:mm:ss");
-                          let args = {
-                              id: selConnectionId,
-                              last_ran_date: nowInSydney
-                          };
-                          fetch(`/api/updateLastRanDate`, {
-                              method: 'POST',
-                              headers: {
-                                  'Content-Type': 'application/json'
-                              },
-                              body: JSON.stringify(args)
-                          })
-                              .then(response => response.json())
-                              .then(async (result) => {
-                                  transNOtes += `Updated Last Sync Time as ${nowInSydney}.\n`;
-                                  templateObject.transNote.set(transNOtes);
-                              })
-                              .catch((err) => console.log(err))
-                      }
-                      runPerFiveMinutes()
+                                let nowInSydney = moment().tz("Australia/Brisbane").format("YYYY-MM-DD HH:mm:ss");
+                                let args = {
+                                    id: selConnectionId,
+                                    last_ran_date: nowInSydney
+                                };
+                                fetch(`/api/updateLastRanDate`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(args)
+                                })
+                                .then(response => response.json())
+                                .then(async (result) => {
+                                    transNOtes += `Updated Last Sync Time as ${nowInSydney}.\n`;
+                                    templateObject.transNote.set(transNOtes);
+                                })
+                                .catch((err) => console.log(err));
+
+                                let account_id = tempConnection.account_id;
+                                let connection_id = tempConnection.connection_id;
+                                let today = new Date();
+        
+                                let year = today.getFullYear();
+                                let month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+                                let day = String(today.getDate()).padStart(2, '0');
+        
+                                let formattedDate = `${year}-${month}-${day}`;
+                                products_num = upload_transaction_count + download_transaction_count
+                                let transaction_data = {
+                                    'accounting_soft': account_id,
+                                    'connection_soft': connection_id,
+                                    'date': formattedDate,
+                                    'order_num': order_transaction_count,
+                                    'products': products,
+                                    'products_num': products_num,
+                                    'uploaded_num': upload_transaction_count,
+                                    'downloaded_num': download_transaction_count,
+                                    'connection_id': selConnectionId
+                                }
+                                transaction_details.push({
+                                    detail_string: 'downloaded products from TrueERP to WooCommerce',
+                                    count: download_transaction_count
+                                });
+                                transaction_details.push({
+                                    detail_string: 'uploaded products from TrueERP to WooCommerce',
+                                    count: upload_transaction_count
+                                })
+                                transaction_details.push({
+                                    detail_string: 'orders from TrueERP to WooCommerce',
+                                    count: order_transaction_count
+                                })
+                                
+                                let insertedTransactionID = 0;
+                                fetch('/api/inserttransaction', {
+                                    method: 'POST',
+                                    headers: {
+                                    'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(transaction_data)
+                                    }).then(response => response.json()).then(async (result) => {
+                                        insertedTransactionID = result
+                                        let postData = {
+                                            'transaction_details': transaction_details,
+                                            'transactionId': insertedTransactionID
+                                        }
+                                        fetch('/api/inserttransactionDetails', {
+                                            method: 'POST',
+                                            headers: {
+                                            'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify(postData)
+                                            }).then(response => response.json())
+                                              .then(async (result) => {
+                                            
+                                            }).catch(error => console.log(error));
+                                }).catch(error => console.log(error));
+
+                            }
+                            runPerFiveMinutes()
+
+                            }).catch(
+                                error => console.log(error)
+                            );
                   })
                   .catch((err) => console.log(err))
           })
@@ -4110,6 +4244,975 @@ fetch(`/api/AustraliaPOSTByID`, {
   .catch((err) => console.log(err))
 }
 else if (connectionType == "zoho") {
+
+    ERP_QuotesState = jQuery("#zoho_quotes2trueerp").is(":checked");
+    ERP_SalesState = jQuery("#zoho_sales_orders2trueerp").is(":checked");
+    ERP_LeadsState = jQuery("#zoho_leads_prospects2trueerp").is(":checked");
+    ERP_CustomerState = jQuery("#zoho_contacts_customers2trueerp").is(":checked");    
+    
+    const postData = {
+        id: FlowRouter.current().queryParams.customerId,
+      };
+      var responseCount = 0;
+      let customerCount = 0;
+      const templateObject = Template.instance();
+      function sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms || DEF_DELAY));
+      }
+      var transNOtes = "Connecting to TrueERP database..";
+      await sleep(300);
+      templateObject.transNote.set(transNOtes);
+      transNOtes = "Connecting to TrueERP database.......";
+      await sleep(300);
+      templateObject.transNote.set(transNOtes);
+      transNOtes = "Connecting to TrueERP database..........";
+      await sleep(300);
+      templateObject.transNote.set(transNOtes);
+      transNOtes = "Connecting to TrueERP database.............";
+      await sleep(300);
+      templateObject.transNote.set(transNOtes);
+      transNOtes = "Connecting to TrueERP database................";
+      await sleep(300);
+      templateObject.transNote.set(transNOtes);
+      transNOtes = "Connecting to TrueERP database...................";
+      await sleep(300);
+      templateObject.transNote.set(transNOtes);
+      transNOtes = "Connecting to TrueERP database........................";
+      await sleep(300);
+      templateObject.transNote.set(transNOtes);
+      transNOtes = "Connecting to TrueERP database.........................\n";
+      templateObject.transNote.set(transNOtes);
+      HTTP.call(
+        "post",
+        "/api/getAccSoftt",
+        {
+          data: {
+            id: postData.id,
+          }
+        },
+        async (error, res) => {
+          let erpObject;
+          if (error) {
+            transNOtes += "Can't connect to TrueERP database\n";
+            templateObject.transNote.set(transNOtes);
+            return;
+          } else {
+            erpObject = res.data[0];
+          }
+      
+          let token = jQuery("#zoho2erp_access_token").val();
+      
+          if (ERP_QuotesState) {
+            await fetch("https://www.zohoapis.com/crm/v2/Quotes", {
+              method: "GET",
+              headers: {
+                Authorization: `Zoho-oauthtoken ${token}`,
+                "Content-Type": "application/json",
+              },
+            })
+              .then((response) => response.json())
+              .then(async (result) => {
+                responseCount = result.data.length;
+                var resultData = result.data;
+                transNOtes +=
+                  `Received ` + responseCount + `Quotes information from Zoho.\n`;
+                
+                transNOtes += `Adding Quotes to TrueERP \n`;
+                templateObject.transNote.set(transNOtes);
+      
+                for (let i = 0; i < responseCount; i++) {
+                  
+                  // let postData = {};
+                  // postData.type = "TQuote";
+                  // postData.fields = {};
+                  // transNOtes += `OrderNumber [${resultData[i].Quote_Number}] converting ..........\n`;
+                  // templateObject.transNote.set(transNOtes);
+                  // postData.fields.OrderNumber = resultData[i].Quote_Number || "";
+      
+                  // transNOtes += `CustomerID [${resultData[i].Customer_No}] converting ..........\n`;
+                  // templateObject.transNote.set(transNOtes);
+                  // postData.fields.CustomerID = resultData[i].Customer_No || "";
+      
+                  // transNOtes += `SalesPerson [${resultData[i].ClientName}] converting ..........\n`;
+                  // templateObject.transNote.set(transNOtes);
+                  // postData.fields.Sales_Person = resultData[i].ClientName || "";
+      
+                  // transNOtes += `Subject converting ..........\n`;
+                  // templateObject.transNote.set(transNOtes);
+                  // postData.fields.Subject = resultData[i].Subject || "ZOHO Quote";
+      
+                  // postData.ProductCode = postData.Product_Details.Product_Code || "";
+                  // postData.ProductName = postData.Product_Details.name || "";
+                  
+      
+                  
+                    //check if the customer exists and add if not
+                    const clientName = resultData[i]?.Account_Name?.name;
+                    let clientId
+                    transNOtes += `Checking Customer in the TrueERP database for ClientName : ${clientName}...\n`;
+                    templateObject.transNote.set(transNOtes);
+                    await fetch(`${erpObject.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
+                        {
+                            method: 'GET',
+                            headers: {
+                              Username: erpObject.user_name,
+                              Password: erpObject.password,
+                              Database: erpObject.database,
+                              "Content-Type": "application/json",
+                            },
+                            redirect: 'follow'
+                        })
+                        .then(response => response.json())
+                        .then(async result => {
+                            if (result?.tcustomer.length > 0) {
+                                clientId = result?.tcustomer[0]?.Id
+                                transNOtes += `Found the Customer as ID : ${clientId}\n`;
+                                templateObject.transNote.set(transNOtes);
+                            } else {
+                                transNOtes += `Not Existing Customer, creating...\n`;
+                                templateObject.transNote.set(transNOtes);
+                                const tempCustomerDetailtoERP = {
+                                    type: "TCustomer",
+                                    fields: {
+                                        ClientTypeName: "Camplist",
+                                        ClientName: resultData[i].Account_Name.name,
+                                        Country: resultData[i].Billing_Country || "",
+                                        State: resultData[i].Billing_State || "",
+                                        Street: resultData[i].Billing_Street || "",
+                                        Postcode: resultData[i].Billing_Code || ""
+                                    }
+                                }
+                                console.log(tempCustomerDetailtoERP,"tempCustomer")
+                                await fetch(`${erpObject.base_url}/TCustomer`,
+                                    {
+                                        method: 'POST',
+                                        headers: {
+                                          Username: erpObject.user_name,
+                                          Password: erpObject.password,
+                                          Database: erpObject.database,
+                                          "Content-Type": "application/json",
+                                        },
+                                        redirect: 'follow',
+                                        body: JSON.stringify(tempCustomerDetailtoERP)
+                                    })
+                                    .then(response => {console.log(response); response.json()} )
+                                    .then(async result => {
+                                        clientId = result?.fields?.ID
+                                        transNOtes += `Added a new customer to TrueERP database with ID : ${clientId}.\n`;
+                                        templateObject.transNote.set(transNOtes);
+                                    })
+                                    .catch(error => console.log('error', error));
+                            }
+                        })
+                        .catch(() => {
+                            transNOtes += `Error while getting client Id from the TrueERP database.\n`;
+                            templateObject.transNote.set(transNOtes);
+                        })
+      
+                    //check if the product exists and add if not
+                    const productList = resultData[i]?.Product_Details
+                    const productIdList = []
+                    const productQtyList = []
+                    transNOtes += `There are ${productList.length} products in the Product_Details.\n`;
+                    templateObject.transNote.set(transNOtes);
+      
+                    for (const product of productList) {
+                        transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.product?.name}...\n`;
+                        templateObject.transNote.set(transNOtes);
+                        await fetch(`${erpObject.base_url}/TProduct?select=[ProductName]="${product?.product?.name}"`,
+                            {
+                                method: 'GET',
+                                headers: {
+                                  Username: erpObject.user_name,
+                                  Password: erpObject.password,
+                                  Database: erpObject.database,
+                                  "Content-Type": "application/json",
+                                },
+                                redirect: 'follow'
+                            })
+                            .then(response => response.json())
+                            .then(async result => {
+                                if (result?.tproduct.length > 0) {
+                                    const productId = result?.tproduct[0]?.Id
+                                    transNOtes += `Found the Product as ID : ${productId}\n`;
+                                    templateObject.transNote.set(transNOtes);
+                                    productIdList.push(productId)
+                                    productQtyList.push(product?.quantity)
+                                } else {
+                                    transNOtes += `Not Existing Product, creating...\n`;
+                                    templateObject.transNote.set(transNOtes);
+      
+                                    let args = {
+                                      productID: product?.product?.id,
+                                      auth: token
+                                    }
+                                  // get product by id from Zoho
+                                    const productListFromZOHO = await new Promise(
+                                      (resolve, reject) => {
+                                        Meteor.call(
+                                          "getZohoProductByID",
+                                          args,
+                                          (error, result) => {
+                                            if (error) {
+                                              reject(error);
+                                            } else {
+                                              resolve(result);
+                                            }
+                                          }
+                                        );
+                                      }
+                                    );
+                      
+                                    if (productListFromZOHO.data) {
+      
+                                      console.log(productListFromZOHO)
+                                      transNOtes += `Product ${productListFromZOHO.data[0].id} Success!\n`;
+                                      
+                                      templateObject.transNote.set(transNOtes);
+      
+                                      const productFromZoho = productListFromZOHO.data[0];
+      
+                                            const tempProductDetailtoERP = {
+                                                type: "TProductWeb",
+                                                fields:
+                                                {
+                                                    ProductType: "INV",
+                                                    ProductName: productFromZoho?.Product_Name,
+                                                    SalesDescription: productFromZoho.Description || "",
+                                                    AssetAccount: "Inventory Asset",
+                                                    CogsAccount: "Cost of Goods Sold",
+                                                    IncomeAccount: "Sales",
+                                                    PRODUCTCODE: productFromZoho.Product_Code || "",
+                                                    TaxCodePurchase: "NCG",
+                                                    TaxCodeSales: "GST",
+                                                    UOMPurchases: "Units",
+                                                    UOMSales: "Units",
+                                                }
+                                            }
+      
+                                            if(productFromZoho.GlobalRef) {
+                                              tempProductDetailtoERP.fields.GlobalRef = productFromZoho.GlobalRef
+                                            }
+      
+                                            console.log(tempProductDetailtoERP)
+      
+                                            await fetch(`${erpObject.base_url}/TProductWeb`,
+                                                {
+                                                    method: 'POST',
+                                                    headers: {
+                                                      Username: erpObject.user_name,
+                                                      Password: erpObject.password,
+                                                      Database: erpObject.database,
+                                                      "Content-Type": "application/json",
+                                                    },
+                                                    redirect: 'follow',
+                                                    body: JSON.stringify(tempProductDetailtoERP)
+                                                })
+                                                .then(response => response.json())
+                                                .then(async result => {
+                                                    const tempProductId = result?.fields?.ID
+                                                    transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
+                                                    templateObject.transNote.set(transNOtes);
+                                                    productIdList.push(tempProductId)
+                                                    productQtyList.push(product?.quantity)
+                                                })
+                                                .catch(error => console.log('error', error));
+                                    } else {
+                                      console.log(productListFromZOHO)
+                                      transNOtes += `product searching by id Failed!\n`;
+                                      transNOtes += `Failed!!!\n`;
+                                      templateObject.transNote.set(transNOtes);
+                                    }
+                                    
+                                }
+                                // productQtyList.push(product?.quantity)
+                            })
+                            .catch(() => {
+                                transNOtes += `Error while getting client Id from the TrueERP database.\n`;
+                                templateObject.transNote.set(transNOtes);
+                            })
+      
+                    }
+      
+                    // create a new Qutoes in ERP.
+      
+                    const QuoteLines = [];
+      
+                    productIdList.forEach((item, index) => {
+                        QuoteLines.push({
+                            type: "TQuoteLine",
+                            fields: {
+                                ProductID: item,
+                                OrderQty: productQtyList[index]
+                            }
+                        })
+                    })
+                    if (QuoteLines.length === 0) {
+                        continue
+                    }
+                    const QuoteData = {
+                        type: "TQuote",
+                        fields: {
+                            CustomerID: clientId,
+                            Lines: QuoteLines,
+                            IsBackOrder: true
+                        }
+                    }
+      
+                 
+                  await fetch("/api/updateTrueERP2", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                      data: QuoteData,
+                      Username: erpObject.user_name,
+                      Password: erpObject.password,
+                      Database: erpObject.database,
+                      url: erpObject.base_url + "/TQuote"
+                    }),
+                  })
+                    .then((response) => response.json())
+                    .then(async (result) => {
+                      console.log(result);
+                    
+                      transNOtes += `Quotes transfer Success!\n`;
+                    
+                      templateObject.transNote.set(transNOtes);
+                    })
+                    .catch((error) => {
+                      console.log(error);
+                      transNOtes += `Quotes transfer Failed!\n`;
+                      transNOtes += `Failed!!!\n`;
+                      templateObject.transNote.set(transNOtes);
+                    });
+                }
+                let tempDate = new Date();
+                let dateString =
+                  tempDate.getUTCFullYear() +
+                  "/" +
+                  ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
+                  "/" +
+                  ("0" + tempDate.getUTCDate()).slice(-2) +
+                  " " +
+                  ("0" + tempDate.getUTCHours()).slice(-2) +
+                  ":" +
+                  ("0" + tempDate.getUTCMinutes()).slice(-2) +
+                  ":" +
+                  ("0" + tempDate.getUTCSeconds()).slice(-2);
+                let argsDate = {
+                  id: FlowRouter.current().queryParams.id,
+                  last_ran_date: dateString,
+                };
+                await fetch(`/api/updateLastRanDate`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(argsDate),
+                })
+                  .then((response) => response.json())
+                  .then(async (result) => {
+                    console.log(result);
+                  })
+                  .catch((err) => console.log(err));
+              })
+              .catch((err) => {
+                console.log(err);
+                transNOtes += `An error occurred while receiving a Quotes from Zoho\n`;
+                templateObject.transNote.set(transNOtes);
+              });
+          }
+      
+          if (ERP_SalesState) {
+            await fetch("https://www.zohoapis.com/crm/v2/Sales_Orders", {
+              method: "GET",
+              headers: {
+                Authorization: `Zoho-oauthtoken ${token}`,
+                "Content-Type": "application/json",
+              },
+            })
+              .then((response) => response.json())
+              .then(async (result) => {
+                responseCount = result.data.length;
+                var resultData = result.data;
+                transNOtes +=
+                  `Received ` + responseCount + `Sales orders information from Zoho.\n`;
+                
+                transNOtes += `Adding Sales Orders to TrueERP \n`;
+                templateObject.transNote.set(transNOtes);
+      
+                for (let i = 0; i < responseCount; i++) {
+                  // let postData = {};
+                  // postData.type = "tsalesorder";
+                  // postData.fields = {};
+                  // transNOtes += `OrderNumber [${resultData[i].Sales_Order_number}] converting ..........\n`;
+                  // templateObject.transNote.set(transNOtes);
+                  // postData.fields.OrderNumber = resultData[i].Sales_Order-number || "";
+      
+                  // transNOtes += `CustomerID [${resultData[i].Customer_No}] converting ..........\n`;
+                  // templateObject.transNote.set(transNOtes);
+                  // postData.fields.CustomerID = resultData[i].Customer_No || "";
+      
+                  // transNOtes += `SalesPerson [${resultData[i].ClientName}] converting ..........\n`;
+                  // templateObject.transNote.set(transNOtes);
+                  // postData.fields.Sales_Person = resultData[i].ClientName || "";
+      
+                  // transNOtes += `Subject converting ..........\n`;
+                  // templateObject.transNote.set(transNOtes);
+                  // postData.fields.Subject = resultData[i].InvoicePrintDesc || "";
+      
+                  // postData.ProductCode = postData.Product_Details.Product_Code || "";
+                  // postData.ProductName = postData.Product_Details.name || "";
+                 
+                  // await fetch("/api/updateTrueERP2", {
+                  //   method: "POST",
+                  //   headers: {
+                  //     "Content-Type": "application/json"
+                  //   },
+                  //   body: JSON.stringify({
+                  //     data: postData,
+                  //     Username: erpObject.user_name,
+                  //     Password: erpObject.password,
+                  //     Database: erpObject.database,
+                  //     url: erpObject.base_url + "/TSalesOrder"
+                  //   }),
+                  // })
+                  //   .then((response) => response.json())
+                  //   .then(async (result) => {
+                  //     if (result.tquote) {
+                  //       transNOtes += `Sales Orders transfer Success!\n`;
+                  //     } else {
+                  //       transNOtes += `Sales Orders transfer Failed!\n${result.message}\n`;
+                  //     }
+                  //     templateObject.transNote.set(transNOtes);
+                  //   })
+                  //   .catch((error) => {
+                  //     transNOtes += `Sales Orders transfer Failed!\n`;
+                  //     transNOtes += `Failed!!!\n`;
+                  //     templateObject.transNote.set(transNOtes);
+                  //   });
+      
+      
+                  const clientName = resultData[i]?.Account_Name?.name;
+                  let clientId
+                  transNOtes += `Checking Customer in the TrueERP database for ClientName : ${clientName}...\n`;
+                  templateObject.transNote.set(transNOtes);
+                  await fetch(`${erpObject.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
+                      {
+                          method: 'GET',
+                          headers: {
+                            Username: erpObject.user_name,
+                            Password: erpObject.password,
+                            Database: erpObject.database,
+                            "Content-Type": "application/json",
+                          },
+                          redirect: 'follow'
+                      })
+                      .then(response => response.json())
+                      .then(async result => {
+                          if (result?.tcustomer.length > 0) {
+                              clientId = result?.tcustomer[0]?.Id
+                              transNOtes += `Found the Customer as ID : ${clientId}\n`;
+                              templateObject.transNote.set(transNOtes);
+                          } else {
+                              transNOtes += `Not Existing Customer, creating...\n`;
+                              templateObject.transNote.set(transNOtes);
+                              const tempCustomerDetailtoERP = {
+                                  type: "TCustomer",
+                                  fields: {
+                                      ClientTypeName: "Camplist",
+                                      ClientName: resultData[i].Account_Name.name,
+                                      Country: resultData[i].Billing_Country || "",
+                                      State: resultData[i].Billing_State || "",
+                                      Street: resultData[i].Billing_Street || "",
+                                      Postcode: resultData[i].Billing_Code || ""
+                                  }
+                              }
+                              console.log(tempCustomerDetailtoERP,"tempCustomer")
+                              await fetch(`${erpObject.base_url}/TCustomer`,
+                                  {
+                                      method: 'POST',
+                                      headers: {
+                                        Username: erpObject.user_name,
+                                        Password: erpObject.password,
+                                        Database: erpObject.database,
+                                        "Content-Type": "application/json",
+                                      },
+                                      redirect: 'follow',
+                                      body: JSON.stringify(tempCustomerDetailtoERP)
+                                  })
+                                  .then(response => {console.log(response); response.json()} )
+                                  .then(async result => {
+                                      clientId = result?.fields?.ID
+                                      transNOtes += `Added a new customer to TrueERP database with ID : ${clientId}.\n`;
+                                      templateObject.transNote.set(transNOtes);
+                                  })
+                                  .catch(error => console.log('error', error));
+                          }
+                      })
+                      .catch(() => {
+                          transNOtes += `Error while getting client Id from the TrueERP database.\n`;
+                          templateObject.transNote.set(transNOtes);
+                      })
+      
+                  //check if the product exists and add if not
+                  const productList = resultData[i]?.Product_Details
+                  const productIdList = []
+                  const productQtyList = []
+                  transNOtes += `There are ${productList.length} products in the Product_Details.\n`;
+                  templateObject.transNote.set(transNOtes);
+      
+                  for (const product of productList) {
+                      transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.product?.name}...\n`;
+                      templateObject.transNote.set(transNOtes);
+                      await fetch(`${erpObject.base_url}/TProduct?select=[ProductName]="${product?.product?.name}"`,
+                          {
+                              method: 'GET',
+                              headers: {
+                                Username: erpObject.user_name,
+                                Password: erpObject.password,
+                                Database: erpObject.database,
+                                "Content-Type": "application/json",
+                              },
+                              redirect: 'follow'
+                          })
+                          .then(response => response.json())
+                          .then(async result => {
+                              if (result?.tproduct.length > 0) {
+                                  const productId = result?.tproduct[0]?.Id
+                                  transNOtes += `Found the Product as ID : ${productId}\n`;
+                                  templateObject.transNote.set(transNOtes);
+                                  productIdList.push(productId)
+                                  productQtyList.push(product?.quantity)
+                              } else {
+                                  transNOtes += `Not Existing Product, creating...\n`;
+                                  templateObject.transNote.set(transNOtes);
+      
+                                  let args = {
+                                    productID: product?.product?.id,
+                                    auth: token
+                                  }
+                                // get product by id from Zoho
+                                  const productListFromZOHO = await new Promise(
+                                    (resolve, reject) => {
+                                      Meteor.call(
+                                        "getZohoProductByID",
+                                        args,
+                                        (error, result) => {
+                                          if (error) {
+                                            reject(error);
+                                          } else {
+                                            resolve(result);
+                                          }
+                                        }
+                                      );
+                                    }
+                                  );
+                    
+                                  if (productListFromZOHO.data) {
+      
+                                    console.log(productListFromZOHO)
+                                    transNOtes += `Product ${productListFromZOHO.data[0].id} Success!\n`;
+                                    
+                                    templateObject.transNote.set(transNOtes);
+      
+                                    const productFromZoho = productListFromZOHO.data[0];
+      
+                                          const tempProductDetailtoERP = {
+                                              type: "TProductWeb",
+                                              fields:
+                                              {
+                                                  ProductType: "INV",
+                                                  ProductName: productFromZoho?.Product_Name,
+                                                  SalesDescription: productFromZoho.Description || "",
+                                                  AssetAccount: "Inventory Asset",
+                                                  CogsAccount: "Cost of Goods Sold",
+                                                  IncomeAccount: "Sales",
+                                                  PRODUCTCODE: productFromZoho.Product_Code || "",
+                                                  TaxCodePurchase: "NCG",
+                                                  TaxCodeSales: "GST",
+                                                  UOMPurchases: "Units",
+                                                  UOMSales: "Units",
+                                              }
+                                          }
+      
+                                          if(productFromZoho.GlobalRef) {
+                                            tempProductDetailtoERP.fields.GlobalRef = productFromZoho.GlobalRef
+                                          }
+      
+                                          console.log(tempProductDetailtoERP)
+      
+                                          await fetch(`${erpObject.base_url}/TProductWeb`,
+                                              {
+                                                  method: 'POST',
+                                                  headers: {
+                                                    Username: erpObject.user_name,
+                                                    Password: erpObject.password,
+                                                    Database: erpObject.database,
+                                                    "Content-Type": "application/json",
+                                                  },
+                                                  redirect: 'follow',
+                                                  body: JSON.stringify(tempProductDetailtoERP)
+                                              })
+                                              .then(response => response.json())
+                                              .then(async result => {
+                                                  const tempProductId = result?.fields?.ID
+                                                  transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
+                                                  templateObject.transNote.set(transNOtes);
+                                                  productIdList.push(tempProductId)
+                                                  productQtyList.push(product?.quantity)
+                                              })
+                                              .catch(error => console.log('error', error));
+                                  } else {
+                                    console.log(productListFromZOHO)
+                                    transNOtes += `product searching by id Failed!\n`;
+                                    transNOtes += `Failed!!!\n`;
+                                    templateObject.transNote.set(transNOtes);
+                                  }
+                                  
+                              }
+                              // productQtyList.push(product?.quantity)
+                          })
+                          .catch(() => {
+                              transNOtes += `Error while getting client Id from the TrueERP database.\n`;
+                              templateObject.transNote.set(transNOtes);
+                          })
+      
+                  }
+      
+                  // create a new Qutoes in ERP.
+      
+                  const OrderLines = [];
+      
+                  productIdList.forEach((item, index) => {
+                      OrderLines.push({
+                          type: "TSalesOrderLine",
+                          fields: {
+                              ProductID: item,
+                              OrderQty: productQtyList[index]
+                          }
+                      })
+                  })
+                  if (OrderLines.length === 0) {
+                      continue
+                  }
+                  const QuoteData = {
+                      type: "TSalesOrder",
+                      fields: {
+                          CustomerID: clientId,
+                          Lines: OrderLines,
+                          IsBackOrder: true
+                      }
+                  }
+      
+               
+                await fetch("/api/updateTrueERP2", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                    data: QuoteData,
+                    Username: erpObject.user_name,
+                    Password: erpObject.password,
+                    Database: erpObject.database,
+                    url: erpObject.base_url + "/TSalesOrder"
+                  }),
+                })
+                  .then((response) => response.json())
+                  .then(async (result) => {
+                    console.log(result);
+                  
+                    transNOtes += `SalesOrder transfer Success!\n`;
+                  
+                    templateObject.transNote.set(transNOtes);
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                    transNOtes += `SalesOrder transfer Failed!\n`;
+                    transNOtes += `Failed!!!\n`;
+                    templateObject.transNote.set(transNOtes);
+                  });
+                }
+                let tempDate = new Date();
+                let dateString =
+                  tempDate.getUTCFullYear() +
+                  "/" +
+                  ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
+                  "/" +
+                  ("0" + tempDate.getUTCDate()).slice(-2) +
+                  " " +
+                  ("0" + tempDate.getUTCHours()).slice(-2) +
+                  ":" +
+                  ("0" + tempDate.getUTCMinutes()).slice(-2) +
+                  ":" +
+                  ("0" + tempDate.getUTCSeconds()).slice(-2);
+                let argsDate = {
+                  id: FlowRouter.current().queryParams.id,
+                  last_ran_date: dateString,
+                };
+                await fetch(`/api/updateLastRanDate`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(argsDate),
+                })
+                  .then((response) => response.json())
+                  .then(async (result) => {
+                    console.log(result);
+                  })
+                  .catch((err) => console.log(err));
+              })
+              .catch((err) => {
+                transNOtes += `An error occurred while receiving a Sales Orders from Zoho\n`;
+                templateObject.transNote.set(transNOtes);
+              });
+          }
+      
+          if (ERP_LeadsState) {
+            await fetch("https://www.zohoapis.com/crm/v2/Leads", {
+              method: "GET",
+              headers: {
+                Authorization: `Zoho-oauthtoken ${token}`,
+                "Content-Type": "application/json",
+              },
+            })
+              .then((response) => response.json())
+              .then(async (result) => {
+                responseCount = result.data.length;
+                var resultData = result.data;
+                transNOtes +=
+                  `Received ` + responseCount + `Leads information from Zoho.\n`;
+                
+                transNOtes += `Adding Leads to TrueERP \n`;
+                templateObject.transNote.set(transNOtes);
+      
+                for (let i = 0; i < responseCount; i++) {
+                  let postData = {};
+                  postData.type = "TProspect";
+                  postData.fields = {};
+                  transNOtes += `FistName [${resultData[i].First_Name}] converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.FirstName = resultData[i].First_Name || "";
+      
+                  transNOtes += `LastName [${resultData[i].Last_Name}] converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.LastName = resultData[i].Last_Name || "";
+      
+                  postData.fields.ClientName = postData.fields.LastName + postData.fields.FirstName;
+      
+      
+                  transNOtes += `Email [${resultData[i].Email}] converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.Email = resultData[i].Email || "";
+      
+                  transNOtes += `Company converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.Companyname = resultData[i].Company || "";
+      
+                  transNOtes += `Phone [${resultData[i].Phone}] converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.Phone = resultData[i].Phone || "";
+      
+                  transNOtes += `Title [${resultData[i].Title}] converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.Title = resultData[i].Title || "";
+      
+                  transNOtes += `SkypeName [${resultData[i].Skype_ID}] converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.SkypeName = resultData[i].Skype_ID || "";
+                  
+                  await fetch("/api/updateTrueERP2", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                      data: postData,
+                      Username: erpObject.user_name,
+                      Password: erpObject.password,
+                      Database: erpObject.database,
+                      url: erpObject.base_url + "/TProspect"
+                    }),
+                  })
+                    .then((response) => response.json())
+                    .then(async (result) => {
+                      
+                      console.log(result)
+      
+                      transNOtes += `Leads transfer Success!\n`;
+                      
+                      templateObject.transNote.set(transNOtes);
+                    })
+                    .catch((error) => {
+                      console.log(error);
+      
+                      transNOtes += `Leads transfer Failed!\n`;
+                      transNOtes += `Failed!!!\n`;
+                      templateObject.transNote.set(transNOtes);
+                    });
+                }
+                let tempDate = new Date();
+                let dateString =
+                  tempDate.getUTCFullYear() +
+                  "/" +
+                  ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
+                  "/" +
+                  ("0" + tempDate.getUTCDate()).slice(-2) +
+                  " " +
+                  ("0" + tempDate.getUTCHours()).slice(-2) +
+                  ":" +
+                  ("0" + tempDate.getUTCMinutes()).slice(-2) +
+                  ":" +
+                  ("0" + tempDate.getUTCSeconds()).slice(-2);
+                let argsDate = {
+                  id: FlowRouter.current().queryParams.id,
+                  last_ran_date: dateString,
+                };
+                await fetch(`/api/updateLastRanDate`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(argsDate),
+                })
+                  .then((response) => response.json())
+                  .then(async (result) => {
+                    console.log(result);
+                  })
+                  .catch((err) => console.log(err));
+              })
+              .catch((err) => {
+                transNOtes += `An error occurred while receiving a Leads from Zoho\n`;
+                templateObject.transNote.set(transNOtes);
+              });
+          }
+      
+          if (ERP_CustomerState) {
+      
+            Meteor.call('getAlldatafromZoho', 'Contacts', token, async (error, result) => {
+              if (error) {
+                console.log(error);
+                transNOtes += `An error occurred while receiving a Customers from Zoho\n ${error.message}`;
+                templateObject.transNote.set(transNOtes);
+              } else {
+                responseCount = result.length;
+                var resultData = result;
+                transNOtes +=
+                  `Received ` + responseCount + `Contacts information from Zoho.\n`;
+                
+                transNOtes += `Adding Contacts to TrueERP \n`;
+                templateObject.transNote.set(transNOtes);
+                
+                for (let i = 0; i < responseCount; i++) {
+                  let postData = {}
+                  postData.type = "TCustomer";
+                  postData.fields = {};
+                  transNOtes += `Contacts Email [${resultData[i].Email}] converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.Email = resultData[i].Email || "";
+      
+                  transNOtes += `First_Name [${resultData[i].First_Name}] converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.FirstName = resultData[i].First_Name || "";
+      
+                  transNOtes += `Last_Name [${resultData[i].Last_Name}] converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.LastName = resultData[i].Last_Name || "";
+      
+                  transNOtes += `Phone converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.Phone = resultData[i].Phone || "";
+      
+                  transNOtes += `Mobile converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.Mobile = resultData[i].Mobile || "";
+      
+                  transNOtes += `SkypeName converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.SkypeName = resultData[i].Skype_ID || "";
+      
+                  transNOtes += `Title converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.Title = resultData[i].Title || "";
+      
+                  transNOtes += `Faxnumber converting ..........\n`;
+                  templateObject.transNote.set(transNOtes);
+                  postData.fields.Faxnumber = resultData[i].Fax || "";
+      
+                  if(resultData[i].GlobalRef){
+                    postData.fields.GlobalRef = resultData[i].GlobalRef;
+                  } else {
+                    postData.fields.ClientName = resultData[i].Full_Name || "";
+                  };
+      
+                  await fetch("/api/updateTrueERP2", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                      data: postData,
+                      Username: erpObject.user_name,
+                      Password: erpObject.password,
+                      Database: erpObject.database,
+                      url: erpObject.base_url + "/TCustomer"
+                    }),
+                  })
+                    .then((response) => response.json())
+                    .then(async (result) => {
+                      console.log(result);
+                      if (!result.code) {
+                        transNOtes += `Customers transfer Success!\n`;
+                      } else {
+                        transNOtes += `Customers transfer Failed!\n${result.message}\n`;
+                      }
+                      templateObject.transNote.set(transNOtes);
+                    })
+                    .catch((error) => {
+                      transNOtes += `Customers transfer Failed!\n`;
+                      transNOtes += `Failed!!!\n`;
+                      templateObject.transNote.set(transNOtes);
+                    });
+                }
+                let tempDate = new Date();
+                let dateString =
+                  tempDate.getUTCFullYear() +
+                  "/" +
+                  ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
+                  "/" +
+                  ("0" + tempDate.getUTCDate()).slice(-2) +
+                  " " +
+                  ("0" + tempDate.getUTCHours()).slice(-2) +
+                  ":" +
+                  ("0" + tempDate.getUTCMinutes()).slice(-2) +
+                  ":" +
+                  ("0" + tempDate.getUTCSeconds()).slice(-2);
+                let argsDate = {
+                  id: FlowRouter.current().queryParams.id,
+                  last_ran_date: dateString,
+                };
+                await fetch(`/api/updateLastRanDate`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(argsDate),
+                })
+                  .then((response) => response.json())
+                  .then(async (result) => {
+                    console.log(result);
+                  })
+                  .catch((err) => console.log(err));
+              }
+            });
+      
+          }
+        }
+      );
 }
 else {
 swal(`Error Occurred While Attempting to Connect to the ${result[0].name} Server`, `Head to Connection Details and Check if ${result[0].name} Server Configuration is Correct`, "error")
