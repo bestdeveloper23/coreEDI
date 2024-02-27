@@ -400,7 +400,7 @@ Template.datatablelist.onRendered(async function () {
                             "AccName": r.accounting_soft_name,
                             "ConnName": r.connection_soft_name,
                             "Date": r.date,
-                            "Count": r.order_num + r.uploaded_num + r.downloaded_num
+                            "Count": r.uploaded_num + r.downloaded_num
                         }
                     })
                     await templateObject.displayTableData(result);

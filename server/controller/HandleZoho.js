@@ -329,6 +329,22 @@ Meteor.methods({
 
     },
 
+    'getzohoDatasforLatest': async function(reqData) {
+      try {
+        const response = await axios.get(`https://www.zohoapis.com/crm/v2/${reqData.data.module}/search?criteria=Modified_Time.after:${reqData.data.lastRanDate}`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        return response.data;
+
+      } catch (error) {
+        throw new Meteor.Error("api-error", error.response.data);
+      }
+    },
+
     'getZohoCustomers': async function (reqData) {
       try {
         const response = await axios.get("https://www.zohoapis.com/crm/v2/Contacts", {

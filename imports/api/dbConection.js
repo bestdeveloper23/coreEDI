@@ -339,7 +339,7 @@ Meteor.startup(() => {
     jsonParser(req, res, () => {
       const data = req.body;
       const insertQuery = "INSERT INTO `transactions` SET accounting_soft='" + data.accounting_soft + "', connection_soft='" + data.connection_soft + "', date='" + data.date + "', order_num='" + 
-      data.order_num + "', products='" + data.products + "', products_num='" + data.product_num + "', uploaded_num='" + data.upload_num + 
+      data.order_num + "', products='" + data.products + "', products_num='" + data.product_num + "', uploaded_num='" + data.uploaded_num + 
       "', downloaded_num='" + data.downloaded_num + "', connection_id='" + data.connection_id + "'";
       pool.query(insertQuery, function (error, results) {
         if (error) {
@@ -355,6 +355,45 @@ Meteor.startup(() => {
     });
   });
 
+  JsonRoutes.add('post', '/api/addtransaction', function (req, res) {
+    console.log(req.body)
+    jsonParser(req, res, () => {
+      const id = req.body.id;
+      const data = req.body.transaction_data;
+      const insertQuery = "UPDATE transactions SET order_num='" + 
+      data.order_num + "', products='" + data.products + "', products_num='" + data.product_num + "', uploaded_num='" + data.uploaded_num + 
+      "', downloaded_num='" + data.downloaded_num + "' WHERE id = " + id + ";";
+      pool.query(insertQuery, function (error, results) {
+        if (error) {
+          return JsonRoutes.sendResult(res, {
+            code: '500',
+            data: error
+          });
+        }
+        return JsonRoutes.sendResult(res, {
+          data: results.insertId
+        });
+      });
+    });
+  });
+
+  JsonRoutes.add('post', '/api/transactionByDate', function (req, res) {
+    jsonParser(req, res, () => {
+      const data = req.body;
+      const insertQuery = "SELECT * FROM transactions WHERE date='" + data.date + "' AND connection_id='" + data.connection_id + "'AND accounting_soft='" + data.accounting_soft + "'AND connection_soft='" + data.connection_soft + "';";
+      pool.query(insertQuery, function (error, results) {
+        if (error) {
+          return JsonRoutes.sendResult(res, {
+            code: '500',
+            data: error
+          });
+        }
+        return JsonRoutes.sendResult(res, {
+          data: results[0] || "No Result"
+        });
+      });
+    });
+  });
   JsonRoutes.add('post', '/api/inserttransactionDetails', function (req, res) {
     jsonParser(req, res, () => {
       let transaction_details = req.body['transaction_details'];

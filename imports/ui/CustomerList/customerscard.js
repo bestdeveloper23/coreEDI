@@ -60,8 +60,8 @@ data.ConnName || '',
 data.RunCycle ? data.RunCycle + ' hour' : '',
 '<span style="display:none;">' + (data.NextRunDate != '' ? moment(data.NextRunDate).format("YYYY/MM/DD") : data.NextRunDate) + '</span>' + (data.NextRunDate != '' ? moment(data.NextRunDate).format("DD/MM/YYYY") : data.NextRunDate),
 '<span style="display:none;">' + (data.NextRunDate != '' ? moment(data.NextRunDate).format("HH:mm:ss") : data.NextRunDate) + '</span>' + (data.NextRunDate != '' ? moment(data.NextRunDate).format("HH:mm:ss") : data.NextRunDate),
-setFrequencyButton,
 runNowButton,
+setFrequencyButton,
 importAgainButton,
 importDate,
 data.Enabled ? 'Y' : 'N'
@@ -96,8 +96,8 @@ let headerStructure = [
 { index: 6, label: "Run Every", class: "colRunEvery", active: true, display: true, width: "110" },
 { index: 7, label: "Next Run Date", class: "colNextScheduledRunAt", active: true, display: true, width: "100" },
 { index: 8, label: "Next Run Time", class: "colNextScheduledRunAt", active: true, display: true, width: "100" },
-{ index: 9, label: "Frequency", class: "colSetFrequency", width: "120", active: true, display: true },
-{ index: 10, label: "Run Now", class: "colRunNow", width: "95", active: true, display: true },
+{ index: 9, label: "Run Now", class: "colRunNow", width: "95", active: true, display: true },
+{ index: 10, label: "Frequency", class: "colSetFrequency", width: "120", active: true, display: true },
 { index: 11, label: "Import Again", class: "colImportAgain", width: "120", active: true, display: true },
 { index: 12, label: "Import Date", class: "colImportDate", width: "130", active: true, display: true },
 { index: 13, label: "Enabled", class: "colEnabled", active: true, display: true, width: "120" },
@@ -1524,61 +1524,61 @@ await fetch(`${tempAccount.base_url}/TProduct?select=[ProductName]="${product?.n
           // templateObject.transNote.set(transNOtes);
 
           //getting product by id from
-          await axios.get(`${url}/wp-json/wc/v3/products/${product.product_id}`, {
-              headers: {
-                  'Authorization': `Bearer ${token}`,
-              }
-          })
-              .then(async (response) => {
-                  const productFromWoo = response.data
+        //   await axios.get(`${url}/wp-json/wc/v3/products/${product.product_id}`, {
+        //       headers: {
+        //           'Authorization': `Bearer ${token}`,
+        //       }
+        //   })
+        //       .then(async (response) => {
+        //           const productFromWoo = response.data
 
-                  const tempProductDetailtoERP = {
-                      type: "TProductWeb",
-                      fields:
-                      {
-                          ProductType: "INV",
-                          ProductName: productFromWoo?.name,
-                          PurchaseDescription: productFromWoo?.description,
-                          SalesDescription: productFromWoo?.short_description,
-                          AssetAccount: "Inventory Asset",
-                          CogsAccount: "Cost of Goods Sold",
-                          IncomeAccount: "Sales",
-                          BuyQty1: 1,
-                          BuyQty1Cost: parseFloat(productFromWoo?.price),
-                          BuyQty2: 1,
-                          BuyQty2Cost: parseFloat(productFromWoo?.price),
-                          BuyQty3: 1,
-                          BuyQty3Cost: parseFloat(productFromWoo?.price),
-                          SellQty1: 1,
-                          SellQty1Price: parseFloat(productFromWoo?.price),
-                          SellQty2: 1,
-                          SellQty2Price: parseFloat(productFromWoo?.price),
-                          SellQty3: 1,
-                          SellQty3Price: parseFloat(productFromWoo?.price),
-                          TaxCodePurchase: "NCG",
-                          TaxCodeSales: "GST",
-                          UOMPurchases: "Units",
-                          UOMSales: "Units"
-                      }
-                  }
+        //           const tempProductDetailtoERP = {
+        //               type: "TProductWeb",
+        //               fields:
+        //               {
+        //                   ProductType: "INV",
+        //                   ProductName: productFromWoo?.name,
+        //                   PurchaseDescription: productFromWoo?.description,
+        //                   SalesDescription: productFromWoo?.short_description,
+        //                   AssetAccount: "Inventory Asset",
+        //                   CogsAccount: "Cost of Goods Sold",
+        //                   IncomeAccount: "Sales",
+        //                   BuyQty1: 1,
+        //                   BuyQty1Cost: parseFloat(productFromWoo?.price),
+        //                   BuyQty2: 1,
+        //                   BuyQty2Cost: parseFloat(productFromWoo?.price),
+        //                   BuyQty3: 1,
+        //                   BuyQty3Cost: parseFloat(productFromWoo?.price),
+        //                   SellQty1: 1,
+        //                   SellQty1Price: parseFloat(productFromWoo?.price),
+        //                   SellQty2: 1,
+        //                   SellQty2Price: parseFloat(productFromWoo?.price),
+        //                   SellQty3: 1,
+        //                   SellQty3Price: parseFloat(productFromWoo?.price),
+        //                   TaxCodePurchase: "NCG",
+        //                   TaxCodeSales: "GST",
+        //                   UOMPurchases: "Units",
+        //                   UOMSales: "Units"
+        //               }
+        //           }
 
-                  await fetch(`${tempAccount.base_url}/TProductWeb`,
-                      {
-                          method: 'POST',
-                          headers: myHeaders,
-                          redirect: 'follow',
-                          body: JSON.stringify(tempProductDetailtoERP)
-                      })
-                      .then(response => response.json())
-                      .then(async result => {
-                          const tempProductId = result?.fields?.ID
-                          // transNOtes += `Added a new product to ERP database with ID : ${tempProductId}.\n`;
-                          // templateObject.transNote.set(transNOtes);
-                          productIdList.push(tempProductId)
-                          productQtyList.push(product?.quantity)
-                      })
-                      .catch(error => console.log('error', error));
-              })
+        //           await fetch(`${tempAccount.base_url}/TProductWeb`,
+        //               {
+        //                   method: 'POST',
+        //                   headers: myHeaders,
+        //                   redirect: 'follow',
+        //                   body: JSON.stringify(tempProductDetailtoERP)
+        //               })
+        //               .then(response => response.json())
+        //               .then(async result => {
+        //                   const tempProductId = result?.fields?.ID
+        //                   // transNOtes += `Added a new product to ERP database with ID : ${tempProductId}.\n`;
+        //                   // templateObject.transNote.set(transNOtes);
+        //                   productIdList.push(tempProductId)
+        //                   productQtyList.push(product?.quantity)
+        //               })
+        //               .catch(error => console.log('error', error));
+        //       })
       }
       // productQtyList.push(product?.quantity)
   })
@@ -1657,7 +1657,7 @@ body: JSON.stringify(args)
 })
 .then(response => response.json())
 .then(async (result) => {
-transNOtes += `\nUpdated Last Sync Time as ${nowInSydney}.\n`;
+transNOtes += `\nUpdated Last Sync Time as ${moment(nowInSydney).format("DD/MMYYYY HH:mm:ss")}.\n`;
 templateObject.transNote.set(transNOtes);
 })
 .catch((err) => console.log(err))
@@ -2891,65 +2891,65 @@ fetch('/api/MagentoByID', {
                                                           productIdList.push(productId)
                                                           productQtyList.push(product?.quantity)
                                                       } else {
-                                                          transNOtes += `Not Existing Product, creating...\n`;
-                                                          templateObject.transNote.set(transNOtes);
+                                                        //   transNOtes += `Not Existing Product, creating...\n`;
+                                                        //   templateObject.transNote.set(transNOtes);
 
                                                           //getting product by id from
-                                                          await axios.get(`${url}/wp-json/wc/v3/products/${product.product_id}`, {
-                                                              headers: {
-                                                                  'Authorization': `Bearer ${token}`,
-                                                              }
-                                                          })
-                                                              .then(async (response) => {
-                                                                  const productFromWoo = response.data
+                                                        //   await axios.get(`${url}/wp-json/wc/v3/products/${product.product_id}`, {
+                                                        //       headers: {
+                                                        //           'Authorization': `Bearer ${token}`,
+                                                        //       }
+                                                        //   })
+                                                        //       .then(async (response) => {
+                                                        //           const productFromWoo = response.data
 
-                                                                  const tempProductDetailtoERP = {
-                                                                      type: "TProductWeb",
-                                                                      fields:
-                                                                      {
-                                                                          ProductType: "INV",
-                                                                          ProductName: productFromWoo?.name,
-                                                                          PurchaseDescription: productFromWoo?.description,
-                                                                          SalesDescription: productFromWoo?.short_description,
-                                                                          AssetAccount: "Inventory Asset",
-                                                                          CogsAccount: "Cost of Goods Sold",
-                                                                          IncomeAccount: "Sales",
-                                                                          BuyQty1: 1,
-                                                                          BuyQty1Cost: parseFloat(productFromWoo?.price),
-                                                                          BuyQty2: 1,
-                                                                          BuyQty2Cost: parseFloat(productFromWoo?.price),
-                                                                          BuyQty3: 1,
-                                                                          BuyQty3Cost: parseFloat(productFromWoo?.price),
-                                                                          SellQty1: 1,
-                                                                          SellQty1Price: parseFloat(productFromWoo?.price),
-                                                                          SellQty2: 1,
-                                                                          SellQty2Price: parseFloat(productFromWoo?.price),
-                                                                          SellQty3: 1,
-                                                                          SellQty3Price: parseFloat(productFromWoo?.price),
-                                                                          TaxCodePurchase: "NCG",
-                                                                          TaxCodeSales: "GST",
-                                                                          UOMPurchases: "Units",
-                                                                          UOMSales: "Units"
-                                                                      }
-                                                                  }
+                                                        //           const tempProductDetailtoERP = {
+                                                        //               type: "TProductWeb",
+                                                        //               fields:
+                                                        //               {
+                                                        //                   ProductType: "INV",
+                                                        //                   ProductName: productFromWoo?.name,
+                                                        //                   PurchaseDescription: productFromWoo?.description,
+                                                        //                   SalesDescription: productFromWoo?.short_description,
+                                                        //                   AssetAccount: "Inventory Asset",
+                                                        //                   CogsAccount: "Cost of Goods Sold",
+                                                        //                   IncomeAccount: "Sales",
+                                                        //                   BuyQty1: 1,
+                                                        //                   BuyQty1Cost: parseFloat(productFromWoo?.price),
+                                                        //                   BuyQty2: 1,
+                                                        //                   BuyQty2Cost: parseFloat(productFromWoo?.price),
+                                                        //                   BuyQty3: 1,
+                                                        //                   BuyQty3Cost: parseFloat(productFromWoo?.price),
+                                                        //                   SellQty1: 1,
+                                                        //                   SellQty1Price: parseFloat(productFromWoo?.price),
+                                                        //                   SellQty2: 1,
+                                                        //                   SellQty2Price: parseFloat(productFromWoo?.price),
+                                                        //                   SellQty3: 1,
+                                                        //                   SellQty3Price: parseFloat(productFromWoo?.price),
+                                                        //                   TaxCodePurchase: "NCG",
+                                                        //                   TaxCodeSales: "GST",
+                                                        //                   UOMPurchases: "Units",
+                                                        //                   UOMSales: "Units"
+                                                        //               }
+                                                        //           }
 
-                                                                  await fetch(`${tempAccount.base_url}/TProductWeb`,
-                                                                      {
-                                                                          method: 'POST',
-                                                                          headers: myHeaders,
-                                                                          redirect: 'follow',
-                                                                          body: JSON.stringify(tempProductDetailtoERP)
-                                                                      })
-                                                                      .then(response => response.json())
-                                                                      .then(async result => {
-                                                                          const tempProductId = result?.fields?.ID
-                                                                          transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
-                                                                          templateObject.transNote.set(transNOtes);
-                                                                          productIdList.push(tempProductId)
-                                                                          productQtyList.push(product?.quantity)
-                                                                      })
-                                                                      .catch(error => console.log('error', error));
-                                                              })
+                                                        //         //   await fetch(`${tempAccount.base_url}/TProductWeb`,
+                                                        //         //       {
+                                                        //         //           method: 'POST',
+                                                        //         //           headers: myHeaders,
+                                                        //         //           redirect: 'follow',
+                                                        //         //           body: JSON.stringify(tempProductDetailtoERP)
+                                                        //         //       })
+                                                        //         //       .then(response => response.json())
+                                                        //         //       .then(async result => {
+                                                        //         //           const tempProductId = result?.fields?.ID
+                                                        //         //         //   transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
+                                                        //         //         //   templateObject.transNote.set(transNOtes);
+                                                        //         //           productIdList.push(tempProductId)
+                                                        //         //           productQtyList.push(product?.quantity)
+                                                        //         //       })
+                                                        //         //       .catch(error => console.log('error', error));
+                                                        //       })
                                                       }
                                                       // productQtyList.push(product?.quantity)
                                                   })
@@ -3145,7 +3145,7 @@ fetch(`/api/WooCommerceByID`, {
                                 }
                             }
 
-                            transNOtes += `Last Sync Time: ${lstUpdateTime}\n`;
+                            transNOtes += `Last Sync Time as ${moment(lstUpdateTime).format("DD/MMYYYY HH:mm:ss")}.\n`;
                             templateObject.transNote.set(transNOtes);
                             async function runPerFiveMinutes() {
                                 if(customer_status){
@@ -3444,65 +3444,65 @@ fetch(`/api/WooCommerceByID`, {
                                                                 productIdList.push(productId)
                                                                 productQtyList.push(product?.quantity)
                                                             } else {
-                                                                transNOtes += `Not Existing Product, creating...\n`;
-                                                                templateObject.transNote.set(transNOtes);
+                                                                // transNOtes += `Not Existing Product, creating...\n`;
+                                                                // templateObject.transNote.set(transNOtes);
 
                                                                 //getting product by id from
-                                                                await axios.get(`${url}/wp-json/wc/v3/products/${product.product_id}`, {
-                                                                    headers: {
-                                                                        'Authorization': `Bearer ${token}`,
-                                                                    }
-                                                                })
-                                                                    .then(async (response) => {
-                                                                        const productFromWoo = response.data
+                                                                // await axios.get(`${url}/wp-json/wc/v3/products/${product.product_id}`, {
+                                                                //     headers: {
+                                                                //         'Authorization': `Bearer ${token}`,
+                                                                //     }
+                                                                // })
+                                                                //     .then(async (response) => {
+                                                                //         const productFromWoo = response.data
 
-                                                                        const tempProductDetailtoERP = {
-                                                                            type: "TProductWeb",
-                                                                            fields:
-                                                                            {
-                                                                                ProductType: "INV",
-                                                                                ProductName: productFromWoo?.name,
-                                                                                PurchaseDescription: productFromWoo?.description,
-                                                                                SalesDescription: productFromWoo?.short_description,
-                                                                                AssetAccount: "Inventory Asset",
-                                                                                CogsAccount: "Cost of Goods Sold",
-                                                                                IncomeAccount: "Sales",
-                                                                                BuyQty1: 1,
-                                                                                BuyQty1Cost: parseFloat(productFromWoo?.price),
-                                                                                BuyQty2: 1,
-                                                                                BuyQty2Cost: parseFloat(productFromWoo?.price),
-                                                                                BuyQty3: 1,
-                                                                                BuyQty3Cost: parseFloat(productFromWoo?.price),
-                                                                                SellQty1: 1,
-                                                                                SellQty1Price: parseFloat(productFromWoo?.price),
-                                                                                SellQty2: 1,
-                                                                                SellQty2Price: parseFloat(productFromWoo?.price),
-                                                                                SellQty3: 1,
-                                                                                SellQty3Price: parseFloat(productFromWoo?.price),
-                                                                                TaxCodePurchase: "NCG",
-                                                                                TaxCodeSales: "GST",
-                                                                                UOMPurchases: "Units",
-                                                                                UOMSales: "Units"
-                                                                            }
-                                                                        }
+                                                                //         const tempProductDetailtoERP = {
+                                                                //             type: "TProductWeb",
+                                                                //             fields:
+                                                                //             {
+                                                                //                 ProductType: "INV",
+                                                                //                 ProductName: productFromWoo?.name,
+                                                                //                 PurchaseDescription: productFromWoo?.description,
+                                                                //                 SalesDescription: productFromWoo?.short_description,
+                                                                //                 AssetAccount: "Inventory Asset",
+                                                                //                 CogsAccount: "Cost of Goods Sold",
+                                                                //                 IncomeAccount: "Sales",
+                                                                //                 BuyQty1: 1,
+                                                                //                 BuyQty1Cost: parseFloat(productFromWoo?.price),
+                                                                //                 BuyQty2: 1,
+                                                                //                 BuyQty2Cost: parseFloat(productFromWoo?.price),
+                                                                //                 BuyQty3: 1,
+                                                                //                 BuyQty3Cost: parseFloat(productFromWoo?.price),
+                                                                //                 SellQty1: 1,
+                                                                //                 SellQty1Price: parseFloat(productFromWoo?.price),
+                                                                //                 SellQty2: 1,
+                                                                //                 SellQty2Price: parseFloat(productFromWoo?.price),
+                                                                //                 SellQty3: 1,
+                                                                //                 SellQty3Price: parseFloat(productFromWoo?.price),
+                                                                //                 TaxCodePurchase: "NCG",
+                                                                //                 TaxCodeSales: "GST",
+                                                                //                 UOMPurchases: "Units",
+                                                                //                 UOMSales: "Units"
+                                                                //             }
+                                                                //         }
 
-                                                                        await fetch(`${tempAccount.base_url}/TProductWeb`,
-                                                                            {
-                                                                                method: 'POST',
-                                                                                headers: myHeaders,
-                                                                                redirect: 'follow',
-                                                                                body: JSON.stringify(tempProductDetailtoERP)
-                                                                            })
-                                                                            .then(response => response.json())
-                                                                            .then(async result => {
-                                                                                const tempProductId = result?.fields?.ID
-                                                                                transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
-                                                                                templateObject.transNote.set(transNOtes);
-                                                                                productIdList.push(tempProductId)
-                                                                                productQtyList.push(product?.quantity)
-                                                                            })
-                                                                            .catch(error => console.log('error', error));
-                                                                    })
+                                                                //         // await fetch(`${tempAccount.base_url}/TProductWeb`,
+                                                                //         //     {
+                                                                //         //         method: 'POST',
+                                                                //         //         headers: myHeaders,
+                                                                //         //         redirect: 'follow',
+                                                                //         //         body: JSON.stringify(tempProductDetailtoERP)
+                                                                //         //     })
+                                                                //         //     .then(response => response.json())
+                                                                //         //     .then(async result => {
+                                                                //         //         const tempProductId = result?.fields?.ID
+                                                                //         //         // transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
+                                                                //         //         // templateObject.transNote.set(transNOtes);
+                                                                //         //         productIdList.push(tempProductId)
+                                                                //         //         productQtyList.push(product?.quantity)
+                                                                //         //     })
+                                                                //         //     .catch(error => console.log('error', error));
+                                                                //     })
                                                             }
                                                             // productQtyList.push(product?.quantity)
                                                         })
@@ -3576,7 +3576,7 @@ fetch(`/api/WooCommerceByID`, {
                                 })
                                 .then(response => response.json())
                                 .then(async (result) => {
-                                    transNOtes += `Updated Last Sync Time as ${nowInSydney}.\n`;
+                                    transNOtes += `Updated Last Sync Time as ${moment(nowInSydney).format("DD/MMYYYY HH:mm:ss")}.\n`;
                                     templateObject.transNote.set(transNOtes);
                                 })
                                 .catch((err) => console.log(err));
@@ -3602,16 +3602,16 @@ fetch(`/api/WooCommerceByID`, {
                                     'downloaded_num': download_transaction_count,
                                     'connection_id': selConnectionId
                                 }
+                                // transaction_details.push({
+                                //     detail_string: 'downloaded products from TrueERP to WooCommerce',
+                                //     count: download_transaction_count
+                                // });
                                 transaction_details.push({
-                                    detail_string: 'downloaded products from TrueERP to WooCommerce',
-                                    count: download_transaction_count
-                                });
-                                transaction_details.push({
-                                    detail_string: 'uploaded products from TrueERP to WooCommerce',
+                                    detail_string: 'Uploaded products from TrueERP to WooCommerce',
                                     count: upload_transaction_count
                                 })
                                 transaction_details.push({
-                                    detail_string: 'orders from TrueERP to WooCommerce',
+                                    detail_string: 'Orders from WooCommerce to TrueERP',
                                     count: order_transaction_count
                                 })
                                 
@@ -3700,7 +3700,7 @@ fetch(`/api/AustraliaPOSTByID`, {
                       myHeaders.append("Username", `${tempAccount.user_name}`);
                       myHeaders.append("Password", `${tempAccount.password}`);
 
-                      transNOtes += `Last Sync Time: ${lstUpdateTime}\n`;
+                      transNOtes += `Last Sync Time as ${moment(lstUpdateTime).format("DD/MMYYYY HH:mm:ss")}.\n`;
                       templateObject.transNote.set(transNOtes);
                       // Getting backorders invoice from ERP machine
                       transNOtes += `-----------------------------------------------------------\n`;
@@ -4644,57 +4644,7 @@ else if (connectionType == "zoho") {
                 templateObject.transNote.set(transNOtes);
       
                 for (let i = 0; i < responseCount; i++) {
-                  // let postData = {};
-                  // postData.type = "tsalesorder";
-                  // postData.fields = {};
-                  // transNOtes += `OrderNumber [${resultData[i].Sales_Order_number}] converting ..........\n`;
-                  // templateObject.transNote.set(transNOtes);
-                  // postData.fields.OrderNumber = resultData[i].Sales_Order-number || "";
-      
-                  // transNOtes += `CustomerID [${resultData[i].Customer_No}] converting ..........\n`;
-                  // templateObject.transNote.set(transNOtes);
-                  // postData.fields.CustomerID = resultData[i].Customer_No || "";
-      
-                  // transNOtes += `SalesPerson [${resultData[i].ClientName}] converting ..........\n`;
-                  // templateObject.transNote.set(transNOtes);
-                  // postData.fields.Sales_Person = resultData[i].ClientName || "";
-      
-                  // transNOtes += `Subject converting ..........\n`;
-                  // templateObject.transNote.set(transNOtes);
-                  // postData.fields.Subject = resultData[i].InvoicePrintDesc || "";
-      
-                  // postData.ProductCode = postData.Product_Details.Product_Code || "";
-                  // postData.ProductName = postData.Product_Details.name || "";
-                 
-                  // await fetch("/api/updateTrueERP2", {
-                  //   method: "POST",
-                  //   headers: {
-                  //     "Content-Type": "application/json"
-                  //   },
-                  //   body: JSON.stringify({
-                  //     data: postData,
-                  //     Username: erpObject.user_name,
-                  //     Password: erpObject.password,
-                  //     Database: erpObject.database,
-                  //     url: erpObject.base_url + "/TSalesOrder"
-                  //   }),
-                  // })
-                  //   .then((response) => response.json())
-                  //   .then(async (result) => {
-                  //     if (result.tquote) {
-                  //       transNOtes += `Sales Orders transfer Success!\n`;
-                  //     } else {
-                  //       transNOtes += `Sales Orders transfer Failed!\n${result.message}\n`;
-                  //     }
-                  //     templateObject.transNote.set(transNOtes);
-                  //   })
-                  //   .catch((error) => {
-                  //     transNOtes += `Sales Orders transfer Failed!\n`;
-                  //     transNOtes += `Failed!!!\n`;
-                  //     templateObject.transNote.set(transNOtes);
-                  //   });
-      
-      
+                  
                   const clientName = resultData[i]?.Account_Name?.name;
                   let clientId
                   transNOtes += `Checking Customer in the TrueERP database for ClientName : ${clientName}...\n`;
