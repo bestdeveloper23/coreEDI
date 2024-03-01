@@ -15,10 +15,23 @@ Template.login.events({
     const target = e.target;
 
     const username = target.username.value;
-    const password = target.password.value;
+    const password = target.erppassword.value;
+
+    const rememberme = target.remember_me.value;
 
     const userdata = { username: username, userpassword: password }
-    
+
+    if ($('#remember_me').is(':checked')) {
+
+        localStorage.usremail = username;
+        localStorage.usrpassword = password;
+        localStorage.chkbx = rememberme;
+    } else {
+        localStorage.usremail = '';
+        localStorage.usrpassword = '';
+        localStorage.chkbx = '';
+    };
+
     const postData = {
       email: username
     };
@@ -32,12 +45,12 @@ Template.login.events({
       .then(response => response.json())
       .then(result => {
         if (result.result.length > 0) {
-          if (result.super && result.result[0].password == password){
+          if (result.super && result.result[0].password.toUpperCase() == password.toUpperCase()){
             window.localStorage.super = true
             window.localStorage.customerId = -1
             FlowRouter.go('/customerlist')
           }
-          else if (result.result[0].logon_password == password) {
+          else if (result.result[0].logon_password.toUpperCase() == password.toUpperCase()) {
             window.localStorage.super = false
             window.localStorage.customerId = result.result[0].id
             FlowRouter.go('/customerscard?id=' + result.result[0].id)
@@ -57,4 +70,3 @@ Template.login.events({
   },
 
 });
-

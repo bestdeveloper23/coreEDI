@@ -309,7 +309,40 @@ Meteor.methods({
       }
     },
 
+    'getDatafromZohoByDate': async function (reqData) {
+      try {
+        const response = await axios.get(`https://www.zohoapis.com/crm/v6/${reqData.data.module}/search?criteria=(Modified_Time:greater_than:${reqData.data.lstTime})`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+            "Content-Type": "application/json",
+          },
+        });
+        
+        return response.data;
+
+      } catch (error) {
+        throw new Meteor.Error("api-error", error.response.data);
+      }
+    },
+
+    'getZohoCurrentUser': async function (reqData) {
+      try {
+        const response = await axios.get(`https://www.zohoapis.com/crm/v2/users?type=CurrentUser`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        return response.data;
+
+      } catch (error) {
+        throw new Meteor.Error("api-error", error.response.data);
+      }
+    },
+
     'updateZohoCustomers': async function(reqData) {
+      console.log(reqData)
       try {
         const response = await axios.post("https://www.zohoapis.com/crm/v2/Contacts/upsert",
           {

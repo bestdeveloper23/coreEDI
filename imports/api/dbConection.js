@@ -179,7 +179,7 @@ Meteor.startup(() => {
         let status = 0
         if(transfer_type.checked == true)
           status = 1
-          const query = "UPDATE transfer_types SET status = '" + status + "'WHERE id = '" + id+ "'" 
+          const query = "UPDATE transfer_types SET status = '" + status + "'WHERE id = '" + id+ "'"
           pool.query(query, (error, results, fields) => {
             if (error) {
               return JsonRoutes.sendResult(res, {
@@ -231,7 +231,7 @@ Meteor.startup(() => {
 
   JsonRoutes.add('post', '/api/getAccSoftt', function (req, res) {
     jsonParser(req, res, () => {
-      
+
       const query = `SELECT * FROM clienttrueerp WHERE id = ${req.body.id}`;
       pool.query(query, function (error, results) {
         if (error) {
@@ -762,17 +762,17 @@ Meteor.startup(() => {
               "UPDATE `clientZoho` SET client_id='" +
               data.client_id +
               "', client_secret='" +
-              data.client_secret + 
-              "', redirect_uri='" + 
+              data.client_secret +
+              "', redirect_uri='" +
               data.redirect_uri +
-              "', print_name_to_short_description='" + 
+              "', print_name_to_short_description='" +
               data.print_name_to_short_description +
-              "', customer_identified_by='" + 
+              "', customer_identified_by='" +
               data.customer_identified_by +
-              "', access_token='" + 
+              "', access_token='" +
               data.access_token +
-              "', enabled='" + 
-              _enabled + 
+              "', enabled='" +
+              _enabled +
               "'WHERE id=" +
               data.id;
             pool.query(updateQuery, (err, re, fe) => {
@@ -795,13 +795,13 @@ Meteor.startup(() => {
               data.client_id +
               "', client_secret='" +
               data.client_secret +
-              "', redirect_uri='" + 
+              "', redirect_uri='" +
               data.redirect_uri +
-              "', print_name_to_short_description='" + 
+              "', print_name_to_short_description='" +
               data.print_name_to_short_description +
-              "', customer_identified_by='" + 
+              "', customer_identified_by='" +
               data.customer_identified_by +
-              "', access_token='" + 
+              "', access_token='" +
               data.access_token +
               "', enabled='" +
               _enabled +
@@ -1521,6 +1521,253 @@ Meteor.startup(() => {
     });
   });
 
+  JsonRoutes.add('POST', '/api/AustPost', async function (req, res) {
+  jsonParser(req, res, async () => {
+    let invoicedID = req.body.InvoiceID ||'';
+    let emailID = req.body.EmailID ||'';
+    let returnedResponse = `Invoice ${req.body.InvoiceID} Update Successfully`;
+    //console.log(res);
+    const querySelectCustomerByEmail = `SELECT a.id, b.id, b.password as auspostpassword, b.reference, b.email, b.base_url, b.account_number, b.api_key,
+    c.database as erp_databasename, c.base_url as erp_base_url, c.user_name as erp_user_name, c.password as erp_password,
+    d.db_name as conndb_name
+                  FROM (SELECT * FROM customers WHERE email = '${emailID}') AS a
+                  LEFT JOIN (SELECT * FROM clientaustraliapost) AS b ON a.id = b.id
+                  LEFT JOIN (SELECT * FROM clienttrueerp) AS c ON a.id = c.id
+                  LEFT JOIN (SELECT * FROM connections WHERE db_name = 'AustPOST') AS d ON a.id = d.customer_id`;
+           return pool.query(querySelectCustomerByEmail,  async function (error, results) {
+            if (error) {
+                return "Error: An error occurred during the database query.";
+            } else {
+              if (results.length > 0) {
+                console.log(results[0].erp_user_name);
+              let getInvoiceURL =  `${results[0].erp_base_url}/Tinvoice/${invoicedID}`;
+
+              console.log(getInvoiceURL);
+              process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+              await HTTP.call('GET', getInvoiceURL, {
+                    headers: {
+                        'Username': results[0].erp_user_name,
+                        'Password': results[0].erp_password,
+                        'Database':results[0].erp_databasename
+                    },
+                }, async (error, response) => {
+                  console.log(error);
+                    if(response){
+                      let result = response.data;
+                      if(response.data != null){
+                      //process.env.NODE_TLS_REJECT_UNAUTHORIZED = "1";
+                        //if (result?.fields?.IsBackOrder) {
+                            // if (result?.fields?.Shipping !== "Aust Post") {
+                            //     console.log(`Back Order Invoice from TrueERP Database with InvoiceID : ${result?.fields?.ID} Isn't through Australia POST`);
+                            // }else {
+                                console.log(`Back Order Invoice from TrueERP Database with InvoiceID : ${result?.fields?.ID}.`);
+
+                                const invoiceDetail = result?.fields
+
+                                const shipPostcode = result?.fields?.ShipPostcode || 7010
+                                const invoicePostcode = result?.fields?.InvoicePostcode || 7010
+
+                                const tempInvoiceLines = result?.fields?.Lines;
+                                let tempInvoice = invoicedID;
+
+                                for (const tempInvoiceLine of tempInvoiceLines) {
+
+                                    const uomNameProductKey = tempInvoiceLine?.fields?.UOMNameProductKey
+                                    const lineTaxCode = tempInvoiceLine?.fields?.LineTaxCode
+
+                                    await HTTP.call('GET', `${results[0].erp_base_url}/TUnitOfMeasure?listtype=detail&select=[KeyValue]="${uomNameProductKey}"`, {
+                                          headers: {
+                                              'Username': results[0].erp_user_name,
+                                              'Password': results[0].erp_password,
+                                              'Database':results[0].erp_databasename
+                                          },
+                                      }, async (error, response) => {
+                                        let result = response.data;
+                                        const length = result?.tunitofmeasure[0]?.fields?.Length;
+                                        const weight = result?.tunitofmeasure[0]?.fields?.Weight;
+                                        const width = result?.tunitofmeasure[0]?.fields?.Width;
+                                        const height = result?.tunitofmeasure[0]?.fields?.Height;
+                                        const multiplier = result?.tunitofmeasure[0]?.fields?.Multiplier ||1;
+                                        const starTrackShippingJSON = {
+                                        "shipments": [
+                                        {
+                                        "from": {
+                                        "name": invoiceDetail?.ContactName,
+                                        "lines": [
+                                        invoiceDetail?.InvoiceStreet1||'27/54 Minjungbal Dr',
+                                        invoiceDetail?.InvoiceStreet2||'Tweed Heads',
+                                        invoiceDetail?.InvoiceStreet3||'South'
+                                        ],
+                                        "suburb": invoiceDetail?.InvoiceSuburb|| "Tweed Heads South",
+                                        "postcode": invoiceDetail?.InvoicePostcode||"2486",
+                                        "state": invoiceDetail?.InvoiceState ||"NSW"
+                                        },
+                                        "to": {
+                                        "name": invoiceDetail?.CustomerName,
+                                        "lines": [
+                                        invoiceDetail?.ShipStreet1||'Shop 8/271',
+                                        invoiceDetail?.ShipStreet2||'Collins St',
+                                        invoiceDetail?.ShipStreet3
+                                        ],
+                                        "suburb": invoiceDetail?.ShipSuburb||"Melbourne",
+                                        "state": invoiceDetail?.ShipState ||"VIC",
+                                        "postcode": invoiceDetail?.ShipPostcode||"3000"
+                                        },
+                                        "items": [
+                                        {
+                                        "length": parseInt(length)||1,
+                                        "height": height||"20",
+                                        "width": width||"15",
+                                        "weight": parseFloat(weight)||2,
+                                        "packaging_type": "CTN",
+                                        "product_id": "FPP"
+                                        }
+                                        ]
+                                        }
+                                        ]
+                                        };
+
+
+                                            let baseUrl = results[0].base_url;
+                                            let accountNumber = results[0].account_number;
+                                            let userAutorization = 'Basic ' + Buffer.from(`${results[0].api_key}:${results[0].auspostpassword}`).toString('base64');
+                                            console.log(baseUrl);
+                                            console.log(accountNumber);
+                                            console.log(starTrackShippingJSON);
+
+                                            console.log(JSON.stringify(starTrackShippingJSON));
+                                            await Meteor.call('checkAUSPOSTshipments', baseUrl, accountNumber, userAutorization, starTrackShippingJSON, async function(error, result) {
+                                            if (error) {
+                                              //console.log(error);
+                                            } else {
+                                            const deliverCost = result.data?.shipments[0]?.shipment_summary?.total_cost * multiplier
+                                            const trackingNumber = result.data.shipments[0]?.items[0]?.tracking_details?.article_id;
+                                            //Update InoiceData
+                                            const updateObj = {
+                                            "type": "TInvoice",
+                                            "fields": {
+                                            "ID": invoicedID || 0,
+                                            "Shipping": "Aust Post",
+                                            "ShippingCost": deliverCost,
+                                            "ConNote": trackingNumber
+                                            }
+                                          };
+                                          await HTTP.call('POST', `${results[0].erp_base_url}/Tinvoice`, {
+                                              headers: {
+                                                  'Username': results[0].erp_user_name,
+                                                  'Password': results[0].erp_password,
+                                                  'Database':results[0].erp_databasename
+                                              },
+                                              data: updateObj
+                                          }, async (error, response) => {
+                                            console.log(response);
+                                          });
+                                            // Create Bill
+                                            let billTotal = (deliverCost * 1.1);
+
+                                            const billObj = {
+                                            "type": "TBill",
+                                            "fields": {
+                                            "SupplierName": "Australia Post 6894736",
+                                            "Lines": [
+                                            {
+                                            "type": "TBillLine",
+                                            "fields": {
+                                            "AccountName": "Australia Post",
+                                            "ProductDescription": "",
+                                            "CustomerJob": "",
+                                            "LineCost": deliverCost,
+                                            "LineTaxCode": "NCG",
+                                            "LineClassName": "Default",
+                                            "CustomField10": "",
+                                            "CustomField9": "",
+                                            "CustomerJobID": invoiceDetail?.CustomerID,
+                                            }
+                                            }
+                                            ],
+                                            "OrderTo": `${invoiceDetail?.CustomerName}\n${invoiceDetail?.ShipStreet1}\n${invoiceDetail?.ShipStreet2}\n${invoiceDetail?.ShipState} ${invoiceDetail?.InvoicePostcode}\nAustralia`,
+                                            "Deleted": false,
+                                            "SupplierInvoiceNumber": `${invoicedID}`,
+                                            "ConNote": `${trackingNumber}`,
+                                            "TermsName": "30 Days",
+                                            "Shipping": "Australia Post",
+                                            "Comments": "",
+                                            "SalesComments": "",
+                                            "OrderStatus": "",
+                                            "BillTotal": parseFloat(billTotal.toFixed(2)),
+                                            "TotalAmountInc": parseFloat(billTotal.toFixed(2))
+                                            }
+                                          };
+
+                                          console.log(results[0].erp_base_url);
+                                          await HTTP.call('POST', `${results[0].erp_base_url}/TBill`, {
+                                              headers: {
+                                                  'Username': results[0].erp_user_name,
+                                                  'Password': results[0].erp_password,
+                                                  'Database':results[0].erp_databasename
+                                              },
+                                              data: billObj
+                                          }, async (error, response) => {
+                                            if(response){
+                                            let result = response.data;
+                                            if (result?.fields?.ID) {
+                                              returnedResponse = {
+                                                result:"OK",
+                                                msg:`Created a Bill with ID : ${result?.fields?.ID}\n Tracking Number : ${trackingNumber}`
+                                              };
+                                              const responseData = {
+                                               statusCode: res.statusCode,
+                                               data: returnedResponse
+                                             };
+
+                                             return JsonRoutes.sendResult(res, responseData);
+                                            }
+                                            }
+                                            })
+                                            //});
+                                            }
+                                            });
+
+                                        })
+                                }
+                          }else{
+                            returnedResponse = {
+                              result:"Error",
+                              msg:response.headers.errormessage
+                            };
+                            const responseData = {
+                             statusCode: res.statusCode,
+                             data: returnedResponse
+                           };
+
+                           return JsonRoutes.sendResult(res, responseData);
+                          }
+                    }
+                    })
+
+              } else {
+                //process.env.NODE_TLS_REJECT_UNAUTHORIZED = "1";
+                returnedResponse = {
+                  result:"Error",
+                  msg:"The connection email does not exist in the CoreEDI setup."
+                };
+                const responseData = {
+                 statusCode: res.statusCode,
+                 data: returnedResponse
+               };
+
+               return JsonRoutes.sendResult(res, responseData);
+
+                //return "Error: The connection email does not exist in the CoreEDI setup.";
+              }
+            }
+
+          });
+
+
+  });
+});
+
   JsonRoutes.add('GET', '/api/getLastRanDate', function (req, res) {
     jsonParser(req, res, () => {
 
@@ -1559,7 +1806,7 @@ Meteor.startup(() => {
   JsonRoutes.add('post', '/api/addConnections', function (req, res) {
     jsonParser(req, res, () => {
       const data = req.body;
-      const query = "SELECT * FROM connections WHERE id = '" + data.id + "'";
+      const query = "SELECT * FROM connections WHERE customer_id = '" + data.customer_id + "' AND connection_id = '" + data.connection_id + "'";
       pool.query(query, (error, results, fields) => {
         if (error) {
           return JsonRoutes.sendResult(res, {
@@ -1569,8 +1816,9 @@ Meteor.startup(() => {
         }
         else {
           if (results.length == 0){
+            let created_Date = new Date("1990-01-01 00:00:01");
             let _enabled = data.enabled ? 1 : 0;
-            const addquery = "INSERT INTO connections (`customer_id`, `db_name`, `account_id`, `connection_id`, `run_cycle`, `enabled`) VALUES ('" + data.customer_id + "', '" + data.db_name + "', '" + data.account_id + "', '" + data.connection_id + "', 1 , '" + _enabled + "');";
+            const addquery = "INSERT INTO connections (`customer_id`, `db_name`, `account_id`, `connection_id`, `last_ran_date`, run_cycle`, `enabled`) VALUES ('" + data.customer_id + "', '" + data.db_name + "', '" + data.account_id + "', '" + data.connection_id + "', '" + created_Date + "', 1 , '" + _enabled + "');";
             console.log(addquery);
             pool.query(addquery, (err, re, fe) => {
               if (err) console.log(err)
@@ -1583,11 +1831,11 @@ Meteor.startup(() => {
           } else if (results.length > 0) {
             // Update existing record
             let _enabled = data.enabled ? 1 : 0;
-            const updateQuery = `UPDATE connections 
+            const updateQuery = `UPDATE connections
                                 SET run_cycle = 1, enabled = '${_enabled}'
-                                WHERE customer_id = '${data.customer_id}' 
-                                AND db_name = '${data.db_name}' 
-                                AND account_id = '${data.account_id}' 
+                                WHERE customer_id = '${data.customer_id}'
+                                AND db_name = '${data.db_name}'
+                                AND account_id = '${data.account_id}'
                                 AND connection_id = '${data.connection_id}'`;
             console.log(updateQuery);
             pool.query(updateQuery, (err, re, fe) => {

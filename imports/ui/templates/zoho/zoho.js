@@ -33,7 +33,7 @@ Template.zohocard.events({
     const CLIENT_ID = zohoData.clientid;
     const REDIRECT_URI = zohoData.redirect_uri;
     const RESPONSE_TYPE = 'token';
-    const SCOPE = 'ZohoCRM.modules.ALL,ZohoCRM.settings.ALL';
+    const SCOPE = 'ZohoCRM.modules.ALL,ZohoCRM.settings.ALL,ZohoCRM.users.ALL';
 
     const authorizationUrl = `https://accounts.zoho.com/oauth/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}&response_type=token`;
     window.location.href = authorizationUrl;
