@@ -357,7 +357,6 @@ var frequency = $('#dailyEveryXDays').val() * unite * 1000;
 var templateObject = Template.instance();
 let listData = $(event.target).closest('tr').attr("id");
 let connectionType =  $(event.target).closest('tr').find('.colConnectionSoftware').text()||'';
-console.log(connectionType);
 templateObject.selConnectionId.set(listData);
 templateObject.connectionType.set(connectionType);
 RunNow('',listData);
@@ -4243,19 +4242,15 @@ fetch(`/api/AustraliaPOSTByID`, {
   })
   .catch((err) => console.log(err))
 }
-else if (connectionType == "zoho") {
+else if (connectionType == "Zoho") {
 
-    ERP_QuotesState = jQuery("#zoho_quotes2trueerp").is(":checked");
-    ERP_SalesState = jQuery("#zoho_sales_orders2trueerp").is(":checked");
-    ERP_LeadsState = jQuery("#zoho_leads_prospects2trueerp").is(":checked");
-    ERP_CustomerState = jQuery("#zoho_contacts_customers2trueerp").is(":checked");    
-    
-    const postData = {
-        id: FlowRouter.current().queryParams.customerId,
-      };
+    ERP_QuotesState = true;
+    ERP_SalesState = true;
+    ERP_LeadsState = true;
+    ERP_CustomerState = true;
+       
       var responseCount = 0;
       let customerCount = 0;
-      const templateObject = Template.instance();
       function sleep(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms || DEF_DELAY));
       }
