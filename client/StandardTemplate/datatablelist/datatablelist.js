@@ -369,15 +369,17 @@ Template.datatablelist.onRendered(async function () {
                         .then(response => response.json())
                         .then(async (result) => {
                             const re = result.tproduct;
-                            // re.map((r, index) => {
-                            //     // var time = r.date.toLocaleTimeString();
-                            //     re[index] = {
-                            //         "Id": parseInt(r.fields.ID),
-                            //         "ProductName": r.fields.ProductName,
-                            //         "Amount": r.fields.SellQTY1,
-                            //         "Price": `$${r.fields.SellQty1PriceInc}`
-                            //     }
-                            // })
+                            re.map((r, index) => {
+                                // var time = r.date.toLocaleTimeString();
+                                re[index] = {
+                                    "Id": parseInt(r.fields.ID),
+                                    "ProductName": r.fields.ProductName,
+                                    "SalesDescription": r.fields.SalesDescription,
+                                    "ProductGroup1": r.fields.ProductGroup1,
+                                    "ProductType": r.fields.ProductType,
+                                    "ProductClass": r.fields.ProductClass
+                                }
+                            })
                             await templateObject.displayTableData(re);
                         })
                         .catch(error => console.log(error));
