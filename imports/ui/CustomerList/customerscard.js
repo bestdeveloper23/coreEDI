@@ -491,6 +491,7 @@ jQuery('#transDetail').html(transData)
 //Template.customerscard.onRendered(h => {
 //Template.customerscard.onRendered(async function() {
 Template.customerscard.onRendered(function () {
+let templateObject = Template.instance();
 setTimeout(function () {
 $("#startDate, .edtDailyStartDate").datepicker({
 showOn: 'button',
@@ -585,6 +586,25 @@ yearRange: "-90:+10",
 //     $(this).closest('tr').siblings().removeClass('currentSelect');
 //     $(this).closest('tr').addClass('currentSelect');
 // });
+// /getfirst-transactions-detail
+fetch(`/api/getfirst-transactions-detail`, {
+    method: 'POST',
+    headers: {
+    'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({id: FlowRouter.current().queryParams.id})
+    })
+    .then(response => response.json())
+    .then(async (result) => {
+    if(result.length){
+        templateObject.seltransactionId.set(result[0].id);
+        templateObject.renderTransactionDetail.set(false);
+        setTimeout(() => {
+            templateObject.renderTransactionDetail.set(true);
+        }, 100);
+    }
+    })
+    .catch((err) => console.log(err))
 }),
 
 Template.customerscard.helpers({
@@ -688,6 +708,10 @@ searchAPI: searchAPI,
 orderby: '[[ 1, "asc" ]]',
 seltransactionId: seltransactionId,
 };
+},
+customerId: function () {
+    var customerId = FlowRouter.current().queryParams.id;
+    return customerId;
 }
 });
 

@@ -342,7 +342,6 @@ Meteor.methods({
     },
 
     'updateZohoCustomers': async function(reqData) {
-      console.log(reqData)
       try {
         const response = await axios.post("https://www.zohoapis.com/crm/v2/Contacts/upsert",
           {

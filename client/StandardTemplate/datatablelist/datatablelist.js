@@ -216,7 +216,8 @@ Template.datatablelist.onRendered(async function () {
                                 "RunCycle": r.run_cycle,
                                 "NextRunDate": r.next_run_date,
                                 "Enabled": r.enabled,
-                                "CustomerName": r.customer_id,
+                                "CustomerID": r.customer_id,
+                                "CustomerName": r.customer_name,
                             }
                         })
                         if(FlowRouter.current().path === '/connectionlist'){
@@ -369,17 +370,15 @@ Template.datatablelist.onRendered(async function () {
                         .then(response => response.json())
                         .then(async (result) => {
                             const re = result.tproduct;
-                            re.map((r, index) => {
-                                // var time = r.date.toLocaleTimeString();
-                                re[index] = {
-                                    "Id": parseInt(r.fields.ID),
-                                    "ProductName": r.fields.ProductName,
-                                    "SalesDescription": r.fields.SalesDescription,
-                                    "ProductGroup1": r.fields.ProductGroup1,
-                                    "ProductType": r.fields.ProductType,
-                                    "ProductClass": r.fields.ProductClass
-                                }
-                            })
+                            // re.map((r, index) => {
+                            //     // var time = r.date.toLocaleTimeString();
+                            //     re[index] = {
+                            //         "Id": parseInt(r.fields.ID),
+                            //         "ProductName": r.fields.ProductName,
+                            //         "Amount": r.fields.SellQTY1,
+                            //         "Price": `$${r.fields.SellQty1PriceInc}`
+                            //     }
+                            // })
                             await templateObject.displayTableData(re);
                         })
                         .catch(error => console.log(error));
@@ -393,6 +392,7 @@ Template.datatablelist.onRendered(async function () {
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                body: JSON.stringify({id: templateObject.data.customerId})
             })
                 .then(response => response.json())
                 .then(async (result) => {

@@ -255,6 +255,7 @@ Meteor.startup(() => {
         '    c.db_name,\n' +
         '    s1.name AS account_name,\n' +
         '    s2.name AS connection_name,\n' +
+        '    s3.name AS customer_name,\n' +
         '    c.last_ran_date,\n' +
         '    c.run_cycle,\n' +
         '    c.next_run_date,\n' +
@@ -264,7 +265,9 @@ Meteor.startup(() => {
         'JOIN\n' +
         '    softwares s1 ON c.account_id = s1.id\n' +
         'JOIN\n' +
-        '    softwares s2 ON c.connection_id = s2.id;\n'
+        '    softwares s2 ON c.connection_id = s2.id\n' +
+        'JOIN\n' +
+        '    customers s3 ON c.customer_id = s3.id;\n'
       pool.query(query, function (error, results) {
         if (error) {
           return JsonRoutes.sendResult(res, {
@@ -281,6 +284,7 @@ Meteor.startup(() => {
 
   JsonRoutes.add('post', '/api/transactions', function (req, res) {
     jsonParser(req, res, () => {
+      let customerId = parseInt(req.body.id);
       const query = `SELECT
                         t.id,
                         s1.name AS accounting_soft_name,
@@ -295,6 +299,10 @@ Meteor.startup(() => {
                         softwares s1 ON t.accounting_soft = s1.id
                     JOIN
                         softwares s2 ON t.connection_soft = s2.id
+                    JOIN
+                        connections c ON t.connection_id = c.id
+                    WHERE
+                        c.customer_id = ${customerId}
                     GROUP BY
                         t.id, s1.name, s2.name, t.date;`
       pool.query(query, function (error, results) {
@@ -335,6 +343,38 @@ Meteor.startup(() => {
     });
   });
 
+  JsonRoutes.add('post', '/api/getfirst-transactions-detail', function (req, res) {
+    jsonParser(req, res, () => {
+      const query = `SELECT
+                          t.id
+                      FROM
+                          transactions t
+                      JOIN
+                          softwares s1 ON t.accounting_soft = s1.id
+                      JOIN
+                          softwares s2 ON t.connection_soft = s2.id
+                      JOIN
+                          connections c ON t.connection_id = c.id
+                      WHERE
+                          c.customer_id = ${req.body.id}
+                      GROUP BY
+                          t.id, s1.name, s2.name, t.date
+                      ORDER BY
+                          t.date DESC
+                      LIMIT 1;`
+      pool.query(query, function (error, results) {
+        if (error) {
+          return JsonRoutes.sendResult(res, {
+            code: '500',
+            data: error
+          });
+        }
+        return JsonRoutes.sendResult(res, {
+          data: results
+        });
+      });
+    });
+  });
   JsonRoutes.add('post', '/api/inserttransaction', function (req, res) {
     jsonParser(req, res, () => {
       const data = req.body;
@@ -432,7 +472,7 @@ Meteor.startup(() => {
         '    s1.id AS account_id,\n' +
         '    s2.name AS connection_name,\n' +
         '    s2.id AS connection_id,\n' +
-        '    s3.termName AS customer_name,\n' +
+        '    s3.name AS customer_name,\n' +
         '    c.last_ran_date,\n' +
         '    c.run_cycle,\n' +
         '    c.next_run_date,\n' +
@@ -1818,7 +1858,7 @@ Meteor.startup(() => {
           if (results.length == 0){
             let created_Date = new Date("1990-01-01 00:00:01");
             let _enabled = data.enabled ? 1 : 0;
-            const addquery = "INSERT INTO connections (`customer_id`, `db_name`, `account_id`, `connection_id`, `last_ran_date`, run_cycle`, `enabled`) VALUES ('" + data.customer_id + "', '" + data.db_name + "', '" + data.account_id + "', '" + data.connection_id + "', '" + created_Date + "', 1 , '" + _enabled + "');";
+            const addquery = "INSERT INTO connections (`customer_id`, `db_name`, `account_id`, `connection_id`, `last_ran_date`, `run_cycle`, `enabled`) VALUES ('" + data.customer_id + "', '" + data.db_name + "', '" + data.account_id + "', '" + data.connection_id + "', '" + data.last_ran_date + "', 1 , '" + _enabled + "');";
             console.log(addquery);
             pool.query(addquery, (err, re, fe) => {
               if (err) console.log(err)

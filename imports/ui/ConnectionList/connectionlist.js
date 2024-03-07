@@ -14,15 +14,32 @@ Template.connectionlist.onCreated(function () {
     templateObject.setupFinished = new ReactiveVar();
 
     templateObject.getDataTableList = function (data) {
+
+      let nextRunDate = '';
+      let lastRunDate = '';
+      let currentDate = new Date();
+      // Check if nextRunDate is a valid date
+      if(Date.parse(data.NextRunDate)) {
+        nextRunDate = data.NextRunDate;
+      } else {
+        nextRunDate = currentDate;
+      };
+
+      if(Date.parse(data.LastRanDate)) {
+        lastRunDate = data.LastRanDate;
+      } else {
+        lastRunDate = currentDate;
+      };
         let dataList = [
             data.ID || '',
             data.CustomerName || '',
+            data.CustomerID || '',
             data.DBName || '-',
             data.AccName || '',
             data.ConnName || '',
-            '<span style="display:none;">' + (data.LastRanDate != '' ? moment(data.LastRanDate).format("YYYY/MM/DD HH:mm:ss") : data.LastRanDate) + '</span>' + (data.LastRanDate != '' ? moment(data.LastRanDate).format("DD/MM/YYYY HH:mm:ss") : data.LastRanDate),
+            '<span style="display:none;">' + (lastRunDate != '' ? moment(lastRunDate).format("YYYY/MM/DD HH:mm:ss") : lastRunDate) + '</span>' + (lastRunDate != '' ? moment(lastRunDate).format("DD/MM/YYYY HH:mm:ss") : lastRunDate),
             data.RunCycle ? data.RunCycle + ' hour' : '',
-            '<span style="display:none;">' + (data.NextRunDate != '' ? moment(data.NextRunDate).format("YYYY/MM/DD HH:mm:ss") : data.NextRunDate) + '</span>' + (data.NextRunDate != '' ? moment(data.NextRunDate).format("DD/MM/YYYY HH:mm:ss") : data.NextRunDate),
+            '<span style="display:none;">' + (nextRunDate != '' ? moment(nextRunDate).format("YYYY/MM/DD HH:mm:ss") : nextRunDate) + '</span>' + (nextRunDate != '' ? moment(nextRunDate).format("DD/MM/YYYY HH:mm:ss") : nextRunDate),
             data.Enabled ? 'Y' : 'N'
         ];
         return dataList;
@@ -31,13 +48,14 @@ Template.connectionlist.onCreated(function () {
     let headerStructure = [
         { index: 0, label: 'ID', class: 'colID', active: false, display: true, width: "80" },
         { index: 1, label: 'Customer Name', class: 'colCustomerName', active: true, display: true, width: "200" },
-        { index: 2, label: "Database Name", class: "colDatabaseName", active: true, display: true, width: "200" },
-        { index: 3, label: "Accounting Software", class: "colAccountingSoftware", active: true, display: true, width: "200" },
-        { index: 4, label: "Connection Software", class: "colConnectionSoftware", active: true, display: true, width: "200" },
-        { index: 5, label: "Last Scheduled Job Ran On", class: "colLastScheduledJobRanOn", active: true, display: true, width: "100" },
-        { index: 6, label: "Run Every", class: "colRunEvery", active: true, display: true, width: "110" },
-        { index: 7, label: "Next Scheduled Run At", class: "colNextScheduledRunAt", active: true, display: true, width: "100" },
-        { index: 8, label: "Enabled", class: "colEnabled", active: true, display: true, width: "120" }
+        { index: 2, label: 'Customer ID', class: 'colCustomerID', active: false, display: true, width: "200" },
+        { index: 3, label: "Database Name", class: "colDatabaseName", active: true, display: true, width: "200" },
+        { index: 4, label: "Accounting Software", class: "colAccountingSoftware", active: true, display: true, width: "200" },
+        { index: 5, label: "Connection Software", class: "colConnectionSoftware", active: true, display: true, width: "200" },
+        { index: 6, label: "Last Scheduled Job Ran On", class: "colLastScheduledJobRanOn", active: true, display: true, width: "100" },
+        { index: 7, label: "Run Every", class: "colRunEvery", active: true, display: true, width: "110" },
+        { index: 8, label: "Next Scheduled Run At", class: "colNextScheduledRunAt", active: true, display: true, width: "100" },
+        { index: 9, label: "Enabled", class: "colEnabled", active: true, display: true, width: "120" }
     ];
     templateObject.tableheaderrecords.set(headerStructure);
 });
@@ -51,7 +69,7 @@ Template.connectionlist.onRendered(function () {
     $('#tblConnectionList tbody').on('click', 'tr', function () {
         //var listData = $(this).closest('tr').find('.colEmployeeID').text();
         var listData = $(this).closest('tr').attr("id");
-        var customerId = $(this).closest('tr').find('.colCustomerName').text();
+        var customerId = $(this).closest('tr').find('.colCustomerID').text();
         if ($(event.target)[0].className == '  colConnectionSoftware') {
             FlowRouter.go('/connectionscard?id=' + listData + '&customerId=' + customerId + '&tab=2');
         }

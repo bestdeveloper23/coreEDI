@@ -6,9 +6,6 @@ import { config } from '../config/config.js';
 require('./method.js');
 
 Meteor.startup(() => {
-
-  console.debug('Server Started!!!');
-
   const query = "SELECT * FROM users WHERE username='" + config.SUPER_USERNAME + "'"
   pool.query(query, (e, r, f) => {
     if (e) console.log('error', e)
