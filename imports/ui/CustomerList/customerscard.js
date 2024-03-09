@@ -50,21 +50,36 @@ style="padding-left: 10px;padding-right: 10px; justify-content: center" title="D
 </div>
 </div>`;
 
+let nextRunDate = '';
+let lastRunDate = '';
+let currentDate = new Date();
+// Check if nextRunDate is a valid date
+if(Date.parse(data.NextRunDate)) {
+  nextRunDate = data.NextRunDate;
+} else {
+  nextRunDate = currentDate;
+};
+if(Date.parse(data.LastRanDate)) {
+  lastRunDate = data.LastRanDate;
+} else {
+  lastRunDate = currentDate;
+};
+
 let dataList = [
 data.ID || '',
 data.DBName || '-',
 data.AccName || '',
 data.ConnName || '',
-'<span style="display:none;">' + (data.LastRanDate != '' ? moment(data.LastRanDate).format("YYYY/MM/DD") : data.LastRanDate) + '</span>' + (data.LastRanDate != '' ? moment(data.LastRanDate).format("DD/MM/YYYY") : data.LastRanDate),
-'<span style="display:none;">' + (data.LastRanDate != '' ? moment(data.LastRanDate).format("HH:mm:ss") : data.LastRanDate) + '</span>' + (data.LastRanDate != '' ? moment(data.LastRanDate).format("HH:mm:ss") : data.LastRanDate),
+'<span style="display:none;">' + (data.LastRanDate != '' ? moment(lastRunDate).format("YYYY/MM/DD") : lastRunDate) + '</span>' + (lastRunDate != '' ? moment(lastRunDate).format("DD/MM/YYYY") : lastRunDate),
+'<span style="display:none;">' + (lastRunDate != '' ? moment(lastRunDate).format("HH:mm:ss") : lastRunDate) + '</span>' + (lastRunDate != '' ? moment(data.LastRanDate).format("HH:mm:ss") : data.LastRanDate),
 data.RunCycle ? data.RunCycle + ' hour' : '',
-'<span style="display:none;">' + (data.NextRunDate != '' ? moment(data.NextRunDate).format("YYYY/MM/DD") : data.NextRunDate) + '</span>' + (data.NextRunDate != '' ? moment(data.NextRunDate).format("DD/MM/YYYY") : data.NextRunDate),
-'<span style="display:none;">' + (data.NextRunDate != '' ? moment(data.NextRunDate).format("HH:mm:ss") : data.NextRunDate) + '</span>' + (data.NextRunDate != '' ? moment(data.NextRunDate).format("HH:mm:ss") : data.NextRunDate),
+'<span style="display:none;">' + (nextRunDate != '' ? moment(nextRunDate).format("YYYY/MM/DD") : nextRunDate) + '</span>' + (nextRunDate != '' ? moment(nextRunDate).format("DD/MM/YYYY") : nextRunDate),
+'<span style="display:none;">' + (nextRunDate != '' ? moment(nextRunDate).format("HH:mm:ss") : nextRunDate) + '</span>' + (nextRunDate != '' ? moment(nextRunDate).format("HH:mm:ss") : nextRunDate),
 runNowButton,
 setFrequencyButton,
 importAgainButton,
 importDate,
-data.Enabled ? 'Y' : 'N'
+data.Enabled ? 'Yes' : 'No'
 ];
 return dataList;
 }
@@ -73,7 +88,7 @@ let dataList = [
 data.ID || '',
 data.AccName || '',
 data.ConnName || '',
-'<span style="display:none;">' + (data.Date != '' ? moment(data.Date).format("YYYY/MM/DD") : data.Date) + '</span>' + (data.Date != '' ? moment(data.Date).format("DD/MM/YYYY") : data.Date),
+'<span style="display:none;">' + (data.Date != '' ? moment(data.Date).format("YYYY/MM/DD HH:mm:ss") : data.Date) + '</span>' + (data.Date != '' ? moment(data.Date).format("DD/MM/YYYY HH:mm:ss") : data.Date),
 data.Count || '0'
 ];
 return dataList;

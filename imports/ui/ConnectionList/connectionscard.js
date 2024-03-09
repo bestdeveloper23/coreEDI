@@ -5603,13 +5603,14 @@ async function TrueERP2Zoho(
     
             let account_id = 7;
             let connection_id = 13;
-            let today = new Date();
+            let today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
       
-            let year = today.getFullYear();
-            let month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
-            let day = String(today.getDate()).padStart(2, "0");
+            // let year = today.getFullYear();
+            // let month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+            // let day = String(today.getDate()).padStart(2, "0");
       
-            let formattedDate = `${year}-${month}-${day}`;
+            // let formattedDate = `${year}-${month}-${day}`;
+            let formattedDate = today;
             let id = FlowRouter.current().queryParams.id;
       
             let products_num =
@@ -6163,6 +6164,10 @@ async function Zoho2TrueERP(
                           },
                         };
 
+                        if(resultData[i]?.GlobalRef) {
+                          QuoteData.fields.GlobalRef = resultData[i].GlobalRef
+                        }
+
                         await fetch("/api/updateTrueERP2", {
                           method: "POST",
                           headers: {
@@ -6571,7 +6576,10 @@ async function Zoho2TrueERP(
                               Comments: "Sales Order Produced in ZOHO"
                           }
                       }
-        
+                      
+                      if(resultData[i]?.GlobalRef) {
+                        OrderData.fields.GlobalRef = resultData[i].GlobalRef
+                      }
                     
                     await fetch("/api/updateTrueERP2", {
                       method: "POST",
@@ -7084,13 +7092,14 @@ async function Zoho2TrueERP(
             
             let account_id = 13;
             let connection_id = 7;
-            let today = new Date();
+            let today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
       
-            let year = today.getFullYear();
-            let month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
-            let day = String(today.getDate()).padStart(2, "0");
+            // let year = today.getFullYear();
+            // let month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+            // let day = String(today.getDate()).padStart(2, "0");
       
-            let formattedDate = `${year}-${month}-${day}`;
+            // let formattedDate = `${year}-${month}-${day}`;
+            let formattedDate = today;
             let id = FlowRouter.current().queryParams.id;
       
             let products_num =

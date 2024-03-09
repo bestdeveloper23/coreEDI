@@ -40,7 +40,7 @@ Template.connectionlist.onCreated(function () {
             '<span style="display:none;">' + (lastRunDate != '' ? moment(lastRunDate).format("YYYY/MM/DD HH:mm:ss") : lastRunDate) + '</span>' + (lastRunDate != '' ? moment(lastRunDate).format("DD/MM/YYYY HH:mm:ss") : lastRunDate),
             data.RunCycle ? data.RunCycle + ' hour' : '',
             '<span style="display:none;">' + (nextRunDate != '' ? moment(nextRunDate).format("YYYY/MM/DD HH:mm:ss") : nextRunDate) + '</span>' + (nextRunDate != '' ? moment(nextRunDate).format("DD/MM/YYYY HH:mm:ss") : nextRunDate),
-            data.Enabled ? 'Y' : 'N'
+            data.Enabled ? 'Yes' : 'No'
         ];
         return dataList;
     }
