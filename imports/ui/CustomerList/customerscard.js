@@ -88,13 +88,14 @@ let dataList = [
 data.ID || '',
 data.AccName || '',
 data.ConnName || '',
-'<span style="display:none;">' + (data.Date != '' ? moment(data.Date).format("YYYY/MM/DD HH:mm:ss") : data.Date) + '</span>' + (data.Date != '' ? moment(data.Date).format("DD/MM/YYYY HH:mm:ss") : data.Date),
+'<span style="display:none;">' + (data.Date != '' ? moment(data.Date).format("YYYY/MM/DD") : data.Date) + '</span>' + (data.Date != '' ? moment(data.Date).format("DD/MM/YYYY") : data.Date),
 data.Count || '0'
 ];
 return dataList;
 }
 templateObject.getDataTableList2 = function (data) {
 let dataList = [
+'<span style="display:none;">' + (data.Date != '' ? moment(data.Date).format("HH:mm:ss") : data.Date) + '</span>' + (data.Date != '' ? moment(data.Date).format("HH:mm:ss") : data.Date),
 data.Detail || '',
 data.Count || '0'
 ];
@@ -127,7 +128,8 @@ let headerStructurefortransaction = [
 ];
 
 let headerStructurefortransactionDetail = [
-{ index: 0, label: "Detail", class: "colConnectionId", active: true, display: true, width: "50" },
+{ index: 0, label: "Time", class: "colTime", active: true, display: true, width: "50"},
+{ index: 1, label: "Detail", class: "colConnectionId", active: true, display: true, width: "50" },
 { index: 4, label: "Transaction Count", class: "colTotalTransactions", active: true, display: true, width: "50" },
 ];
 

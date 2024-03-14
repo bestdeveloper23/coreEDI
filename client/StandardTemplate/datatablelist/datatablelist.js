@@ -422,9 +422,9 @@ Template.datatablelist.onRendered(async function () {
                     result.map((r, index) => {
                         result[index] = {
                             "TransactionId": r.transaction_id,
+                            "Time": r.date,
                             "Detail": r.detail_string,
-                            "Count": r.count,
-                            // "Test": templateObject.data.seltransactionId
+                            "Count": r.count
                         }
                     })
                     await templateObject.displayTableData(result);

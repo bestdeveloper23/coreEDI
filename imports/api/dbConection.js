@@ -439,12 +439,13 @@ Meteor.startup(() => {
       let transaction_details = req.body['transaction_details'];
       let transactionId = req.body['transactionId'];
       let detail_string = "";
+      let date = req.body['date'];
       let count = 0;
       for(let i = 0; i< transaction_details.length; i++){
         let transaction_detail = transaction_details[i]
         detail_string = transaction_detail['detail_string']
         count = transaction_detail['count']
-        const insertQuery = "INSERT INTO `transactions_detail` SET transaction_id='" + transactionId + "', detail_string='" + detail_string + "', count='" +count + "'";
+        const insertQuery = "INSERT INTO `transactions_detail` SET transaction_id='" + transactionId + "', detail_string='" + detail_string + "', count='" + count + "', date='" + date + "'";
         pool.query(insertQuery, function (error, results) {
           if (error) {
             return JsonRoutes.sendResult(res, {

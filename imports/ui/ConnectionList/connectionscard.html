@@ -513,28 +513,19 @@
                                             <div class="form-group col-md-4">
                                                 <label class="text-nowrap">Database</label>
                                                 <input type="text" class="form-control" id="trueerp_database"
-                                                    name="edtMiddleName" value="{{record.database}}">
+                                                    name="database" value="{{record.database}}">
                                             </div>
                                             <div class="form-group col-md-4">
                                                 <label class="text-nowrap">Client ID</label>
                                                 <input type="text" class="form-control edtClientID" id="trueerp_id"
-                                                    name="edtLastName" value="{{record.id}}" disabled>
+                                                    name="client_id" value="{{record.id}}" disabled>
                                             </div>
                                             <div class="form-group col-md-4">
                                                 <label class="text-nowrap">Base URL</label>
                                                 <input type="text" class="form-control" id="trueerp_base_url"
-                                                    name="edtMiddleName" value="{{record.base_url}}">
+                                                    name="base_url" value="{{record.base_url}}">
                                             </div>
                                         </div>
-                                        {{ #if equals connection "Zoho" }}
-                                        <div class="row">
-                                            <div class="form-group col-md-12">
-                                                <label class="text-nowrap">Zoho CRM access_token</label>
-                                                <input type="text" class="form-control" id="zoho2erp_access_token"
-                                                    name="edtMiddleName">
-                                            </div>
-                                        </div>
-                                        {{ /if}}
                                         {{ #if equals connection "Magento" }}
                                         <div class="row transferOption">
                                             <div class="col-12 col-lg-4" id="whatTransfer">
@@ -864,6 +855,7 @@
                                         <div class="row transferOption">
                                             <div class="col-12 col-lg-6" id="whatTransfer">
                                                 <h5 style="margin-bottom: 8px;">Customer Card Extras</h5>
+                                                <div class="form-group" style="margin: 4px;">
                                                 {{> toggle_button
                                                 className="chkGlobalSettings mt-3"
                                                 id="magento_invoices2magento"
@@ -873,6 +865,8 @@
                                                 labelclass='mt-2'
                                                 isChecked=true
                                                 }}
+                                                </div>
+                                                <div class="form-group" style="margin: 4px;">
                                                 {{> toggle_button
                                                 className="chkGlobalSettings mt-3"
                                                 id="magento_customers2magento"
@@ -882,6 +876,8 @@
                                                 labelclass='mt-3'
                                                 isChecked=false
                                                 }}
+                                                </div>
+                                                <div class="form-group" style="margin: 4px;">
                                                 {{> toggle_button
                                                 className="chkGlobalSettings mt-3"
                                                 id="magento_customers2magento"
@@ -891,6 +887,7 @@
                                                 labelclass='mt-3'
                                                 isChecked=false
                                                 }}
+                                                </div>
                                             </div>
                                             <div class="col-12 col-lg-6" style="padding: 0;">
                                                 <div class="row" style="padding-left: 20px;">
@@ -982,13 +979,13 @@
                                         <div class="d-xl-flex justify-content-between align-items-xl-center"
                                             style="margin: 16px 0px 0px 0px;">
                                             <div>
+                                                <button class="btn btn-success btnRunERP btn-auto-RunERP"
+                                                id="btnRunERP" type="button"><i class="fa fa-sync"
+                                                    style="margin-right: 5px;"></i>Run Now</button>
                                                 <button class="btn btn-success btnTestERP btn-auto-testERP"
                                                     id="btnTestERP" type="button"><i class="fa fa-play"
                                                         style="margin-right: 5px;"></i>Test TrueERP</button>
 
-                                                        <button class="btn btn-success btnRunERP btn-auto-RunERP"
-                                                    id="btnRunERP" type="button"><i class="fa fa-sync"
-                                                        style="margin-right: 5px;"></i>Run Now</button>
                                             </div>
                                             <div>
                                                 <button class="btn btn-success btnSave btn-auto-save" id="saveTrueERP"

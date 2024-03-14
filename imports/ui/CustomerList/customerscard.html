@@ -55,11 +55,11 @@
                             <input type="text" class="form-control" id="edtCustomerEmail" name="edtCustomerEmail"
                               value="{{record.email}}">
                           </div>
-                          <div class="form-group flex-grow-1" style="padding-right: 8px;"><label class="text-nowrap">First
+                          <div class="form-group flex-grow-1" style="padding-right: 8px;padding-left: 4px;"><label class="text-nowrap">First
                               Name</label><input type="text" class="form-control" id="edtFirstName" name="edtFirstName"
                               value="{{record.firstname}}">
                           </div>
-                          <div class="form-group flex-grow-1" style="padding-right: 4px; padding-left:4px;"><label
+                          <div class="form-group flex-grow-1" style="padding-right: 8px; padding-left:8px;"><label
                               class="text-nowrap">Middle
                               Name</label><input type="text" class="form-control" id="edtMiddleName"
                               name="edtMiddleName" value="{{record.middlename}}"></div>
@@ -75,19 +75,19 @@
                                 class="text-nowrap">Phone</label><input type="text" class="form-control"
                                 id="edtCustomerPhone" name="edtCustomerPhone" value="{{record.phone}}">
                             </div>
-                            <div class="form-group flex-grow-1" style="margin: 4px; padding-right: 4px;"><label
+                            <div class="form-group flex-grow-1" style="margin: 4px; padding-left: 4px;padding-right :4px;"><label
                                 class="text-nowrap">Mobile</label><input type="text" class="form-control"
                                 id="edtCustomerMobile" name="edtCustomerMobile" value="{{record.mobile}}">
                             </div>
-                            <div class="form-group flex-grow-1" style="margin: 4px;padding-left:4px;"><label
+                            <div class="form-group flex-grow-1" style="margin: 4px;padding-left: 4px;padding-right :4px;"><label
                                 class="text-nowrap">Fax</label><input type="text" class="form-control"
                                 id="edtCustomerFax" name="edtCustomerFax" value="{{record.fax}}"></div>
-                            <div class="form-group col-md-3" style="margin: 4px; padding-left: 4px;padding-right :4px;">
+                            <div class="form-group flex-grow-1" style="margin: 4px; padding-left: 4px;padding-right :4px;">
                               <label class="text-nowrap">Skype ID</label>
                               <input type="text" class="form-control" id="edtCustomerSkypeID" name="edtCustomerSkypeID"
                                 value="{{record.skype}}">
                             </div>
-                            <div class="form-group col-md-3" style="margin: 4px;padding-left :4px;padding-right:4px;">
+                            <div class="form-group flex-grow-1" style="margin: 4px;padding-left:4px;">
                               <label class="text-nowrap">Website</label>
                               <input type="text" class="form-control" id="edtCustomerWebsite" name="edtCustomerWebsite"
                                 value="{{record.website}}">
@@ -162,8 +162,8 @@
                   </div>
                   <div class="tab-pane border rounded-0 tab-Transaction" role="tabpanel" id="tab-3"
                     style="background-color: #ededed; border-color: #ededed #00a3d3 #00a3d3 #00a3d3 !important;">
-                    <div class="row">
-                      <div class="col-10 row d-xl-flex flex-column justify-content-xl-center" style="margin: 12px;">
+                    <div class="row mx-0">
+                      <div class="col-12 col-lg-10 row d-xl-flex flex-column justify-content-xl-center mx-0 py-3">
                         <style>
                           tbody tr:nth-of-type(odd) {
                             background-color: white;
@@ -183,7 +183,7 @@
                         customerId=customerId
                         }}
                       </div>
-                      <div class="row-2" style="margin-top: 50px;">
+                      <div class="col-12 d-none d-lg-block col-lg-2" style="margin-top: 50px;">
                         <div class="row" style="padding: 10px; justify-content: center"><button
                             class="btn btn-success btnSave btn-auto-update hover-text1" style="width: 100%;" id="runNow"
                             title="" type="button"><i class="fa fa-sync" style="margin-right: 5px;"></i>Run Now<span
@@ -249,7 +249,7 @@
                     style="border-color: #ededed #00a3d3 #00a3d3 #00a3d3 !important; background-color: #ededed;">
                     <div class="row no-gutters d-xl-flex flex-column justify-content-xl-start" style="margin: 12px;">
                       <div class="col d-xl-flex align-items-xl-start" style="width: 40%;">
-                        <div class="form-group flex-grow-1" style="margin: 4px;padding-right:4px;">
+                        <div class="form-group flex-grow-1" style="margin: 4px;padding-right:8px;">
                           <label>Username or Email</label>
                           <!-- <input type="text" class="form-control" name="logonName"
                             id="EmpEmailAddress" value="{{record.LogonName}}"
@@ -267,7 +267,7 @@
                               <input type="password" class="form-control" id="logonPassword" name="logonPassword"
                                 value="{{record.logon_password}}">
                             </div>
-                            <div style="width: 15%; float: left;">
+                            <div style="width: 10%; float: left;">
                               <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"
                                 style="color: #00a3d3; margin-top: 10px; margin-left: 4px;"></span>
                             </div>
