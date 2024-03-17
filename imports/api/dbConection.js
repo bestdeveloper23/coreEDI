@@ -50,8 +50,17 @@ function handleDisconnect() {
 
 handleDisconnect();
 
-Meteor.startup(() => {
+function handleError(error, res) { //Handle All Errors From here
+  if (error) {
+    console.log(error);
+    // JsonRoutes.sendResult(res, {
+    //   code: '500',
+    //   data: error
+    // });
+  }
+};
 
+Meteor.startup(() => {
   JsonRoutes.add('post', '/api/admin/verify/email', function (req, res) {
     jsonParser(req, res, () => {
       const data = req.body;
@@ -61,10 +70,7 @@ Meteor.startup(() => {
           const query2 = "SELECT * FROM customers WHERE logon_name = '" + data.email + "'"
           pool.query(query2, function (error, result) {
             if (error) {
-              return JsonRoutes.sendResult(res, {
-                code: '500',
-                data: error
-              });
+              handleError(error, res);
             }
             return JsonRoutes.sendResult(res, {
               data: {
@@ -90,10 +96,7 @@ Meteor.startup(() => {
       const query = "SELECT * FROM users WHERE email = '" + data.useremail + "'"
       pool.query(query, (error, results, fields) => {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         else {
           if (results.length == 0) {
@@ -122,10 +125,7 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM customers'
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -140,10 +140,7 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM customers WHERE id=' + data.id
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -158,10 +155,22 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM transfer_types WHERE connection_id=' + data.id
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
+        }
+        return JsonRoutes.sendResult(res, {
+          data: results
+        });
+      });
+    });
+  });
+
+  JsonRoutes.add('post', '/api/identifiertypesByID', function (req, res) {
+    jsonParser(req, res, () => {
+      const data = req.body;
+      const query = 'SELECT * FROM identifier WHERE connection_id=' + data.id
+      pool.query(query, function (error, results) {
+        if (error) {
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -182,10 +191,7 @@ Meteor.startup(() => {
           const query = "UPDATE transfer_types SET status = '" + status + "'WHERE id = '" + id+ "'"
           pool.query(query, (error, results, fields) => {
             if (error) {
-              return JsonRoutes.sendResult(res, {
-                code: '500',
-                data: error
-              });
+              handleError(error, res);
             }
           });
       }
@@ -200,10 +206,7 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM employees'
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -217,10 +220,7 @@ Meteor.startup(() => {
       const query = `SELECT * FROM clienttrueerp`;
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -235,10 +235,7 @@ Meteor.startup(() => {
       const query = `SELECT * FROM clienttrueerp WHERE id = ${req.body.id}`;
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -270,10 +267,7 @@ Meteor.startup(() => {
         '    customers s3 ON c.customer_id = s3.id;\n'
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -307,10 +301,7 @@ Meteor.startup(() => {
                         t.id, s1.name, s2.name, t.date;`
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -324,17 +315,15 @@ Meteor.startup(() => {
       const query = 'SELECT\n' +
         '    transaction_id,\n' +
         '    detail_string,\n' +
-        '    count\n' +
+        '    count,\n' +
+        '    date\n' +
         'FROM\n' +
         '    transactions_detail\n' +
         'WHERE\n' +
         `    transaction_id = ${req.body.id};\n`
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -364,10 +353,7 @@ Meteor.startup(() => {
                       LIMIT 1;`
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -378,15 +364,11 @@ Meteor.startup(() => {
   JsonRoutes.add('post', '/api/inserttransaction', function (req, res) {
     jsonParser(req, res, () => {
       const data = req.body;
-      const insertQuery = "INSERT INTO `transactions` SET accounting_soft='" + data.accounting_soft + "', connection_soft='" + data.connection_soft + "', date='" + data.date + "', order_num='" + 
-      data.order_num + "', products='" + data.products + "', products_num='" + data.product_num + "', uploaded_num='" + data.uploaded_num + 
-      "', downloaded_num='" + data.downloaded_num + "', connection_id='" + data.connection_id + "'";
+      const insertQuery = "INSERT INTO `transactions` SET accounting_soft='" + data.accounting_soft + "', connection_soft='" + data.connection_soft + "', date='" + data.date + "', order_num='" +
+      data.order_num + "', products='" + data.products + "', products_num='" + data.product_num + "', uploaded_num='" + data.uploaded_num +"', downloaded_num='" + data.downloaded_num + "', connection_id='" + data.connection_id + "'";
       pool.query(insertQuery, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results.insertId
@@ -396,19 +378,15 @@ Meteor.startup(() => {
   });
 
   JsonRoutes.add('post', '/api/addtransaction', function (req, res) {
-    console.log(req.body)
     jsonParser(req, res, () => {
       const id = req.body.id;
       const data = req.body.transaction_data;
-      const insertQuery = "UPDATE transactions SET order_num='" + 
-      data.order_num + "', products='" + data.products + "', products_num='" + data.product_num + "', uploaded_num='" + data.uploaded_num + 
+      const insertQuery = "UPDATE transactions SET order_num='" +
+      data.order_num + "', products='" + data.products + "', products_num='" + data.product_num + "', uploaded_num='" + data.uploaded_num +
       "', downloaded_num='" + data.downloaded_num + "' WHERE id = " + id + ";";
       pool.query(insertQuery, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results.insertId
@@ -420,13 +398,10 @@ Meteor.startup(() => {
   JsonRoutes.add('post', '/api/transactionByDate', function (req, res) {
     jsonParser(req, res, () => {
       const data = req.body;
-      const insertQuery = "SELECT * FROM transactions WHERE date='" + data.date + "' AND connection_id='" + data.connection_id + "'AND accounting_soft='" + data.accounting_soft + "'AND connection_soft='" + data.connection_soft + "';";
+      const insertQuery = "SELECT * FROM transactions WHERE date='" + data.date + "';";
       pool.query(insertQuery, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results[0] || "No Result"
@@ -448,10 +423,7 @@ Meteor.startup(() => {
         const insertQuery = "INSERT INTO `transactions_detail` SET transaction_id='" + transactionId + "', detail_string='" + detail_string + "', count='" + count + "', date='" + date + "'";
         pool.query(insertQuery, function (error, results) {
           if (error) {
-            return JsonRoutes.sendResult(res, {
-              code: '500',
-              data: error
-            });
+            handleError(error, res);
           }
         });
       }
@@ -489,10 +461,7 @@ Meteor.startup(() => {
         'WHERE c.id=' + data.id
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -523,10 +492,7 @@ Meteor.startup(() => {
         'WHERE c.customer_id=' + data.id
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -551,10 +517,7 @@ Meteor.startup(() => {
         '    c.id = ' + data.id;
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -569,10 +532,7 @@ Meteor.startup(() => {
       const query = "SELECT * FROM employees WHERE no='" + data.id + "'"
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+        handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -587,10 +547,7 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM clienttrueerp WHERE id=' + data.id
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -605,10 +562,7 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM clientmagento WHERE id=' + data.id
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -623,10 +577,7 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM clientaustraliapost WHERE id=' + data.id
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -641,10 +592,7 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM clientwoocommerce WHERE id=' + data.id
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -659,10 +607,7 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM clientzoho WHERE id=' + data.id
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -677,10 +622,7 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM clientxero WHERE id=' + data.id
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -695,10 +637,7 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM clientamazon WHERE id=' + data.id
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -713,10 +652,7 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM clientroute4me WHERE id=' + data.id
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -731,10 +667,7 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM clientsageaccounting WHERE id=' + data.id
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -749,10 +682,7 @@ Meteor.startup(() => {
       const query = "SELECT * FROM clientmagento WHERE id = '" + data.id + "'"
       pool.query(query, (error, results, fields) => {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         else {
           if (results.length != 0) {
@@ -792,10 +722,7 @@ Meteor.startup(() => {
       const query = "SELECT * FROM clientZoho WHERE id = '" + data.id + "'"
       pool.query(query, (error, results, fields) => {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: "500",
-            data: error,
-          });
+          handleError(error, res);
         } else {
           if (results.length != 0) {
             let _enabled = data.enabled ? 1 : 0;
@@ -814,6 +741,10 @@ Meteor.startup(() => {
               data.access_token +
               "', enabled='" +
               _enabled +
+              "', username='" +
+              data.username +
+              "', password='" +
+              data.password +
               "'WHERE id=" +
               data.id;
             pool.query(updateQuery, (err, re, fe) => {
@@ -846,6 +777,10 @@ Meteor.startup(() => {
               data.access_token +
               "', enabled='" +
               _enabled +
+              "', username='" +
+              data.username +
+              "', password='" +
+              data.password +
               "'";
             pool.query(insertQuery, (err, re, fe) => {
               if (err) {
@@ -870,10 +805,7 @@ Meteor.startup(() => {
       const query = "SELECT * FROM clientwoocommerce WHERE id = '" + data.id + "'"
       pool.query(query, (error, results, fields) => {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         else {
           if (results.length != 0) {
@@ -913,10 +845,7 @@ Meteor.startup(() => {
       const query = "SELECT * FROM clientaustraliapost WHERE id = '" + data.id + "'"
       pool.query(query, (error, results, fields) => {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         else {
           if (results.length != 0) {
@@ -952,18 +881,21 @@ Meteor.startup(() => {
     jsonParser(req, res, () => {
       const data = req.body;
       const query = "SELECT * FROM clienttrueerp WHERE id = '" + data.id + "'"
-      console.log(query);
       pool.query(query, (error, results, fields) => {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         else {
           if (results.length != 0) {
             let _enabled = data.enabled ? 1 : 0;
-            const updateQuery = "UPDATE `clienttrueerp` SET user_name='" + data.user_name + "', password='" + data.password + "', `database`='" + data.database + "', base_url='" + data.base_url + "', enabled='" + _enabled + "' WHERE id=" + data.id
+            const updateQuery = "UPDATE `clienttrueerp` SET user_name='" + data.user_name +
+                                "', password='" + data.password +
+                                "', `database`='" + data.database +
+                                "', base_url='" + data.base_url +
+                                "', invoice_template='" + data.invoice_template +
+                                "', customer_type='" + data.customer_type +
+                                "', enabled='" + _enabled +
+                                "' WHERE id=" + data.id
             pool.query(updateQuery, (err, re, fe) => {
               if (err) console.log(err)
               else {
@@ -975,8 +907,8 @@ Meteor.startup(() => {
           }
           else {
             let _enabled = data.enabled ? 1 : 0;
-            const insertQuery = "INSERT INTO clienttrueerp (`id`, `user_name`, `password`, `database`, `base_url`, `enabled`, `customer_type`, `invoice_template`) VALUES ('" + data.id + "','" + data.user_name + "', '" + data.password + "', '" + data.database + "', '" + data.base_url + "', '" + _enabled + "', 0, 0);";
-            console.log(insertQuery);
+            const insertQuery = "INSERT INTO clienttrueerp (`id`, `user_name`, `password`, `database`, `base_url`, `enabled`, `customer_type`, `invoice_template`) VALUES ('" +
+                                data.id + "','" + data.user_name + "', '" + data.password + "', '" + data.database + "', '" + data.base_url + "', '" + _enabled + "', '" + data.customer_type + "', '" + data.invoice_template + "');";
               pool.query(insertQuery, (err, re, fe) => {
               if (err) console.log(err)
               else {
@@ -997,10 +929,7 @@ Meteor.startup(() => {
       const query = "SELECT * FROM employees WHERE employeeEmail = '" + data.email + "'";
       pool.query(query, (error, results, fields) => {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         else {
           if (results.length == 0) {
@@ -1015,10 +944,10 @@ Meteor.startup(() => {
             })
           }
           else {
-            return JsonRoutes.sendResult(res, {
-              code: '500',
-              data: 'Ooooooooooooooooooopps ! ! !'
-            });
+            // return JsonRoutes.sendResult(res, {
+            //   code: '500',
+            //   data: 'Ooooooooooooooooooopps ! ! !'
+            // });
           }
         }
       })
@@ -1031,10 +960,7 @@ Meteor.startup(() => {
       const query = "SELECT * FROM employees WHERE no = '" + data.id + "'"
       pool.query(query, (error, results, fields) => {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         else {
           if (results.length != 0) {
@@ -1049,10 +975,10 @@ Meteor.startup(() => {
             })
           }
           else {
-            return JsonRoutes.sendResult(res, {
-              code: '500',
-              data: 'Ooooooooooooooooooopps ! ! !'
-            });
+            // return JsonRoutes.sendResult(res, {
+            //   code: '500',
+            //   data: 'Ooooooooooooooooooopps ! ! !'
+            // });
           }
         }
       })
@@ -1065,10 +991,7 @@ Meteor.startup(() => {
       const query = "SELECT * FROM employees WHERE no = '" + data.id + "'"
       pool.query(query, (error, results, fields) => {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         else {
           if (results.length != 0) {
@@ -1083,10 +1006,10 @@ Meteor.startup(() => {
             })
           }
           else {
-            return JsonRoutes.sendResult(res, {
-              code: '500',
-              data: 'Ooooooooooooooooooopps ! ! !'
-            });
+            // return JsonRoutes.sendResult(res, {
+            //   code: '500',
+            //   data: 'Ooooooooooooooooooopps ! ! !'
+            // });
           }
         }
       })
@@ -1106,10 +1029,7 @@ Meteor.startup(() => {
       const query = "SELECT * FROM customers WHERE email = '" + data.email + "'"
       pool.query(query, (error, results, fields) => {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         else {
           if (results.length == 0) {
@@ -1139,10 +1059,7 @@ Meteor.startup(() => {
       const query = "SELECT * FROM customers WHERE id = '" + data.id + "'"
       pool.query(query, (error, results, fields) => {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         else {
           if (results.length != 0) {
@@ -1170,10 +1087,10 @@ Meteor.startup(() => {
             })
           }
           else {
-            return JsonRoutes.sendResult(res, {
-              code: '500',
-              data: 'Ooooooooooooooooooopps ! ! !'
-            });
+            // return JsonRoutes.sendResult(res, {
+            //   code: '500',
+            //   data: 'Ooooooooooooooooooopps ! ! !'
+            // });
           }
         }
       })
@@ -1186,10 +1103,7 @@ Meteor.startup(() => {
       const query = "SELECT * FROM customers WHERE id = '" + data.id + "'"
       pool.query(query, (error, results, fields) => {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         else {
           if (results.length != 0) {
@@ -1204,10 +1118,10 @@ Meteor.startup(() => {
             })
           }
           else {
-            return JsonRoutes.sendResult(res, {
-              code: '500',
-              data: 'Ooooooooooooooooooopps ! ! !'
-            });
+            // return JsonRoutes.sendResult(res, {
+            //   code: '500',
+            //   data: 'Ooooooooooooooooooopps ! ! !'
+            // });
           }
         }
       })
@@ -1220,10 +1134,7 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM softwares WHERE id=' + data.id
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -1238,10 +1149,7 @@ Meteor.startup(() => {
       const query = 'SELECT * FROM softwares WHERE name <>  "TrueERP"';
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -1253,12 +1161,10 @@ Meteor.startup(() => {
   JsonRoutes.add('post', '/api/getInvoiceList', async function (req, res) {
     await jsonParser(req, res, async () => {
       const data = req.body;
-      console.log(data)
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1'
       await axios(data)
         .then((result) => {
           process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1'
-          console.log(result)
           data = result.data;
           JsonRoutes.sendResult(res, {
             data: data
@@ -1266,11 +1172,7 @@ Meteor.startup(() => {
         })
         .catch((error) => {
           process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1'
-          console.log("err", error)
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         })
     });
   });
@@ -1295,10 +1197,7 @@ Meteor.startup(() => {
         })
         .catch((error) => {
           console.log("err", error)
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         })
     })
   })
@@ -1310,10 +1209,7 @@ Meteor.startup(() => {
 
       pool.query(query, function (error, results) {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         return JsonRoutes.sendResult(res, {
           data: results
@@ -1338,18 +1234,13 @@ Meteor.startup(() => {
       // timeout: 5000
     })
       .then((result) => {
-        console.log(result);
         adminToken = result.data;
         JsonRoutes.sendResult(res, {
           data: adminToken
         });
       })
       .catch((error) => {
-        console.log("err", error)
-        return JsonRoutes.sendResult(res, {
-          code: '500',
-          data: error
-        });
+        handleError(error, res);
       })
   });
 
@@ -1369,10 +1260,7 @@ Meteor.startup(() => {
         });
       })
       .catch((error) => {
-        return JsonRoutes.sendResult(res, {
-          code: '500',
-          data: error
-        })
+        handleError(error, res);
       })
   })
 
@@ -1383,18 +1271,13 @@ Meteor.startup(() => {
       headers: req.body.headers
     })
       .then((result) => {
-        console.log(result)
         return JsonRoutes.sendResult(res, {
           code: '200',
           data: result.data
         })
       })
       .catch((error) => {
-        console.log(error)
-        return JsonRoutes.sendResult(res, {
-          code: '500',
-          data: error
-        })
+        handleError(error, res);
       })
   })
 
@@ -1414,10 +1297,7 @@ Meteor.startup(() => {
         });
       })
       .catch((error) => {
-        return JsonRoutes.sendResult(res, {
-          code: '500',
-          data: error
-        })
+        handleError(error, res);
       })
 
   })
@@ -1441,10 +1321,7 @@ Meteor.startup(() => {
         });
       })
       .catch((error) => {
-        return JsonRoutes.sendResult(res, {
-          code: '500',
-          data: error
-        });
+        handleError(error, res);
       })
   })
 
@@ -1459,7 +1336,6 @@ Meteor.startup(() => {
       data: req.body.data
     })
       .then((result) => {
-        console.log(result);
         JsonRoutes.sendResult(res, {
           data: result.data
         });
@@ -1489,10 +1365,7 @@ Meteor.startup(() => {
         });
       })
       .catch((error) => {
-        return JsonRoutes.sendResult(res, {
-          code: '500',
-          data: error.response.data
-        });
+        handleError(error, res);
       })
   })
 
@@ -1512,10 +1385,7 @@ Meteor.startup(() => {
         })
       })
       .catch((error) => {
-        return JsonRoutes.sendResult(res, {
-          code: '500',
-          data: error
-        })
+        handleError(error, res);
       })
   })
 
@@ -1535,10 +1405,7 @@ Meteor.startup(() => {
         });
       })
       .catch((error) => {
-        return JsonRoutes.sendResult(res, {
-          code: '500',
-          data: error
-        });
+        handleError(error, res);
       })
   })
 
@@ -1551,10 +1418,7 @@ Meteor.startup(() => {
     // const query = 'SELECT * FROM transactions';
     pool.query(query1, function (error, results) {
       if (error) {
-        return JsonRoutes.sendResult(res, {
-          code: '500',
-          data: error
-        });
+        handleError(error, res);
       }
       return JsonRoutes.sendResult(res, {
         data: results
@@ -1567,7 +1431,6 @@ Meteor.startup(() => {
     let invoicedID = req.body.InvoiceID ||'';
     let emailID = req.body.EmailID ||'';
     let returnedResponse = `Invoice ${req.body.InvoiceID} Update Successfully`;
-    //console.log(res);
     const querySelectCustomerByEmail = `SELECT a.id, b.id, b.password as auspostpassword, b.reference, b.email, b.base_url, b.account_number, b.api_key,
     c.database as erp_databasename, c.base_url as erp_base_url, c.user_name as erp_user_name, c.password as erp_password,
     d.db_name as conndb_name
@@ -1580,10 +1443,7 @@ Meteor.startup(() => {
                 return "Error: An error occurred during the database query.";
             } else {
               if (results.length > 0) {
-                console.log(results[0].erp_user_name);
               let getInvoiceURL =  `${results[0].erp_base_url}/Tinvoice/${invoicedID}`;
-
-              console.log(getInvoiceURL);
               process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
               await HTTP.call('GET', getInvoiceURL, {
                     headers: {
@@ -1592,7 +1452,6 @@ Meteor.startup(() => {
                         'Database':results[0].erp_databasename
                     },
                 }, async (error, response) => {
-                  console.log(error);
                     if(response){
                       let result = response.data;
                       if(response.data != null){
@@ -1672,11 +1531,6 @@ Meteor.startup(() => {
                                             let baseUrl = results[0].base_url;
                                             let accountNumber = results[0].account_number;
                                             let userAutorization = 'Basic ' + Buffer.from(`${results[0].api_key}:${results[0].auspostpassword}`).toString('base64');
-                                            console.log(baseUrl);
-                                            console.log(accountNumber);
-                                            console.log(starTrackShippingJSON);
-
-                                            console.log(JSON.stringify(starTrackShippingJSON));
                                             await Meteor.call('checkAUSPOSTshipments', baseUrl, accountNumber, userAutorization, starTrackShippingJSON, async function(error, result) {
                                             if (error) {
                                               //console.log(error);
@@ -1739,8 +1593,6 @@ Meteor.startup(() => {
                                             "TotalAmountInc": parseFloat(billTotal.toFixed(2))
                                             }
                                           };
-
-                                          console.log(results[0].erp_base_url);
                                           await HTTP.call('POST', `${results[0].erp_base_url}/TBill`, {
                                               headers: {
                                                   'Username': results[0].erp_user_name,
@@ -1816,10 +1668,7 @@ Meteor.startup(() => {
 
       pool.query(query, (error, results, fields) => {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: 500,
-            data: error
-          })
+          handleError(error, res);
         } else {
           return JsonRoutes.sendResult(res, {
             code: 200,
@@ -1850,17 +1699,13 @@ Meteor.startup(() => {
       const query = "SELECT * FROM connections WHERE customer_id = '" + data.customer_id + "' AND connection_id = '" + data.connection_id + "'";
       pool.query(query, (error, results, fields) => {
         if (error) {
-          return JsonRoutes.sendResult(res, {
-            code: '500',
-            data: error
-          });
+          handleError(error, res);
         }
         else {
           if (results.length == 0){
             let created_Date = new Date("1990-01-01 00:00:01");
             let _enabled = data.enabled ? 1 : 0;
             const addquery = "INSERT INTO connections (`customer_id`, `db_name`, `account_id`, `connection_id`, `last_ran_date`, `run_cycle`, `enabled`) VALUES ('" + data.customer_id + "', '" + data.db_name + "', '" + data.account_id + "', '" + data.connection_id + "', '" + data.last_ran_date + "', 1 , '" + _enabled + "');";
-            console.log(addquery);
             pool.query(addquery, (err, re, fe) => {
               if (err) console.log(err)
               else {
@@ -1878,7 +1723,6 @@ Meteor.startup(() => {
                                 AND db_name = '${data.db_name}'
                                 AND account_id = '${data.account_id}'
                                 AND connection_id = '${data.connection_id}'`;
-            console.log(updateQuery);
             pool.query(updateQuery, (err, re, fe) => {
               if (err) {
                 console.log(err);

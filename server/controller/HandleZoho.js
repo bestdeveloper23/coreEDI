@@ -3,6 +3,8 @@ import { HTTP } from 'meteor/http';
 import pool from '../../imports/api/dbConection.js';
 import { JsonRoutes } from 'meteor/simple:json-routes';
 const axios = require('axios').default;
+const { Builder, By, Key } = require('selenium-webdriver');
+const chrome = require('selenium-webdriver/chrome');
 
 Meteor.methods({
     'getZoho': function () {
@@ -104,174 +106,80 @@ Meteor.methods({
         })
     },
     
-    'getAccessToken': function ({tempAccount: tempAccount}) {
-        console.log(tempAccount);
-        return new Promise((resolve, reject) => {
-            const Zoho = require('zoho-api');
-            const path = require('path');
-            const base = path.resolve('.');
+    'getZohoAccessToken': async function (url, username, password) {
+      
+      console.log(url, username, password)
 
-            const api = new Zoho.Api({
-                clientId: tempAccount.client_id,
-                clientSecret: tempAccount.client_secret,
-                tokenFile: base + '/../../../../../tokens.json', // Absolute path from current directory
-                setup: true
-            });
+      try {
 
-            const fetchApi = new Zoho.Api({
-                clientId: tempAccount.client_id,
-                clientSecret: tempAccount.client_secret,
-                tokenFile: base + '/../../../../../tokens.json', // Absolute path from current directory
-            });
-
-            function fetchData(sourceType, erpAccount, jsonData) {
-
-            }
-
-            api.setup(tempAccount.authorization_code)
-                .then((response) => {
-                    console.log('Tokens file generated!');
-                    console.log(response);
-
-                    fetchApi.api('GET', '/Leads')
-                        .then((response) => {
-                            console.log('Got data!');
-
-                            Meteor.call(`getTrueERPFromId`, {id: tempAccount.id}, (err, result) => {
-                                if (err)
-                                    console.log(err);
-                                else {
-                                    let erpAccount = result[0];
-                                    let text;
-
-                                    for(let i = 0 ; i < response.data.data.length ; i ++) {
-                                        let jsonData = {
-                                            "type": "TProspect",
-                                            "fields": {
-                                                "Active": true,
-                                                "AltPhone": "",
-                                                "AssessorsName": "",
-                                                "BailmentAmountEx": 0,
-                                                "BailmentNumber": "",
-                                                "Billcountry": "",
-                                                "BillPostcode": "4113",
-                                                "BillState": "Qld",
-                                                "BillStreet": "Hunters Shack",
-                                                "BillStreet2": "2 Sherwood Forest",
-                                                "BillStreet3": "",
-                                                "Billsuburb": "8 MILE PLAINS",
-                                                "BodyType": "",
-                                                "ClaimNumber": "",
-                                                "ClientCustomFieldValues": null,
-                                                "ClientName": response.data.data[i].Company,
-                                                "ClientPaysShippment": false,
-                                                "ClientShipperAccountNo": "",
-                                                "Colour": "",
-                                                "Companyname": response.data.data[i].Company,
-                                                "CompanyTypeName": "Unknown",
-                                                "Contacts": [],
-                                                "Country": response.data.data[i].Country,
-                                                "CreationDate": "",
-                                                "CUSTDATE1": "",
-                                                "CUSTFLD3": "",
-                                                "CUSTFLD4": "",
-                                                "DefaultAPAccount": "",
-                                                "DefaultARAccount": "",
-                                                "DefaultSOTemplateID": 0,
-                                                "DontContact": false,
-                                                "Email": response.data.data[i].Email,
-                                                "EmpID": 0,
-                                                "EmpName": "",
-                                                "ExcessAmount": 0,
-                                                "ExternalRef": "",
-                                                "Faxnumber": "",
-                                                "FirstName": response.data.data[i].First_Name,
-                                                "ForcePOOnSalesOrder": false,
-                                                "FTPAddress": "",
-                                                "FTPPassword": "",
-                                                "FTPUserName": "",
-                                                "IsCustomer": true,
-                                                "ISEmpty": false,
-                                                "IsJob": false,
-                                                "IsOtherContact": true,
-                                                "IsSupplier": false,
-                                                "KeyStringFieldName": "Company",
-                                                "KeyValue": "Apple Corp",
-                                                "LastName": response.data.data[i].Last_Name,
-                                                "LicenseRenewDuration": 1,
-                                                "Mobile": response.data.data[i].Mobile,
-                                                "MsTimeStamp": response.data.data[i].Created_Time,
-                                                "MsUpdateSiteCode": "DEF",
-                                                "NewOrUsed": "",
-                                                "Notes": "",
-                                                "OtherFollowUps": null,
-                                                "Phone": response.data.data[i].Phone,
-                                                "Postcode": response.data.data[i].Zip_Code,
-                                                "PrintName": response.data.data[i].Company,
-                                                "ProductGroupDiscount": [],
-                                                "PublishOnVS1": false,
-                                                "Recno": response.data.data[i].Owner.id,
-                                                "RepName": response.data.data[i].Owner.name,
-                                                "SendFTPXMLInvoices": false,
-                                                "SendFTPXMLPOs": false,
-                                                "SkypeName": response.data.data[i].Skype_ID,
-                                                "SourceName": "Referral",
-                                                "State": response.data.data[i].State,
-                                                "Status": "Burden Expense",
-                                                "StockReceivedDate": 0,
-                                                "StormDate": "",
-                                                "StormLocation": "",
-                                                "Street": response.data.data[i].Street,
-                                                "Street2": "2 Sherwood Forest",
-                                                "Street3": "",
-                                                "Suburb": "8 MILE PLAINS",
-                                                "Title": response.data.data[i].Salutation,
-                                                "URL": response.data.data[i].Website,
-                                                "Year": ""
-                                            }
-                                        }
-
-                                        HTTP.call('POST', `${erpAccount.base_url}/TProspect`, {
-                                            headers: {
-                                                'Username': `${erpAccount.user_name}`,
-                                                'Password': `${erpAccount.password}`,
-                                                'Database': `${erpAccount.database}`,
-                                            },
-                                            data: jsonData
-                                        }, (error, response) => {
-                                            if (error)
-                                                console.error('Error:', error);
-                                            else {
-                                                text += `1 Lead Successfully Added to TrueERP with ID Number ${response.data.fields.ID}\n`
-                                                console.log(text);
-                                            }
-                                            // if( i == productCount - 1)
-                                            //     fetchOrder(lstUpdateTime, token, selConnectionId, text);
-                                        });
-                                    }
-                                }
-                            })
-
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            reject(err);
-                        });
-                })
-                .catch((err) => {
-                    console.log('Something failed!');
-                    console.log(err);
-
-                    fetchApi.api('GET', '/Leads')
-                        .then((response) => {
-                            console.log('Got data!');
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            reject(err);
-                        });
-                });
-        });
+        // Create a new WebDriver instance
+        const options = new chrome.Options();
+        options.addArguments('--headless');
+    
+        // Create a new WebDriver instance with headless mode enabled
+        const driver = await new Builder()
+          .forBrowser('chrome')
+          .setChromeOptions(options)
+          .build();
+        // Navigate to the website
+        await driver.get(url);
+    
+        try {
+            const usernameInput = await driver.findElement(By.id('login_id'));
+            await usernameInput.sendKeys(username);
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+          } catch (error) {}
+      
+        try {
+        const nextButton = await driver.findElement(By.id('nextbtn'));
+        await nextButton.click();
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        } catch (error) {}
+    
+        try {
+        const passwordInput = await driver.findElement(By.id('password'));
+        await passwordInput.sendKeys(password);
+        const loginButton = await driver.findElement(By.id('nextbtn'));
+        await loginButton.click();
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        } catch (error) {}
+    
+        try {
+          const continueButton = await driver.findElement(By.className('continue_button'));
+          await continueButton.click();
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+        } catch (error) {}
+  
+        try {
+        const laterButton = await driver.findElement(By.className('remind_me_later'));
+        await laterButton.click();
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        } catch (error) {}
+    
+        try {
+        const acceptButton = await driver.findElement(By.className('btn'));
+        await acceptButton.click();
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        } catch (error) {}
+      
+    
+        // Get the current URL, which should contain the RedirectURL
+        const currentURL = await driver.getCurrentUrl();
+    
+        // Extract the token ID from the URL string
+        const regex = /access_token=([^&]+)/;
+        const match = currentURL.match(regex);
+        const tokenID = match ? match[1] : null;
+    
+        // Close the browser
+        await driver.quit();
+    
+        return tokenID;
+      } catch (error) {
+        // Handle any errors that occur during the automation process
+        console.error(error);
+        throw new Error('An error occurred');
+      }
     },
 
     'getAlldatafromZoho': async function (module, accessToken) {

@@ -44,26 +44,27 @@ Template.login.events({
     })
       .then(response => response.json())
       .then(result => {
+        console.log(result);
         if (result.result.length > 0) {
           if (result.super && result.result[0].password.toUpperCase() == password.toUpperCase()){
-            window.localStorage.super = true
-            window.localStorage.customerId = -1
-            FlowRouter.go('/customerlist')
+            window.localStorage.super = true;
+            window.localStorage.customerId = -1;
+            FlowRouter.go('/customerlist');
           }
-          else if (result.result[0].logon_password.toUpperCase() == password.toUpperCase()) {
-            window.localStorage.super = false
-            window.localStorage.customerId = result.result[0].id
-            FlowRouter.go('/customerscard?id=' + result.result[0].id)
-            document.getElementById('sidenavemployees').style.display = 'none'
-            document.getElementById('sidenavconnections').style.display = 'none'
+          else if (result.result[0]?.logon_password?.toUpperCase() == password.toUpperCase()) {
+            window.localStorage.super = false;
+            window.localStorage.customerId = result.result[0].id;
+            FlowRouter.go('/customerscard?id=' + result.result[0].id);
+            document.getElementById('sidenavemployees').style.display = 'none';
+            document.getElementById('sidenavconnections').style.display = 'none';
           }
           else {
             swal("Invalid CoreEDI Password", "Entered password is not correct. \n Re-enter your password and try again!", "error");
-            $('.loginSpinner').hide()
+            $('.loginSpinner').hide();
           }
         } else {
           swal("Invalid CoreEDI User", "Entered user is not correct. \n Re-enter your email and try again!", "error");
-          $('.loginSpinner').hide()
+          $('.loginSpinner').hide();
         }
       })
       .catch(error => console.log(error));

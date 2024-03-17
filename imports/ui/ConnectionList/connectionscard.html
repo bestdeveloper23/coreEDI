@@ -634,9 +634,9 @@
                                                             </label>
                                                             <select class="form-control" id="magento_cIdentify"
                                                                 name="cIdentify" style="cursor: pointer;">
-                                                                {{#if equals record.customer_identified_by 0}}
-                                                                <option value="1" selected>Invoice</option>
-                                                                <option value="0">Sales Order</option>
+                                                                {{#if equals record.invoice_template 0}}
+                                                                <option value="0" selected>Invoice</option>
+                                                                <option value="1">Sales Order</option>
                                                                 {{else}}
                                                                 <option value="0">Invoice</option>
                                                                 <option value="1" selected>Sales Order</option>
@@ -647,9 +647,9 @@
                                                             style="margin-left: 4px;padding-left:4px; width: 80%">
                                                             <select class="form-control" id="magento_pName" name="pName"
                                                                 style="cursor: pointer;">
-                                                                {{#if equals record.product_name 0}}
-                                                                <option value="1" selected>Email</option>
-                                                                <option value="0">CustomerID</option>
+                                                                {{#if equals record.customer_type 0}}
+                                                                <option value="0" selected>Email</option>
+                                                                <option value="1">CustomerID</option>
                                                                 {{else}}
                                                                 <option value="0">Email</option>
                                                                 <option value="1" selected>CustomerID</option>
@@ -775,14 +775,14 @@
                                         {{ #if equals connection "AustraliaPOST" }}
                                         <div class="row transferOption">
                                             <div class="col-12 col-lg-4" id="whatTransfer">
-                                                <h5 style="margin-bottom: 8px;">Type of Transfer</h5>
+                                                <h5 class="mb-4">Type of Transfer</h5>
                                                 {{> toggle_button
                                                 className="chkGlobalSettings mt-3"
-                                                id="magento_invoices2magento"
+                                                id="austpost_invoices2austpost"
                                                 width="80px"
-                                                for="magento_invoices2magento"
+                                                for="austpost_invoices2austpost"
                                                 displayName="AustPOST Invoices"
-                                                labelclass='mt-2'
+                                                labelclass=''
                                                 isChecked=true
                                                 }}
                                                 {{> toggle_button
@@ -791,7 +791,7 @@
                                                 width="80px"
                                                 for="magento_customers2magento"
                                                 displayName="AustPOST Customers"
-                                                labelclass='mt-3'
+                                                labelclass=''
                                                 isChecked=false
                                                 }}
                                             </div>
@@ -858,33 +858,33 @@
                                                 <div class="form-group" style="margin: 4px;">
                                                 {{> toggle_button
                                                 className="chkGlobalSettings mt-3"
-                                                id="magento_invoices2magento"
+                                                id="austpost_customertype"
                                                 width="80px"
-                                                for="magento_invoices2magento"
+                                                for="austpost_customertype"
                                                 displayName="Customer Type"
-                                                labelclass='mt-2'
+                                                labelclass=''
                                                 isChecked=true
                                                 }}
                                                 </div>
                                                 <div class="form-group" style="margin: 4px;">
                                                 {{> toggle_button
                                                 className="chkGlobalSettings mt-3"
-                                                id="magento_customers2magento"
+                                                id="austpost_DefaultInvoiceTemplate"
                                                 width="80px"
-                                                for="magento_customers2magento"
+                                                for="austpost_DefaultInvoiceTemplate"
                                                 displayName="Default Invoice Template"
-                                                labelclass='mt-3'
+                                                labelclass=''
                                                 isChecked=false
                                                 }}
                                                 </div>
                                                 <div class="form-group" style="margin: 4px;">
                                                 {{> toggle_button
                                                 className="chkGlobalSettings mt-3"
-                                                id="magento_customers2magento"
+                                                id="austpost_relatedcustomers"
                                                 width="80px"
-                                                for="magento_customers2magento"
+                                                for="austpost_relatedcustomers"
                                                 displayName="Use Related Customers"
-                                                labelclass='mt-3'
+                                                labelclass=''
                                                 isChecked=false
                                                 }}
                                                 </div>
@@ -982,8 +982,8 @@
                                                 <button class="btn btn-success btnRunERP btn-auto-RunERP"
                                                 id="btnRunERP" type="button"><i class="fa fa-sync"
                                                     style="margin-right: 5px;"></i>Run Now</button>
-                                                <button class="btn btn-success btnTestERP btn-auto-testERP"
-                                                    id="btnTestERP" type="button"><i class="fa fa-play"
+                                                <button class="btn btn-success btnTestERPConnection btn-auto-testERP"
+                                                    id="btnTestERPConnection" type="button"><i class="fa fa-play"
                                                         style="margin-right: 5px;"></i>Test TrueERP</button>
 
                                             </div>

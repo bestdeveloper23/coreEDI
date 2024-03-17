@@ -2916,7 +2916,7 @@ fetch('/api/MagentoByID', {
                                           for (const product of productList) {
                                               transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.name}...\n`;
                                               templateObject.transNote.set(transNOtes);
-                                              await fetch(`${tempAccount.base_url}/TProduct?select=[ProductName]="${product?.name}"`,
+                                              await fetch(`${tempAccount.base_url}/TProduct?select=[ProductPrintName]="${product?.name}"`,
                                                   {
                                                       method: 'GET',
                                                       headers: myHeaders,
@@ -3152,7 +3152,7 @@ fetch(`/api/WooCommerceByID`, {
                         let postData1 = {
                             id: selConnectionId
                         }
-                        
+
                         fetch('/api/transfertypesByID', {
                             method: 'POST',
                             headers: {
@@ -3168,18 +3168,18 @@ fetch(`/api/WooCommerceByID`, {
                                     transferTypes2.push(e);
                                 }
                             });
-                            
+
                             await templateObject.transferTypes2.set(transferTypes2);
                             let transferTypes =  await templateObject.transferTypes2.get();
                             let customer_status = false;
                             let product_status = false;
-                            
+
                             for(let i = 0; i< transferTypes.length; i++){
-                                if(transferTypes[i].transfer_type == 'TrueERP Customers' 
+                                if(transferTypes[i].transfer_type == 'TrueERP Customers'
                                                         && transferTypes[i].status == 1){
                                     customer_status = true
                                 }
-                                else if(transferTypes[i].transfer_type == 'TrueERP Products' 
+                                else if(transferTypes[i].transfer_type == 'TrueERP Products'
                                                         && transferTypes[i].status == 1){
                                     product_status = true
                                 }
@@ -3335,7 +3335,7 @@ fetch(`/api/WooCommerceByID`, {
                                                             weight: `"${result?.fields?.NetWeightKg}"`
                                                         }
                                                         products.push(bodyToAddWoocommerce?.name)
-                                                  
+
                                                         transNOtes += `(Detail) Product name: ${bodyToAddWoocommerce?.name}, Price: ${bodyToAddWoocommerce?.price}, Description: ${bodyToAddWoocommerce?.description}.\n`;
                                                         transNOtes += `Adding ${newProductsFromERPCount} Product to Woocommerce.\n`;
                                                         templateObject.transNote.set(transNOtes);
@@ -3381,7 +3381,7 @@ fetch(`/api/WooCommerceByID`, {
                                     .then(async (response) => {
                                         const ordersFromWoocommerce = response.data
                                         order_transaction_count  = ordersFromWoocommerce.length
-        
+
                                         if (ordersFromWoocommerce.length === 0) {
                                             transNOtes += `There is no newly added Order in the Woocommerce Website.\n`;
                                             templateObject.transNote.set(transNOtes);
@@ -3469,7 +3469,7 @@ fetch(`/api/WooCommerceByID`, {
                                                     transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.name}...\n`;
                                                     products.push(product?.name)
                                                     templateObject.transNote.set(transNOtes);
-                                                    await fetch(`${tempAccount.base_url}/TProduct?select=[ProductName]="${product?.name}"`,
+                                                    await fetch(`${tempAccount.base_url}/TProduct?select=[ProductPrintName]="${product?.name}"`,
                                                         {
                                                             method: 'GET',
                                                             headers: myHeaders,
@@ -3624,22 +3624,22 @@ fetch(`/api/WooCommerceByID`, {
                                 let account_id = tempConnection.account_id;
                                 let connection_id = tempConnection.connection_id;
                                 let today = new Date();
-        
+
                                 let year = today.getFullYear();
                                 let month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
                                 let day = String(today.getDate()).padStart(2, '0');
-        
+
                                 let formattedDate = `${year}-${month}-${day}`;
                                 products_num = upload_transaction_count + download_transaction_count
                                 let transaction_data = {
                                     'accounting_soft': account_id,
                                     'connection_soft': connection_id,
                                     'date': formattedDate,
-                                    'order_num': order_transaction_count,
-                                    'products': products,
-                                    'products_num': products_num,
-                                    'uploaded_num': upload_transaction_count,
-                                    'downloaded_num': download_transaction_count,
+                                    'order_num': order_transaction_count||0,
+                                    'products': products||'',
+                                    'products_num': products_num||0,
+                                    'uploaded_num': upload_transaction_count||0,
+                                    'downloaded_num': download_transaction_count||0,
                                     'connection_id': selConnectionId
                                 }
                                 // transaction_details.push({
@@ -3654,7 +3654,7 @@ fetch(`/api/WooCommerceByID`, {
                                     detail_string: 'Orders from WooCommerce to TrueERP',
                                     count: order_transaction_count
                                 })
-                                
+
                                 let insertedTransactionID = 0;
                                 fetch('/api/inserttransaction', {
                                     method: 'POST',
@@ -3676,7 +3676,7 @@ fetch(`/api/WooCommerceByID`, {
                                             body: JSON.stringify(postData)
                                             }).then(response => response.json())
                                               .then(async (result) => {
-                                            
+
                                             }).catch(error => console.log(error));
                                 }).catch(error => console.log(error));
 
@@ -4287,43 +4287,23 @@ else if (connectionType == "Zoho") {
 
     ERP_QuotesState = true;
     ERP_SalesState = true;
-    ERP_LeadsState = true;
+    ERP_ProductsState = true;
     ERP_CustomerState = true;
-       
+
+    ZOHO_QuotesState = true;
+    ZOHO_SalesState = true;
+    ZOHO_LeadsState = true;
+    ZOHO_CustomerState = true;
+
       var responseCount = 0;
       let customerCount = 0;
-      function sleep(ms) {
-        return new Promise((resolve) => setTimeout(resolve, ms || DEF_DELAY));
-      }
-      var transNOtes = "Connecting to TrueERP database..";
-      await sleep(300);
-      templateObject.transNote.set(transNOtes);
-      transNOtes = "Connecting to TrueERP database.......";
-      await sleep(300);
-      templateObject.transNote.set(transNOtes);
-      transNOtes = "Connecting to TrueERP database..........";
-      await sleep(300);
-      templateObject.transNote.set(transNOtes);
-      transNOtes = "Connecting to TrueERP database.............";
-      await sleep(300);
-      templateObject.transNote.set(transNOtes);
-      transNOtes = "Connecting to TrueERP database................";
-      await sleep(300);
-      templateObject.transNote.set(transNOtes);
-      transNOtes = "Connecting to TrueERP database...................";
-      await sleep(300);
-      templateObject.transNote.set(transNOtes);
-      transNOtes = "Connecting to TrueERP database........................";
-      await sleep(300);
-      templateObject.transNote.set(transNOtes);
-      transNOtes = "Connecting to TrueERP database.........................\n";
-      templateObject.transNote.set(transNOtes);
+      
       HTTP.call(
         "post",
         "/api/getAccSoftt",
         {
           data: {
-            id: postData.id,
+            id: tempConnection.customer_id,
           }
         },
         async (error, res) => {
@@ -4335,868 +4315,3035 @@ else if (connectionType == "Zoho") {
           } else {
             erpObject = res.data[0];
           }
-      
-          let token = jQuery("#zoho2erp_access_token").val();
-      
-          if (ERP_QuotesState) {
-            await fetch("https://www.zohoapis.com/crm/v2/Quotes", {
-              method: "GET",
-              headers: {
-                Authorization: `Zoho-oauthtoken ${token}`,
-                "Content-Type": "application/json",
-              },
+
+          let upload_transaction_count = 0;
+          let download_transaction_count = 0;
+          let transaction_details = [];
+          let products;
+
+          await fetch('/api/ZohoByID', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({id: tempConnection.customer_id})
             })
-              .then((response) => response.json())
-              .then(async (result) => {
-                responseCount = result.data.length;
-                var resultData = result.data;
-                transNOtes +=
-                  `Received ` + responseCount + `Quotes information from Zoho.\n`;
-                
-                transNOtes += `Adding Quotes to TrueERP \n`;
-                templateObject.transNote.set(transNOtes);
-      
-                for (let i = 0; i < responseCount; i++) {
-                  
-                  // let postData = {};
-                  // postData.type = "TQuote";
-                  // postData.fields = {};
-                  // transNOtes += `OrderNumber [${resultData[i].Quote_Number}] converting ..........\n`;
-                  // templateObject.transNote.set(transNOtes);
-                  // postData.fields.OrderNumber = resultData[i].Quote_Number || "";
-      
-                  // transNOtes += `CustomerID [${resultData[i].Customer_No}] converting ..........\n`;
-                  // templateObject.transNote.set(transNOtes);
-                  // postData.fields.CustomerID = resultData[i].Customer_No || "";
-      
-                  // transNOtes += `SalesPerson [${resultData[i].ClientName}] converting ..........\n`;
-                  // templateObject.transNote.set(transNOtes);
-                  // postData.fields.Sales_Person = resultData[i].ClientName || "";
-      
-                  // transNOtes += `Subject converting ..........\n`;
-                  // templateObject.transNote.set(transNOtes);
-                  // postData.fields.Subject = resultData[i].Subject || "ZOHO Quote";
-      
-                  // postData.ProductCode = postData.Product_Details.Product_Code || "";
-                  // postData.ProductName = postData.Product_Details.name || "";
-                  
-      
-                  
-                    //check if the customer exists and add if not
-                    const clientName = resultData[i]?.Account_Name?.name;
-                    let clientId
-                    transNOtes += `Checking Customer in the TrueERP database for ClientName : ${clientName}...\n`;
-                    templateObject.transNote.set(transNOtes);
-                    await fetch(`${erpObject.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
-                        {
-                            method: 'GET',
-                            headers: {
-                              Username: erpObject.user_name,
-                              Password: erpObject.password,
-                              Database: erpObject.database,
-                              "Content-Type": "application/json",
-                            },
-                            redirect: 'follow'
-                        })
-                        .then(response => response.json())
-                        .then(async result => {
-                            if (result?.tcustomer.length > 0) {
-                                clientId = result?.tcustomer[0]?.Id
-                                transNOtes += `Found the Customer as ID : ${clientId}\n`;
-                                templateObject.transNote.set(transNOtes);
-                            } else {
-                                transNOtes += `Not Existing Customer, creating...\n`;
-                                templateObject.transNote.set(transNOtes);
-                                const tempCustomerDetailtoERP = {
-                                    type: "TCustomer",
-                                    fields: {
-                                        ClientTypeName: "Camplist",
-                                        ClientName: resultData[i].Account_Name.name,
-                                        Country: resultData[i].Billing_Country || "",
-                                        State: resultData[i].Billing_State || "",
-                                        Street: resultData[i].Billing_Street || "",
-                                        Postcode: resultData[i].Billing_Code || ""
-                                    }
-                                }
-                                console.log(tempCustomerDetailtoERP,"tempCustomer")
-                                await fetch(`${erpObject.base_url}/TCustomer`,
-                                    {
-                                        method: 'POST',
-                                        headers: {
-                                          Username: erpObject.user_name,
-                                          Password: erpObject.password,
-                                          Database: erpObject.database,
-                                          "Content-Type": "application/json",
-                                        },
-                                        redirect: 'follow',
-                                        body: JSON.stringify(tempCustomerDetailtoERP)
-                                    })
-                                    .then(response => {console.log(response); response.json()} )
-                                    .then(async result => {
-                                        clientId = result?.fields?.ID
-                                        transNOtes += `Added a new customer to TrueERP database with ID : ${clientId}.\n`;
-                                        templateObject.transNote.set(transNOtes);
-                                    })
-                                    .catch(error => console.log('error', error));
-                            }
-                        })
-                        .catch(() => {
-                            transNOtes += `Error while getting client Id from the TrueERP database.\n`;
-                            templateObject.transNote.set(transNOtes);
-                        })
-      
-                    //check if the product exists and add if not
-                    const productList = resultData[i]?.Product_Details
-                    const productIdList = []
-                    const productQtyList = []
-                    transNOtes += `There are ${productList.length} products in the Product_Details.\n`;
-                    templateObject.transNote.set(transNOtes);
-      
-                    for (const product of productList) {
-                        transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.product?.name}...\n`;
-                        templateObject.transNote.set(transNOtes);
-                        await fetch(`${erpObject.base_url}/TProduct?select=[ProductName]="${product?.product?.name}"`,
-                            {
-                                method: 'GET',
-                                headers: {
-                                  Username: erpObject.user_name,
-                                  Password: erpObject.password,
-                                  Database: erpObject.database,
-                                  "Content-Type": "application/json",
-                                },
-                                redirect: 'follow'
-                            })
-                            .then(response => response.json())
-                            .then(async result => {
-                                if (result?.tproduct.length > 0) {
-                                    const productId = result?.tproduct[0]?.Id
-                                    transNOtes += `Found the Product as ID : ${productId}\n`;
-                                    templateObject.transNote.set(transNOtes);
-                                    productIdList.push(productId)
-                                    productQtyList.push(product?.quantity)
-                                } else {
-                                    transNOtes += `Not Existing Product, creating...\n`;
-                                    templateObject.transNote.set(transNOtes);
-      
-                                    let args = {
-                                      productID: product?.product?.id,
-                                      auth: token
-                                    }
-                                  // get product by id from Zoho
-                                    const productListFromZOHO = await new Promise(
-                                      (resolve, reject) => {
-                                        Meteor.call(
-                                          "getZohoProductByID",
-                                          args,
-                                          (error, result) => {
-                                            if (error) {
-                                              reject(error);
-                                            } else {
-                                              resolve(result);
-                                            }
-                                          }
-                                        );
-                                      }
-                                    );
-                      
-                                    if (productListFromZOHO.data) {
-      
-                                      console.log(productListFromZOHO)
-                                      transNOtes += `Product ${productListFromZOHO.data[0].id} Success!\n`;
-                                      
-                                      templateObject.transNote.set(transNOtes);
-      
-                                      const productFromZoho = productListFromZOHO.data[0];
-      
-                                            const tempProductDetailtoERP = {
-                                                type: "TProductWeb",
-                                                fields:
-                                                {
-                                                    ProductType: "INV",
-                                                    ProductName: productFromZoho?.Product_Name,
-                                                    SalesDescription: productFromZoho.Description || "",
-                                                    AssetAccount: "Inventory Asset",
-                                                    CogsAccount: "Cost of Goods Sold",
-                                                    IncomeAccount: "Sales",
-                                                    PRODUCTCODE: productFromZoho.Product_Code || "",
-                                                    TaxCodePurchase: "NCG",
-                                                    TaxCodeSales: "GST",
-                                                    UOMPurchases: "Units",
-                                                    UOMSales: "Units",
-                                                }
-                                            }
-      
-                                            if(productFromZoho.GlobalRef) {
-                                              tempProductDetailtoERP.fields.GlobalRef = productFromZoho.GlobalRef
-                                            }
-      
-                                            console.log(tempProductDetailtoERP)
-      
-                                            await fetch(`${erpObject.base_url}/TProductWeb`,
-                                                {
-                                                    method: 'POST',
-                                                    headers: {
-                                                      Username: erpObject.user_name,
-                                                      Password: erpObject.password,
-                                                      Database: erpObject.database,
-                                                      "Content-Type": "application/json",
-                                                    },
-                                                    redirect: 'follow',
-                                                    body: JSON.stringify(tempProductDetailtoERP)
-                                                })
-                                                .then(response => response.json())
-                                                .then(async result => {
-                                                    const tempProductId = result?.fields?.ID
-                                                    transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
-                                                    templateObject.transNote.set(transNOtes);
-                                                    productIdList.push(tempProductId)
-                                                    productQtyList.push(product?.quantity)
-                                                })
-                                                .catch(error => console.log('error', error));
-                                    } else {
-                                      console.log(productListFromZOHO)
-                                      transNOtes += `product searching by id Failed!\n`;
-                                      transNOtes += `Failed!!!\n`;
-                                      templateObject.transNote.set(transNOtes);
-                                    }
-                                    
-                                }
-                                // productQtyList.push(product?.quantity)
-                            })
-                            .catch(() => {
-                                transNOtes += `Error while getting client Id from the TrueERP database.\n`;
-                                templateObject.transNote.set(transNOtes);
-                            })
-      
-                    }
-      
-                    // create a new Qutoes in ERP.
-      
-                    const QuoteLines = [];
-      
-                    productIdList.forEach((item, index) => {
-                        QuoteLines.push({
-                            type: "TQuoteLine",
-                            fields: {
-                                ProductID: item,
-                                OrderQty: productQtyList[index]
-                            }
-                        })
-                    })
-                    if (QuoteLines.length === 0) {
-                        continue
-                    }
-                    const QuoteData = {
-                        type: "TQuote",
-                        fields: {
-                            CustomerID: clientId,
-                            Lines: QuoteLines,
-                            IsBackOrder: true
-                        }
-                    }
-      
-                 
-                  await fetch("/api/updateTrueERP2", {
-                    method: "POST",
+            .then(response => response.json())
+            .then(async (ZohoClient) => {
+              ZohoInfo = ZohoClient[0];
+
+              const CLIENT_ID = ZohoInfo.client_id;
+              const REDIRECT_URI = ZohoInfo.redirect_uri;
+              const RESPONSE_TYPE = "token";
+              const SCOPE = "ZohoCRM.modules.ALL,ZohoCRM.settings.ALL,ZohoCRM.users.ALL"
+              const ZOHO_USERNAME = ZohoInfo.username;
+              const ZOHO_PASSWORD = ZohoInfo.password;
+
+              const authorizationUrl = `https://accounts.zoho.com/oauth/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}&response_type=token`;
+
+              let token = '';
+              
+              const tokenPromise = await new Promise((resolve, reject) => {
+                Meteor.call("getZohoAccessToken", authorizationUrl, ZOHO_USERNAME, ZOHO_PASSWORD, (error, result) => {
+                  if (error) {
+                    reject(error);
+                  } else {
+                    resolve(result);
+                  }
+                });
+              });
+              
+              if (tokenPromise) {
+                token = tokenPromise
+              }
+
+              console.log(token);
+
+              if (ERP_SalesState) {
+                await fetch(
+                  erpObject.base_url +
+                    // "/TSalesOrder?PropertyList=Lines,ClientName,OrderNumber,CustomerID,CreationDate,ClientName,DueDate,InvoicePrintDesc,ID&select=[MsTimeStamp]>"${lstUpdateTime}"`,
+                    `/TSalesOrder?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
+                  // `/TSalesOrder?Listtype=detail&limitCount=3`,
+                  {
+                    method: "GET",
                     headers: {
-                      "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                      data: QuoteData,
+                      "Content-Type": "application/json",
                       Username: erpObject.user_name,
                       Password: erpObject.password,
                       Database: erpObject.database,
-                      url: erpObject.base_url + "/TQuote"
-                    }),
-                  })
-                    .then((response) => response.json())
-                    .then(async (result) => {
-                      console.log(result);
-                    
-                      transNOtes += `Quotes transfer Success!\n`;
-                    
-                      templateObject.transNote.set(transNOtes);
-                    })
-                    .catch((error) => {
-                      console.log(error);
-                      transNOtes += `Quotes transfer Failed!\n`;
-                      transNOtes += `Failed!!!\n`;
-                      templateObject.transNote.set(transNOtes);
-                    });
-                }
-                let tempDate = new Date();
-                let dateString =
-                  tempDate.getUTCFullYear() +
-                  "/" +
-                  ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
-                  "/" +
-                  ("0" + tempDate.getUTCDate()).slice(-2) +
-                  " " +
-                  ("0" + tempDate.getUTCHours()).slice(-2) +
-                  ":" +
-                  ("0" + tempDate.getUTCMinutes()).slice(-2) +
-                  ":" +
-                  ("0" + tempDate.getUTCSeconds()).slice(-2);
-                let argsDate = {
-                  id: FlowRouter.current().queryParams.id,
-                  last_ran_date: dateString,
-                };
-                await fetch(`/api/updateLastRanDate`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify(argsDate),
-                })
+                    },
+                  }
+                )
                   .then((response) => response.json())
                   .then(async (result) => {
-                    console.log(result);
+                    if (result.tsalesorder.length === 0) {
+                      transNOtes += `There is no newly added Sales Order in TrueERP.\n`;
+                      templateObject.transNote.set(transNOtes);
+                    } else {
+                      responseCount = result.tsalesorder.length;
+                      var resultData = result.tsalesorder;
+                      // download_transaction_count += responseCount;
+                      // transaction_details.push({
+                      //   detail_string:
+                      //     "Downloaded Sales Orders from TrueERP to Zoho",
+                      //   count: responseCount,
+                      // });
+                      let formatting =
+                        responseCount > 1 ? "Sales Orders" : "Sales Order";
+                      transNOtes +=
+                        `Received ` +
+                        responseCount +
+                        ` ${formatting} from TrueERP.\n`;
+
+                      transNOtes += `Adding ${formatting} to Zoho CRM \n`;
+                      templateObject.transNote.set(transNOtes);
+                      function sleep(ms) {
+                        return new Promise((resolve) =>
+                          setTimeout(resolve, ms || DEF_DELAY)
+                        );
+                      }
+
+                      
+                      const reqData = {
+                        auth: token,
+                        module: "Sales_Orders",
+                        fieldName: "GlobalRef",
+                        data: {
+                          fields: [
+                            {
+                              field_label: "GlobalRef",
+                              data_type: "text",
+                            },
+                          ],
+                        },
+                      };
+
+                      //Check GlobalRef existence
+                      const resultPromise = await new Promise(
+                        (resolve, reject) => {
+                          Meteor.call(
+                            "checkFieldExistence",
+                            reqData,
+                            (error, result) => {
+                              if (error) {
+                                reject(error);
+                              } else {
+                                resolve(result);
+                              }
+                            }
+                          );
+                        }
+                      );
+
+                      // Process the resultPromise
+                      if (resultPromise) {
+                        if (!resultPromise) {
+                          const resultPromise = await new Promise(
+                            (resolve, reject) => {
+                              Meteor.call(
+                                "addcustomFields",
+                                reqData,
+                                (error, result) => {
+                                  if (error) {
+                                    reject(error);
+                                  } else {
+                                    resolve(result);
+                                  }
+                                }
+                              );
+                            }
+                          );
+
+                          if (resultPromise.data) {
+                            transNOtes += `${reqData.module} field has been added in Sales_Orders module!\n`;
+                            templateObject.transNote.set(transNOtes);
+                          } else {
+                            console.log(resultPromise);
+                            transNOtes += `${reqData.module} field adding Failed!\n`;
+                            templateObject.transNote.set(transNOtes);
+                          }
+                        }
+                      } else if (!resultPromise) {
+                        transNOtes += `${reqData.fieldName} field already exists!\n`;
+                        templateObject.transNote.set(transNOtes);
+                      } else {
+                        console.error("Error:", resultPromise);
+                        transNOtes += `Checking Field existing Failed!\n`;
+                        transNOtes += `Failed!!!\n`;
+                        templateObject.transNote.set(transNOtes);
+                      }
+
+                      let postData = [];
+                      for (let i = 0; i < responseCount; i++) {
+                        const productList = [];
+                        if (!resultData[i].fields.Lines) {
+                          continue;
+                        }
+                        for (
+                          let j = 0;
+                          j < resultData[i].fields.Lines.length;
+                          j++
+                        ) {
+                          const productreqData = {
+                            auth: token,
+                            productName: resultData[i]?.fields?.Lines[
+                              j
+                            ]?.fields?.ProductName.replace(/[\[\]()]/g, ""),
+                            productID:
+                              resultData[i]?.fields?.Lines[j]?.fields
+                                ?.ProductID,
+                          };
+                          if (!productreqData.productName) {
+                            productreqData.productName = "Temp product";
+                          }
+                          const resultPromiseProductDetect = await new Promise(
+                            (resolve, reject) => {
+                              Meteor.call(
+                                "getZohoProduct",
+                                productreqData,
+                                (error, result) => {
+                                  if (error) {
+                                    reject(error);
+                                  } else {
+                                    resolve(result);
+                                  }
+                                }
+                              );
+                            }
+                          );
+
+                          if (resultPromiseProductDetect.data) {
+                            if (resultPromiseProductDetect.data.length > 0) {
+                              transNOtes += `Product Name "${productreqData.productName}" already exits in ZOHO\n`;
+                              productList.push({
+                                product: {
+                                  name: resultData[i]?.fields?.Lines[j]?.fields
+                                    ?.ProductName,
+                                  id: resultPromiseProductDetect.data[0].id,
+                                },
+                                quantity:
+                                  resultData[i]?.fields?.Lines[j].fields
+                                    ?.OrderQty,
+                                product_description:
+                                  resultData[i]?.fields?.Lines[j].fields
+                                    ?.ProductDescription,
+                              });
+                            } else {
+                              const addProduct2Zotorequest = {
+                                auth: token,
+                                data: [
+                                  {
+                                    Product_Name: resultData[i]?.fields?.Lines[
+                                      j
+                                    ]?.fields?.ProductName.replace(
+                                      /[\[\]()]/g,
+                                      ""
+                                    ),
+                                    Description:
+                                      resultData[i]?.fields?.Lines[j]?.fields
+                                        ?.ProductDescription,
+                                    GlobalRef:
+                                      resultData[i]?.fields?.Lines[j]?.fields
+                                        ?.GlobalRef,
+                                  },
+                                ],
+                              };
+
+                              const resultPromiseProduct = await new Promise(
+                                (resolve, reject) => {
+                                  Meteor.call(
+                                    "addZohoProduct",
+                                    addProduct2Zotorequest,
+                                    (error, result) => {
+                                      if (error) {
+                                        reject(error);
+                                      } else {
+                                        resolve(result);
+                                      }
+                                    }
+                                  );
+                                }
+                              );
+
+                              if (resultPromiseProduct.data) {
+                                transNOtes += `${addProduct2Zotorequest.data[0].Product_Name} has been added in ZOHO\n`;
+                                templateObject.transNote.set(transNOtes);
+                                productList.push({
+                                  product: {
+                                    name: resultData[i]?.fields?.Lines[j]
+                                      ?.fields?.ProductName,
+                                    id: resultPromiseProduct.data[0].details.id,
+                                  },
+                                  quantity:
+                                    resultData[i]?.fields?.Lines[j].fields
+                                      ?.OrderQty,
+                                  product_description:
+                                    resultData[i]?.fields?.Lines[j].fields
+                                      ?.ProductDescription,
+                                });
+                              } else {
+                                transNOtes += `${resultPromiseProduct}`;
+                                templateObject.transNote.set(transNOtes);
+                              }
+                            }
+                          } else {
+                            const addProduct2Zotorequest = {
+                              auth: token,
+                              data: [
+                                {
+                                  Product_Name: resultData[i]?.fields?.Lines[
+                                    j
+                                  ]?.fields?.ProductName.replace(
+                                    /[\[\]()]/g,
+                                    ""
+                                  ),
+                                  Description:
+                                    resultData[i]?.fields?.Lines[j]?.fields
+                                      ?.ProductDescription,
+                                  GlobalRef:
+                                    resultData[i]?.fields?.Lines[j]?.fields
+                                      ?.GlobalRef,
+                                },
+                              ],
+                            };
+
+                            const resultPromiseProduct = await new Promise(
+                              (resolve, reject) => {
+                                Meteor.call(
+                                  "addZohoProduct",
+                                  addProduct2Zotorequest,
+                                  (error, result) => {
+                                    if (error) {
+                                      reject(error);
+                                    } else {
+                                      resolve(result);
+                                    }
+                                  }
+                                );
+                              }
+                            );
+
+                            if (resultPromiseProduct.data) {
+                              transNOtes += `${addProduct2Zotorequest.data[0].Product_Name} has been added in ZOHO\n`;
+                              templateObject.transNote.set(transNOtes);
+                              productList.push({
+                                product: {
+                                  name: resultData[i]?.fields?.Lines[j]?.fields
+                                    ?.ProductName,
+                                  id: resultPromiseProduct.data[0].details.id,
+                                },
+                                quantity:
+                                  resultData[i]?.fields?.Lines[j].fields
+                                    ?.OrderQty,
+                                product_description:
+                                  resultData[i].fields.Lines[j].fields
+                                    .ProductDescription || "",
+                              });
+                            } else {
+                              console.log(resultPromiseProduct);
+                              transNOtes += `${resultPromiseProduct}`;
+                              templateObject.transNote.set(transNOtes);
+                            }
+                          }
+                        }
+
+                        const accountreqData = {
+                          auth: token,
+                          Account_Name: resultData[
+                            i
+                          ]?.fields?.ClientName.replace(/[\[\]()]/g, ""),
+                        };
+                        if (!accountreqData.Account_Name) {
+                          accountreqData.Account_Name = "Temp Account";
+                        }
+                        let accountID;
+
+                        const resultPromiseAccountDetect = await new Promise(
+                          (resolve, reject) => {
+                            Meteor.call(
+                              "getZohoAccount",
+                              accountreqData,
+                              (error, result) => {
+                                if (error) {
+                                  reject(error);
+                                } else {
+                                  resolve(result);
+                                }
+                              }
+                            );
+                          }
+                        );
+
+                        if (resultPromiseAccountDetect.data) {
+                          if (resultPromiseAccountDetect.data.length > 0) {
+                            transNOtes += `Account Name "${accountreqData.Account_Name}" already exists in ZOHO\n`;
+                            templateObject.transNote.set(transNOtes);
+                            accountID = resultPromiseAccountDetect.data[0].id;
+                          } else {
+                            const addAccount2Zotorequest = {
+                              auth: token,
+                              data: [
+                                {
+                                  Account_Name: resultData[
+                                    i
+                                  ]?.fields?.ClientName.replace(
+                                    /[\[\]()]/g,
+                                    ""
+                                  ),
+                                },
+                              ],
+                            };
+
+                            const resultPromiseAccount = await new Promise(
+                              (resolve, reject) => {
+                                Meteor.call(
+                                  "addZohoAccounts",
+                                  addAccount2Zotorequest,
+                                  (error, result) => {
+                                    if (error) {
+                                      reject(error);
+                                    } else {
+                                      resolve(result);
+                                    }
+                                  }
+                                );
+                              }
+                            );
+
+                            if (resultPromiseAccount.data) {
+                              transNOtes += `Account ${addAccount2Zotorequest.data[0].Account_Name} has been added in ZOHO\n`;
+                              templateObject.transNote.set(transNOtes);
+                              accountID = resultPromiseAccount.data[0].id;
+                            } else {
+                              console.log(error);
+                              transNOtes += `${error.message}`;
+                              templateObject.transNote.set(transNOtes);
+                            }
+                          }
+                        } else {
+                          const addAccount2Zotorequest = {
+                            auth: token,
+                            data: [
+                              {
+                                Account_Name:
+                                  resultData[i].fields.ClientName.replace(
+                                    /[\[\]()]/g,
+                                    ""
+                                  ) || "TEST NAME",
+                              },
+                            ],
+                          };
+
+                          const resultPromiseAccount = await new Promise(
+                            (resolve, reject) => {
+                              Meteor.call(
+                                "addZohoAccounts",
+                                addAccount2Zotorequest,
+                                (error, result) => {
+                                  if (error) {
+                                    reject(error);
+                                  } else {
+                                    resolve(result);
+                                  }
+                                }
+                              );
+                            }
+                          );
+
+                          if (resultPromiseAccount.data) {
+                            transNOtes += `Account ${addAccount2Zotorequest.data[0].Account_Name} has been added in ZOHO\n`;
+                            templateObject.transNote.set(transNOtes);
+                            accountID = resultPromiseAccount.data[0].id;
+                          } else {
+                            console.log(resultPromiseAccount);
+                          }
+                        }
+
+                        postData.push({
+                          Account_Name: {
+                            name: resultData[i]?.fields?.ClientName.replace(
+                              /[\[\]()]/g,
+                              ""
+                            ),
+                            id: accountID,
+                          },
+                          Product_Details: productList,
+                          GlobalRef: resultData[i]?.fields?.GlobalRef,
+                          // Subject: resultData[i]?.fields?.ShipToDesc,
+                          Subject: resultData[i]?.fields?.GlobalRef,
+                        });
+
+                        let tempNote = transNOtes;
+                      }
+
+                      let args = {
+                        auth: token,
+                        data: postData,
+                      };
+
+                      const batchSize = 100;
+                      const numBatches = Math.ceil(postData.length / batchSize);
+
+                      let upload_num = 0;
+                      // Loop through the data in batches
+                      for (let i = 0; i < numBatches; i++) {
+                        const startIdx = i * batchSize;
+                        const endIdx = Math.min(
+                          startIdx + batchSize,
+                          postData.length
+                        );
+                        const batchData = postData.slice(startIdx, endIdx);
+                        args.data = batchData;
+
+                        const resultSalesOrder = await new Promise(
+                          (resolve, reject) => {
+                            Meteor.call(
+                              "updateZohoOrders",
+                              args,
+                              (error, result) => {
+                                if (error) {
+                                  reject(error);
+                                } else {
+                                  resolve(result);
+                                }
+                              }
+                            );
+                          }
+                        );
+
+                        if (resultSalesOrder.data) {
+                          console.log(resultSalesOrder);
+                          if (resultSalesOrder.data) {
+                            upload_transaction_count +=
+                              resultSalesOrder.data.length;
+                            upload_num += resultSalesOrder.data.length;
+                            transNOtes += `Sales Order transfer Success!\n`;
+                          } else {
+                            transNOtes += `Sales Order transfer Failed!\n${result.message}\n`;
+                          }
+                          templateObject.transNote.set(transNOtes);
+                        } else {
+                          console.log(resultSalesOrder);
+                          transNOtes += `Sales Order transfer Failed!\n`;
+                          transNOtes += `Failed!!!\n`;
+                          templateObject.transNote.set(transNOtes);
+                        }
+                      }
+                      transaction_details.push({
+                        detail_string:
+                          "Uploaded Sales Orders from TrueERP to Zoho",
+                        count: upload_num,
+                      });
+
+                      let tempDate = new Date();
+                      let dateString =
+                        tempDate.getUTCFullYear() +
+                        "/" +
+                        ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
+                        "/" +
+                        ("0" + tempDate.getUTCDate()).slice(-2) +
+                        " " +
+                        ("0" + tempDate.getUTCHours()).slice(-2) +
+                        ":" +
+                        ("0" + tempDate.getUTCMinutes()).slice(-2) +
+                        ":" +
+                        ("0" + tempDate.getUTCSeconds()).slice(-2);
+                      let argsDate = {
+                        id: FlowRouter.current().queryParams.id,
+                        last_ran_date: dateString,
+                      };
+                      await fetch(`/api/updateLastRanDate`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(argsDate),
+                      })
+                        .then((response) => response.json())
+                        .then(async (result) => {
+                          console.log(result);
+                        })
+                        .catch((err) => console.log(err));
+                    }
                   })
-                  .catch((err) => console.log(err));
+                  .catch((error) => {
+                    console.log(error);
+                    transNOtes += `An error occurred while receiving Sales_Orders from TrueERP database\n`;
+                    templateObject.transNote.set(transNOtes);
+                  });
+              }
+
+              if (ERP_CustomerState) {
+                await fetch(
+                  erpObject.base_url +
+                    `/TCustomer?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
+                  // `/TCustomer?PropertyList=ClientName,Email,FirstName,LastName,Phone,Mobile,SkypeName,Title,Faxnumber,Country,State,Street,Postcode,Billcountry,BillState,BillPostcode,BillStreet&limitCount=3`,
+                  {
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Username: erpObject.user_name,
+                      Password: erpObject.password,
+                      Database: erpObject.database,
+                    },
+                  }
+                )
+                  .then((response) => response.json())
+                  .then(async (result) => {
+                    if (result.tcustomer.length === 0) {
+                      transNOtes += `There is no newly added Customer in TrueERP.\n`;
+                      templateObject.transNote.set(transNOtes);
+                    } else {
+                      responseCount = result.tcustomer.length;
+                      var resultData = result.tcustomer;
+                      // download_transaction_count += responseCount;
+                      // transaction_details.push({
+                      //   detail_string:
+                      //     "Downloaded Customers from TrueERP to Zoho",
+                      //   count: responseCount,
+                      // });
+                      let formatting =
+                        responseCount > 1 ? "Customers" : "Customer";
+                      transNOtes +=
+                        `Received ` +
+                        responseCount +
+                        ` ${formatting} from TrueERP.\n`;
+
+                      transNOtes += `Adding ${formatting} to Zoho CRM \n`;
+                      templateObject.transNote.set(transNOtes);
+                      function sleep(ms) {
+                        return new Promise((resolve) =>
+                          setTimeout(resolve, ms || DEF_DELAY)
+                        );
+                      }
+
+                      
+
+                      // fields existence checking
+
+                      const reqData = {
+                        auth: token,
+                        module: "Contacts",
+                        fieldName: "GlobalRef",
+                        data: {
+                          fields: [
+                            {
+                              field_label: "GlobalRef",
+                              data_type: "text",
+                            },
+                          ],
+                        },
+                      };
+
+                      //Check GlobalRef existence
+                      const resultPromise = await new Promise(
+                        (resolve, reject) => {
+                          Meteor.call(
+                            "checkFieldExistence",
+                            reqData,
+                            (error, result) => {
+                              if (error) {
+                                reject(error);
+                              } else {
+                                resolve(result);
+                              }
+                            }
+                          );
+                        }
+                      );
+
+                      // Process the resultPromise
+                      if (resultPromise) {
+                        if (!resultPromise) {
+                          const resultPromise = await new Promise(
+                            (resolve, reject) => {
+                              Meteor.call(
+                                "addcustomFields",
+                                reqData,
+                                (error, result) => {
+                                  if (error) {
+                                    reject(error);
+                                  } else {
+                                    resolve(result);
+                                  }
+                                }
+                              );
+                            }
+                          );
+
+                          if (resultPromise.data) {
+                            transNOtes += `${reqData.module} field has been added in Contacts module!\n`;
+                            templateObject.transNote.set(transNOtes);
+                          } else {
+                            console.log(resultPromise);
+                            transNOtes += `${reqData.module} field adding Failed!\n`;
+                            templateObject.transNote.set(transNOtes);
+                          }
+                        }
+                      } else if (!resultPromise) {
+                        transNOtes += `${reqData.fieldName} field already exists!\n`;
+                        templateObject.transNote.set(transNOtes);
+                      } else {
+                        console.error("Error:", resultPromise);
+                        transNOtes += `Checking Field existing Failed!\n`;
+                        transNOtes += `Failed!!!\n`;
+                        templateObject.transNote.set(transNOtes);
+                      }
+
+                      let postData = [];
+                      for (let i = 0; i < responseCount; i++) {
+                        tempData = {};
+
+                        let tempNote = transNOtes;
+                        //Email converting
+                        tempData.Email = resultData[i].Email || "";
+
+                        // Customer Name converting
+                        tempData.First_Name = resultData[i].FirstName || "";
+
+                        tempData.Last_Name = resultData[i].LastName || "";
+                        transNOtes =
+                          tempNote +
+                          `Customer ${resultData[i]?.LastName} formating.... \n`;
+                        templateObject.transNote.set(transNOtes);
+
+                        //Phone converting
+                        tempData.Phone = resultData[i].Phone || "";
+
+                        // Mobile converting
+                        tempData.Mobile = resultData[i].Mobile || "";
+
+                        // Skypenumber converting
+                        tempData.Skype_ID = resultData[i].SkypeName || "";
+
+                        // Title converting
+                        tempData.Title = resultData[i].Title || "";
+
+                        // Fax converting
+                        tempData.Fax = resultData[i].Faxnumber || "";
+
+                        // Country converting
+                        tempData.Mailing_Country = resultData[i].Country || "";
+
+                        tempData.GlobalRef = resultData[i].GlobalRef;
+
+                        // City converting
+                        tempData.Mailing_City = resultData[i].City || "";
+
+                        // State converting
+                        tempData.Mailing_State = resultData[i].State || "";
+
+                        // Street converting
+                        tempData.Mailing_Street = resultData[i].Street || "";
+
+                        // Postcode converting
+                        tempData.Mailing_Zip = resultData[i].Postcode || "";
+
+                        if (!resultData[i].LastName) {
+                          transNOtes += `Customer ID ${resultData[i].Id} not imported as no Last name\n`;
+                          templateObject.transNote.set(transNOtes);
+                          continue;
+                        } else {
+                          postData.push(tempData);
+                        }
+                      }
+
+                      let args = {
+                        auth: token,
+                        data: postData,
+                      };
+
+                      const batchSize = 100;
+                      const numBatches = Math.ceil(postData.length / batchSize);
+                      let upload_num = 0;
+                      // Loop through the data in batches
+                      for (let i = 0; i < numBatches; i++) {
+                        const startIdx = i * batchSize;
+                        const endIdx = Math.min(
+                          startIdx + batchSize,
+                          postData.length
+                        );
+                        const batchData = postData.slice(startIdx, endIdx);
+                        args.data = batchData;
+
+                        const resultPromise = await new Promise(
+                          (resolve, reject) => {
+                            Meteor.call(
+                              "updateZohoCustomers",
+                              args,
+                              (error, result) => {
+                                if (error) {
+                                  reject(error);
+                                } else {
+                                  resolve(result);
+                                }
+                              }
+                            );
+                          }
+                        );
+
+                        if (resultPromise.data) {
+                          console.log(resultPromise.data);
+                          upload_transaction_count += resultPromise.data.length;
+                          upload_num = resultPromise.data.length;
+                          transNOtes += `Customers transfer Success!\n`;
+                          templateObject.transNote.set(transNOtes);
+                        } else {
+                          console.log(resultPromise);
+                          transNOtes += `Customers transfer Failed!\n`;
+                          transNOtes += `Failed!!!\n`;
+                          templateObject.transNote.set(transNOtes);
+                        }
+                      }
+
+                      transaction_details.push({
+                        detail_string:
+                          "Uploaded Customers from TrueERP to Zoho",
+                        count: upload_num,
+                      });
+
+                      let tempDate = new Date();
+                      let dateString =
+                        tempDate.getUTCFullYear() +
+                        "/" +
+                        ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
+                        "/" +
+                        ("0" + tempDate.getUTCDate()).slice(-2) +
+                        " " +
+                        ("0" + tempDate.getUTCHours()).slice(-2) +
+                        ":" +
+                        ("0" + tempDate.getUTCMinutes()).slice(-2) +
+                        ":" +
+                        ("0" + tempDate.getUTCSeconds()).slice(-2);
+                      let argsDate = {
+                        id: FlowRouter.current().queryParams.id,
+                        last_ran_date: dateString,
+                      };
+                      await fetch(`/api/updateLastRanDate`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(argsDate),
+                      })
+                        .then((response) => response.json())
+                        .then(async (result) => {
+                          console.log(result);
+                        })
+                        .catch((err) => console.log(err));
+                      // fetchProduct(templateObject, lstUpdateTime, tempConnectionSoftware.base_api_url, tempAccount, token, selConnectionId, text);
+                      // }
+                    }
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                    transNOtes += `An error occurred while receiving a Customer from TrueERP database\n`;
+                    templateObject.transNote.set(transNOtes);
+                  });
+              }
+
+              if (ERP_ProductsState) {
+                await fetch(
+                  erpObject.base_url +
+                    `/TProduct?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
+                  // `/TProduct?PropertyList=ProductName,PRODUCTCODE,ProductDescription,Active,SalesDescription,TotalQtyonOrder,TotalQtyInStock,WHOLESALEPRICE&limitCount=3`,
+                  {
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Username: erpObject.user_name,
+                      Password: erpObject.password,
+                      Database: erpObject.database,
+                    },
+                  }
+                )
+                  .then((response) => response.json())
+                  .then(async (result) => {
+                    if (result.tproduct.length === 0) {
+                      transNOtes += `There is no newly added Products in TrueERP.\n`;
+                      templateObject.transNote.set(transNOtes);
+                    } else {
+                      responseCount = result.tproduct.length;
+                      var resultData = result.tproduct;
+                      products = resultData;
+                      // download_transaction_count += responseCount;
+                      // transaction_details.push({
+                      //   detail_string:
+                      //     "Downloaded Products from TrueERP to Zoho",
+                      //   count: responseCount,
+                      // });
+                      let formatting =
+                        responseCount > 1 ? "Products" : "Product";
+                      transNOtes +=
+                        `Received ` +
+                        responseCount +
+                        ` ${formatting} from TrueERP.\n`;
+
+                      transNOtes += `Adding ${formatting} to Zoho CRM \n`;
+                      templateObject.transNote.set(transNOtes);
+                      function sleep(ms) {
+                        return new Promise((resolve) =>
+                          setTimeout(resolve, ms || DEF_DELAY)
+                        );
+                      }
+
+                      
+
+                      const reqData = {
+                        auth: token,
+                        module: "Products",
+                        fieldName: "GlobalRef",
+                        data: {
+                          fields: [
+                            {
+                              field_label: "GlobalRef",
+                              data_type: "text",
+                            },
+                          ],
+                        },
+                      };
+
+                      //Check GlobalRef existence
+                      const resultPromise = await new Promise(
+                        (resolve, reject) => {
+                          Meteor.call(
+                            "checkFieldExistence",
+                            reqData,
+                            (error, result) => {
+                              if (error) {
+                                reject(error);
+                              } else {
+                                resolve(result);
+                              }
+                            }
+                          );
+                        }
+                      );
+
+                      // Process the resultPromise
+                      if (resultPromise) {
+                        if (!resultPromise) {
+                          const resultPromise = await new Promise(
+                            (resolve, reject) => {
+                              Meteor.call(
+                                "addcustomFields",
+                                reqData,
+                                (error, result) => {
+                                  if (error) {
+                                    reject(error);
+                                  } else {
+                                    resolve(result);
+                                  }
+                                }
+                              );
+                            }
+                          );
+
+                          if (resultPromise.data) {
+                            transNOtes += `${reqData.module} field has been added in Products module!\n`;
+                            templateObject.transNote.set(transNOtes);
+                          } else {
+                            console.log(resultPromise);
+                            transNOtes += `${reqData.module} field adding Failed!\n`;
+                            templateObject.transNote.set(transNOtes);
+                          }
+                        }
+                      } else if (!resultPromise) {
+                        transNOtes += `${reqData.fieldName} field already exists!\n`;
+                        templateObject.transNote.set(transNOtes);
+                      } else {
+                        console.error("Error:", resultPromise);
+                        transNOtes += `Checking Field existing Failed!\n`;
+                        transNOtes += `Failed!!!\n`;
+                        templateObject.transNote.set(transNOtes);
+                      }
+
+                      let postData = [responseCount];
+                      for (let i = 0; i < responseCount; i++) {
+                        // postData[i] = {};
+
+                        let tempNote = transNOtes;
+
+                        postData[i] = {
+                          Product_Name: resultData[i]?.ProductName,
+                          Product_Code: resultData[i]?.PRODUCTCODE,
+                          Description: resultData[i]?.SalesDescription,
+                          Product_Active: resultData[i]?.Active,
+                          Qty_Ordered: resultData[i]?.TotalQtyonOrder,
+                          Qty_in_Stock: resultData[i]?.TotalQtyInStock,
+                          Unit_Price: resultData[i]?.WHOLESALEPRICE,
+                          GlobalRef: resultData[i]?.GlobalRef,
+                        };
+                      }
+
+                      let args = {
+                        auth: token,
+                        data: postData,
+                      };
+
+                      const batchSize = 100;
+                      const numBatches = Math.ceil(postData.length / batchSize);
+                      let upload_num = 0;
+                      // Loop through the data in batches
+                      for (let i = 0; i < numBatches; i++) {
+                        const startIdx = i * batchSize;
+                        const endIdx = Math.min(
+                          startIdx + batchSize,
+                          postData.length
+                        );
+                        const batchData = postData.slice(startIdx, endIdx);
+                        args.data = batchData;
+
+                        const resultProductsPromise = await new Promise(
+                          (resolve, reject) => {
+                            Meteor.call(
+                              "updateZohoProducts",
+                              args,
+                              (error, result) => {
+                                if (error) {
+                                  reject(error);
+                                } else {
+                                  resolve(result);
+                                }
+                              }
+                            );
+                          }
+                        );
+
+                        if (resultProductsPromise.data) {
+                          upload_transaction_count +=
+                            resultProductsPromise.data.length;
+                          upload_num += resultProductsPromise.data.length;
+                          transNOtes += `Products transfer Success!\n`;
+                          templateObject.transNote.set(transNOtes);
+                        } else {
+                          console.log(resultProductsPromise);
+                          transNOtes += `Products transfer Failed!\n`;
+                          templateObject.transNote.set(transNOtes);
+                        }
+                      }
+
+                      transaction_details.push({
+                        detail_string: "Uploaded Products from TrueERP to Zoho",
+                        count: upload_num,
+                      });
+
+                      let tempDate = new Date();
+                      let dateString =
+                        tempDate.getUTCFullYear() +
+                        "/" +
+                        ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
+                        "/" +
+                        ("0" + tempDate.getUTCDate()).slice(-2) +
+                        " " +
+                        ("0" + tempDate.getUTCHours()).slice(-2) +
+                        ":" +
+                        ("0" + tempDate.getUTCMinutes()).slice(-2) +
+                        ":" +
+                        ("0" + tempDate.getUTCSeconds()).slice(-2);
+                      let argsDate = {
+                        id: FlowRouter.current().queryParams.id,
+                        last_ran_date: dateString,
+                      };
+                      await fetch(`/api/updateLastRanDate`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(argsDate),
+                      })
+                        .then((response) => response.json())
+                        .then(async (result) => {
+                          console.log(result);
+                        })
+                        .catch((err) => console.log(err));
+                    }
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                    transNOtes += `An error occurred while receiving a Products from TrueERP database\n`;
+                    templateObject.transNote.set(transNOtes);
+                  });
+              }
+
+              if (ERP_QuotesState) {
+                await fetch(
+                  erpObject.base_url +
+                    `/TQuote?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
+                  // `/TQuote?Listtype=detail&limitCount=3`,
+                  {
+                    method: "GET",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Username: erpObject.user_name,
+                      Password: erpObject.password,
+                      Database: erpObject.database,
+                    },
+                  }
+                )
+                  .then((response) => response.json())
+                  .then(async (result) => {
+                    if (result.tquote.length === 0) {
+                      transNOtes += `There is no newly added Quote in TrueERP.\n`;
+                      templateObject.transNote.set(transNOtes);
+                    } else {
+                      responseCount = result.tquote.length;
+                      var resultData = result.tquote;
+                      // download_transaction_count += responseCount;
+                      // transaction_details.push({
+                      //   detail_string:
+                      //     "Downloaded Quotes from TrueERP to Zoho",
+                      //   count: responseCount,
+                      // });
+                      let formatting = responseCount > 1 ? "Quotes" : "Quote";
+                      transNOtes +=
+                        `Received ` +
+                        responseCount +
+                        ` ${formatting} from TrueERP.\n`;
+
+                      transNOtes += `Adding ${formatting} to Zoho CRM \n`;
+                      templateObject.transNote.set(transNOtes);
+                      function sleep(ms) {
+                        return new Promise((resolve) =>
+                          setTimeout(resolve, ms || DEF_DELAY)
+                        );
+                      }
+
+                      
+
+                      const reqData = {
+                        auth: token,
+                        module: "Quotes",
+                        fieldName: "GlobalRef",
+                        data: {
+                          fields: [
+                            {
+                              field_label: "GlobalRef",
+                              data_type: "text",
+                            },
+                          ],
+                        },
+                      };
+
+                      //Check GlobalRef existence
+                      const resultPromise = await new Promise(
+                        (resolve, reject) => {
+                          Meteor.call(
+                            "checkFieldExistence",
+                            reqData,
+                            (error, result) => {
+                              if (error) {
+                                reject(error);
+                              } else {
+                                resolve(result);
+                              }
+                            }
+                          );
+                        }
+                      );
+
+                      // Process the resultPromise
+                      if (resultPromise) {
+                        if (!resultPromise) {
+                          const resultPromise = await new Promise(
+                            (resolve, reject) => {
+                              Meteor.call(
+                                "addcustomFields",
+                                reqData,
+                                (error, result) => {
+                                  if (error) {
+                                    reject(error);
+                                  } else {
+                                    resolve(result);
+                                  }
+                                }
+                              );
+                            }
+                          );
+
+                          if (resultPromise.data) {
+                            transNOtes += `${reqData.module} field has been added in Quotes module!\n`;
+                            templateObject.transNote.set(transNOtes);
+                          } else {
+                            console.log(resultPromise);
+                            transNOtes += `${reqData.module} field adding Failed!\n`;
+                            templateObject.transNote.set(transNOtes);
+                          }
+                        }
+                      } else if (!resultPromise) {
+                        transNOtes += `${reqData.fieldName} field already exists!\n`;
+                        templateObject.transNote.set(transNOtes);
+                      } else {
+                        console.error("Error:", resultPromise);
+                        transNOtes += `Checking Field existing Failed!\n`;
+                        transNOtes += `Failed!!!\n`;
+                        templateObject.transNote.set(transNOtes);
+                      }
+
+                      let postData = [];
+                      for (let i = 0; i < responseCount; i++) {
+                        const productList = [];
+                        if (!resultData[i].fields.Lines) {
+                          continue;
+                        }
+                        for (
+                          let j = 0;
+                          j < resultData[i].fields.Lines.length;
+                          j++
+                        ) {
+                          const productreqData = {
+                            auth: token,
+                            productName: resultData[i]?.fields?.Lines[
+                              j
+                            ]?.fields?.ProductName.replace(/[\[\]()]/g, ""),
+                            productID:
+                              resultData[i]?.fields?.Lines[j]?.fields
+                                ?.ProductID,
+                          };
+                          if (!productreqData.productName) {
+                            productreqData.productName = "Temp product";
+                          }
+                          const resultPromiseProductDetect = await new Promise(
+                            (resolve, reject) => {
+                              Meteor.call(
+                                "getZohoProduct",
+                                productreqData,
+                                (error, result) => {
+                                  if (error) {
+                                    reject(error);
+                                  } else {
+                                    resolve(result);
+                                  }
+                                }
+                              );
+                            }
+                          );
+
+                          if (resultPromiseProductDetect.data) {
+                            if (resultPromiseProductDetect.data.length > 0) {
+                              transNOtes += `Product Name "${productreqData.productName}" already exits in ZOHO\n`;
+                              productList.push({
+                                product: {
+                                  name: resultData[i]?.fields?.Lines[j]?.fields
+                                    ?.ProductName,
+                                  id: resultPromiseProductDetect.data[0].id,
+                                },
+                                quantity:
+                                  resultData[i]?.fields?.Lines[j].fields
+                                    ?.OrderQty,
+                                product_description:
+                                  resultData[i]?.fields?.Lines[j].fields
+                                    ?.ProductDescription,
+                              });
+                            } else {
+                              const addProduct2Zotorequest = {
+                                auth: token,
+                                data: [
+                                  {
+                                    Product_Name: resultData[i]?.fields?.Lines[
+                                      j
+                                    ]?.fields?.ProductName.replace(
+                                      /[\[\]()]/g,
+                                      ""
+                                    ),
+                                    Description:
+                                      resultData[i]?.fields?.Lines[j]?.fields
+                                        ?.ProductDescription,
+                                    GlobalRef:
+                                      resultData[i]?.fields?.Lines[j]?.fields
+                                        ?.GlobalRef,
+                                  },
+                                ],
+                              };
+
+                              const resultPromiseProduct = await new Promise(
+                                (resolve, reject) => {
+                                  Meteor.call(
+                                    "addZohoProduct",
+                                    addProduct2Zotorequest,
+                                    (error, result) => {
+                                      if (error) {
+                                        reject(error);
+                                      } else {
+                                        resolve(result);
+                                      }
+                                    }
+                                  );
+                                }
+                              );
+
+                              if (resultPromiseProduct.data) {
+                                transNOtes +=
+                                  `${addProduct2Zotorequest.data[0].Product_Name}` +
+                                  ` has been added in ZOHO\n`;
+                                templateObject.transNote.set(transNOtes);
+                                productList.push({
+                                  product: {
+                                    name: resultData[i]?.fields?.Lines[j]
+                                      ?.fields?.ProductName,
+                                    id: resultPromiseProduct.data[0].details.id,
+                                  },
+                                  quantity:
+                                    resultData[i]?.fields?.Lines[j].fields
+                                      ?.OrderQty,
+                                  product_description:
+                                    resultData[i]?.fields?.Lines[j].fields
+                                      ?.ProductDescription,
+                                });
+                              } else {
+                                transNOtes += `${resultPromiseProduct}`;
+                                templateObject.transNote.set(transNOtes);
+                              }
+                            }
+                          } else {
+                            const addProduct2Zotorequest = {
+                              auth: token,
+                              data: [
+                                {
+                                  Product_Name: resultData[i]?.fields?.Lines[
+                                    j
+                                  ]?.fields?.ProductName.replace(
+                                    /[\[\]()]/g,
+                                    ""
+                                  ),
+                                  Description:
+                                    resultData[i]?.fields?.Lines[j]?.fields
+                                      ?.ProductDescription,
+                                  GlobalRef:
+                                    resultData[i]?.fields?.Lines[j]?.fields
+                                      ?.GlobalRef,
+                                },
+                              ],
+                            };
+
+                            const resultPromiseProduct = await new Promise(
+                              (resolve, reject) => {
+                                Meteor.call(
+                                  "addZohoProduct",
+                                  addProduct2Zotorequest,
+                                  (error, result) => {
+                                    if (error) {
+                                      reject(error);
+                                    } else {
+                                      resolve(result);
+                                    }
+                                  }
+                                );
+                              }
+                            );
+
+                            if (resultPromiseProduct.data) {
+                              transNOtes += `${addProduct2Zotorequest.data[0].Product_Name} has been added in ZOHO\n`;
+                              templateObject.transNote.set(transNOtes);
+                              productList.push({
+                                product: {
+                                  name: resultData[i]?.fields?.Lines[j]?.fields
+                                    ?.ProductName,
+                                  id: resultPromiseProduct.data[0].details.id,
+                                },
+                                quantity:
+                                  resultData[i]?.fields?.Lines[j].fields
+                                    ?.OrderQty,
+                                product_description:
+                                  resultData[i]?.fields?.Lines[j].fields
+                                    ?.ProductDescription,
+                              });
+                            } else {
+                              console.log(resultPromiseProduct);
+                              transNOtes += `${resultPromiseProduct}`;
+                              templateObject.transNote.set(transNOtes);
+                            }
+                          }
+                        }
+
+                        const accountreqData = {
+                          auth: token,
+                          Account_Name: resultData[
+                            i
+                          ]?.fields?.ClientName.replace(/[\[\]()]/g, ""),
+                        };
+                        if (!accountreqData.Account_Name) {
+                          accountreqData.Account_Name = "Temp Account";
+                        }
+                        let accountID;
+
+                        const resultPromiseAccountDetect = await new Promise(
+                          (resolve, reject) => {
+                            Meteor.call(
+                              "getZohoAccount",
+                              accountreqData,
+                              (error, result) => {
+                                if (error) {
+                                  reject(error);
+                                } else {
+                                  resolve(result);
+                                }
+                              }
+                            );
+                          }
+                        );
+
+                        if (resultPromiseAccountDetect.data) {
+                          if (resultPromiseAccountDetect.data.length > 0) {
+                            transNOtes += `Account Name "${accountreqData.Account_Name}" already exists in ZOHO\n`;
+                            templateObject.transNote.set(transNOtes);
+                            accountID = resultPromiseAccountDetect.data[0].id;
+                          } else {
+                            const addAccount2Zotorequest = {
+                              auth: token,
+                              data: [
+                                {
+                                  Account_Name: resultData[
+                                    i
+                                  ]?.fields?.ClientName.replace(
+                                    /[\[\]()]/g,
+                                    ""
+                                  ),
+                                },
+                              ],
+                            };
+
+                            const resultPromiseAccount = await new Promise(
+                              (resolve, reject) => {
+                                Meteor.call(
+                                  "addZohoAccounts",
+                                  addAccount2Zotorequest,
+                                  (error, result) => {
+                                    if (error) {
+                                      reject(error);
+                                    } else {
+                                      resolve(result);
+                                    }
+                                  }
+                                );
+                              }
+                            );
+
+                            if (resultPromiseAccount.data) {
+                              transNOtes += `Account ${addAccount2Zotorequest.data[0].Account_Name} has been added in ZOHO\n`;
+                              templateObject.transNote.set(transNOtes);
+                              accountID = resultPromiseAccount.data[0].id;
+                            } else {
+                              console.log(error);
+                              transNOtes += `${error.message}`;
+                              templateObject.transNote.set(transNOtes);
+                            }
+                          }
+                        } else {
+                          const addAccount2Zotorequest = {
+                            auth: token,
+                            data: [
+                              {
+                                Account_Name: resultData[
+                                  i
+                                ]?.fields?.ClientName.replace(/[\[\]()]/g, ""),
+                              },
+                            ],
+                          };
+
+                          const resultPromiseAccount = await new Promise(
+                            (resolve, reject) => {
+                              Meteor.call(
+                                "addZohoAccounts",
+                                addAccount2Zotorequest,
+                                (error, result) => {
+                                  if (error) {
+                                    reject(error);
+                                  } else {
+                                    resolve(result);
+                                  }
+                                }
+                              );
+                            }
+                          );
+
+                          if (resultPromiseAccount.data) {
+                            transNOtes += `Account ${addAccount2Zotorequest.data[0].Account_Name} has been added in ZOHO\n`;
+                            templateObject.transNote.set(transNOtes);
+                            accountID = resultPromiseAccount.data[0].id;
+                          } else {
+                            console.log(resultPromiseAccount);
+                          }
+                        }
+
+                        postData.push({
+                          Account_Name: {
+                            name: resultData[i]?.fields?.ClientName.replace(
+                              /[\[\]()]/g,
+                              ""
+                            ),
+                            id: accountID,
+                          },
+                          Product_Details: productList,
+                          GlobalRef: resultData[i]?.fields?.GlobalRef,
+                          // Subject: resultData[i]?.fields?.ShipToDesc,
+                          Subject: resultData[i]?.fields?.GlobalRef,
+                        });
+                      }
+
+                      let args = {
+                        auth: token,
+                        data: postData,
+                      };
+
+                      const batchSize = 100;
+                      const numBatches = Math.ceil(postData.length / batchSize);
+                      let upload_num = 0;
+                      // Loop through the data in batches
+                      for (let i = 0; i < numBatches; i++) {
+                        const startIdx = i * batchSize;
+                        const endIdx = Math.min(
+                          startIdx + batchSize,
+                          postData.length
+                        );
+                        const batchData = postData.slice(startIdx, endIdx);
+                        args.data = batchData;
+
+                        const resultQuotes = await new Promise(
+                          (resolve, reject) => {
+                            Meteor.call(
+                              "updateZohoQuotes",
+                              args,
+                              (error, result) => {
+                                if (error) {
+                                  reject(error);
+                                } else {
+                                  resolve(result);
+                                }
+                              }
+                            );
+                          }
+                        );
+
+                        if (resultQuotes.data) {
+                          if (resultQuotes.data) {
+                            console.log(resultQuotes);
+                            upload_transaction_count +=
+                              resultQuotes.data.length;
+                            upload_num += resultQuotes.data.length;
+                            transNOtes += `Quotes transfer Success!\n`;
+                          } else {
+                            transNOtes += `Quotes transfer Failed!\n${result.message}\n`;
+                          }
+                          templateObject.transNote.set(transNOtes);
+                        } else {
+                          console.log(resultQuotes);
+                          transNOtes += `Quotes transfer Failed!\n`;
+                          transNOtes += `Failed!!!\n`;
+                          templateObject.transNote.set(transNOtes);
+                        }
+                      }
+                      transaction_details.push({
+                        detail_string: "Uploaded Quotes from TrueERP to Zoho",
+                        count: upload_num,
+                      });
+
+                      let tempDate = new Date();
+                      let dateString =
+                        tempDate.getUTCFullYear() +
+                        "/" +
+                        ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
+                        "/" +
+                        ("0" + tempDate.getUTCDate()).slice(-2) +
+                        " " +
+                        ("0" + tempDate.getUTCHours()).slice(-2) +
+                        ":" +
+                        ("0" + tempDate.getUTCMinutes()).slice(-2) +
+                        ":" +
+                        ("0" + tempDate.getUTCSeconds()).slice(-2);
+                      let argsDate = {
+                        id: FlowRouter.current().queryParams.id,
+                        last_ran_date: dateString,
+                      };
+                      await fetch(`/api/updateLastRanDate`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(argsDate),
+                      })
+                        .then((response) => response.json())
+                        .then(async (result) => {
+                          console.log(result);
+                        })
+                        .catch((err) => console.log(err));
+                    }
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                    transNOtes += `An error occurred while receiving a Quotes from TrueERP database\n`;
+                    templateObject.transNote.set(transNOtes);
+                  });
+              }
+
+              let account_id = 7;
+              let connection_id = 13;
+              let today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
+              // let year = today.getFullYear();
+              // let month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+              // let day = String(today.getDate()).padStart(2, "0");
+
+              // let formattedDate = `${year}-${month}-${day}`;
+              let formattedDate = moment(today).format("YYYY-MM-DD");
+              let id = FlowRouter.current().queryParams.id;
+
+              let products_num =
+                upload_transaction_count + download_transaction_count;
+              let transaction_data = {
+                accounting_soft: account_id,
+                connection_soft: connection_id,
+                date: formattedDate,
+                order_num: products_num,
+                products: products,
+                products_num: products_num,
+                uploaded_num: upload_transaction_count,
+                downloaded_num: download_transaction_count,
+                connection_id: id,
+              };
+
+              let insertedTransactionID = 0;
+              fetch("/api/transactionByDate", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  date: moment().format("YYYY-MM-DD"),
+                  connection_id: id,
+                  accounting_soft: account_id,
+                  connection_soft: connection_id,
+                }),
               })
-              .catch((err) => {
-                console.log(err);
-                transNOtes += `An error occurred while receiving a Quotes from Zoho\n`;
-                templateObject.transNote.set(transNOtes);
-              });
-          }
-      
-          if (ERP_SalesState) {
-            await fetch("https://www.zohoapis.com/crm/v2/Sales_Orders", {
-              method: "GET",
-              headers: {
-                Authorization: `Zoho-oauthtoken ${token}`,
-                "Content-Type": "application/json",
-              },
-            })
-              .then((response) => response.json())
-              .then(async (result) => {
-                responseCount = result.data.length;
-                var resultData = result.data;
-                transNOtes +=
-                  `Received ` + responseCount + `Sales orders information from Zoho.\n`;
-                
-                transNOtes += `Adding Sales Orders to TrueERP \n`;
-                templateObject.transNote.set(transNOtes);
-      
-                for (let i = 0; i < responseCount; i++) {
-                  
-                  const clientName = resultData[i]?.Account_Name?.name;
-                  let clientId
-                  transNOtes += `Checking Customer in the TrueERP database for ClientName : ${clientName}...\n`;
-                  templateObject.transNote.set(transNOtes);
-                  await fetch(`${erpObject.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
-                      {
-                          method: 'GET',
+                .then((response) => response.json())
+                .then(async (result) => {
+                  if (result != "No Result") {
+                    transaction_data.order_num =
+                      transaction_data.order_num + result.order_num;
+                    transaction_data.products_num =
+                      transaction_data.products_num + result.products_num;
+                    transaction_data.uploaded_num =
+                      transaction_data.uploaded_num + result.uploaded_num;
+                    transaction_data.downloaded_num =
+                      transaction_data.downloaded_num + result.downloaded_num;
+                    let resultId = result.id;
+                    fetch("/api/addtransaction", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        id: resultId,
+                        transaction_data: transaction_data,
+                      }),
+                    })
+                      .then((response) => response.json())
+                      .then(async (result) => {
+                        insertedTransactionID = resultId;
+                        let postData = {
+                          transaction_details: transaction_details,
+                          transactionId: insertedTransactionID,
+                          date: today,
+                        };
+                        fetch("/api/inserttransactionDetails", {
+                          method: "POST",
                           headers: {
-                            Username: erpObject.user_name,
-                            Password: erpObject.password,
-                            Database: erpObject.database,
                             "Content-Type": "application/json",
                           },
-                          redirect: 'follow'
+                          body: JSON.stringify(postData),
+                        })
+                          .then((response) => response.json())
+                          .then(async (result) => {})
+                          .catch((error) => console.log(error));
                       })
-                      .then(response => response.json())
-                      .then(async result => {
-                          if (result?.tcustomer.length > 0) {
-                              clientId = result?.tcustomer[0]?.Id
-                              transNOtes += `Found the Customer as ID : ${clientId}\n`;
-                              templateObject.transNote.set(transNOtes);
-                          } else {
-                              transNOtes += `Not Existing Customer, creating...\n`;
-                              templateObject.transNote.set(transNOtes);
-                              const tempCustomerDetailtoERP = {
-                                  type: "TCustomer",
-                                  fields: {
-                                      ClientTypeName: "Camplist",
-                                      ClientName: resultData[i].Account_Name.name,
-                                      Country: resultData[i].Billing_Country || "",
-                                      State: resultData[i].Billing_State || "",
-                                      Street: resultData[i].Billing_Street || "",
-                                      Postcode: resultData[i].Billing_Code || ""
-                                  }
-                              }
-                              console.log(tempCustomerDetailtoERP,"tempCustomer")
-                              await fetch(`${erpObject.base_url}/TCustomer`,
-                                  {
-                                      method: 'POST',
-                                      headers: {
-                                        Username: erpObject.user_name,
-                                        Password: erpObject.password,
-                                        Database: erpObject.database,
-                                        "Content-Type": "application/json",
-                                      },
-                                      redirect: 'follow',
-                                      body: JSON.stringify(tempCustomerDetailtoERP)
-                                  })
-                                  .then(response => {console.log(response); response.json()} )
-                                  .then(async result => {
-                                      clientId = result?.fields?.ID
-                                      transNOtes += `Added a new customer to TrueERP database with ID : ${clientId}.\n`;
-                                      templateObject.transNote.set(transNOtes);
-                                  })
-                                  .catch(error => console.log('error', error));
-                          }
+                      .catch((error) => console.log(error));
+                  } else {
+                    fetch("/api/inserttransaction", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify(transaction_data),
+                    })
+                      .then((response) => response.json())
+                      .then(async (result) => {
+                        insertedTransactionID = result;
+                        let postData = {
+                          transaction_details: transaction_details,
+                          transactionId: insertedTransactionID,
+                          date: today,
+                        };
+                        fetch("/api/inserttransactionDetails", {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify(postData),
+                        })
+                          .then((response) => response.json())
+                          .then(async (result) => {})
+                          .catch((error) => console.log(error));
                       })
-                      .catch(() => {
-                          transNOtes += `Error while getting client Id from the TrueERP database.\n`;
+                      .catch((error) => console.log(error));
+                  }
+                });
+
+              upload_transaction_count = 0;
+              download_transaction_count = 0;
+              transaction_details = [];
+
+              await fetch(
+                "https://www.zohoapis.com/crm/v2/users?type=CurrentUser",
+                {
+                  method: "GET",
+                  headers: {
+                    Authorization: `Zoho-oauthtoken ${token}`,
+                    "Content-Type": "application/json",
+                  },
+                }
+              )
+                .then((response) => response.json())
+                .then(async (result) => {
+                  if (result.users.length > 0) {
+                    lstUpdateTime = encodeURIComponent(
+                      moment(connectionResult[0].last_ran_date)
+                        .tz(result.users[0].time_zone)
+                        .subtract(1, "hours")
+                        .format("YYYY-MM-DDTHH:mm:ssZ")
+                    );
+                  }
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
+
+              if (ZOHO_QuotesState) {
+                transNOtes += "Processing Quotes.........\n";
+                templateObject.transNote.set(transNOtes);
+                const args = {
+                  auth: token,
+                  data: {
+                    module: "Quotes",
+                    lstTime: lstUpdateTime,
+                  },
+                };
+                const resultQuotes = await new Promise((resolve, reject) => {
+                  Meteor.call(
+                    "getDatafromZohoByDate",
+                    args,
+                    (error, result) => {
+                      if (error) {
+                        reject(error);
+                      } else {
+                        resolve(result);
+                      }
+                    }
+                  );
+                });
+
+                if (resultQuotes) {
+                  const ids = resultQuotes.data.map((quote) => {
+                    return quote.id;
+                  });
+                  let combinedIds = ids.join(",");
+
+                  await fetch(
+                    `https://www.zohoapis.com/crm/v2/Quotes?${combinedIds}`,
+                    {
+                      method: "GET",
+                      headers: {
+                        Authorization: `Zoho-oauthtoken ${token}`,
+                        "Content-Type": "application/json",
+                      },
+                    }
+                  )
+                    .then((response) => response.json())
+                    .then(async (result) => {
+                      if (result.data.length === 0) {
+                        transNOtes += `There is no newly added Quote in ZOHO.\n`;
+                        templateObject.transNote.set(transNOtes);
+                      } else {
+                        responseCount = result.data.length;
+                        var resultData = result.data;
+                        let formatting = responseCount > 1 ? "Quotes" : "Quote";
+                        transNOtes +=
+                          `Received ` +
+                          responseCount +
+                          ` ${formatting} from Zoho.\n`;
+
+                        transNOtes += `Adding ${formatting} to TrueERP \n`;
+                        templateObject.transNote.set(transNOtes);
+
+                        let upload_num = 0;
+
+                        for (let i = 0; i < responseCount; i++) {
+                          let tempCount = i % 10;
+                          let count =
+                            tempCount === 0
+                              ? `${i + 1}st`
+                              : tempCount === 1
+                              ? `${i + 1}nd`
+                              : tempCount === 2
+                              ? `${i + 1}rd`
+                              : `${i + 1}th`;
+                          transNOtes += `Adding ${count} Quote to ERP database.\n`;
+                          console.log(count, tempCount, transNOtes);
                           templateObject.transNote.set(transNOtes);
-                      })
-      
-                  //check if the product exists and add if not
-                  const productList = resultData[i]?.Product_Details
-                  const productIdList = []
-                  const productQtyList = []
-                  transNOtes += `There are ${productList.length} products in the Product_Details.\n`;
-                  templateObject.transNote.set(transNOtes);
-      
-                  for (const product of productList) {
-                      transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.product?.name}...\n`;
-                      templateObject.transNote.set(transNOtes);
-                      await fetch(`${erpObject.base_url}/TProduct?select=[ProductName]="${product?.product?.name}"`,
-                          {
-                              method: 'GET',
+                          const clientName = resultData[i]?.Account_Name?.name;
+                          let clientId;
+                          transNOtes += `Checking Customer in the TrueERP database for ClientName : ${clientName}...\n`;
+                          templateObject.transNote.set(transNOtes);
+                          await fetch(
+                            `${erpObject.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
+                            {
+                              method: "GET",
                               headers: {
                                 Username: erpObject.user_name,
                                 Password: erpObject.password,
                                 Database: erpObject.database,
                                 "Content-Type": "application/json",
                               },
-                              redirect: 'follow'
-                          })
-                          .then(response => response.json())
-                          .then(async result => {
-                              if (result?.tproduct.length > 0) {
-                                  const productId = result?.tproduct[0]?.Id
-                                  transNOtes += `Found the Product as ID : ${productId}\n`;
-                                  templateObject.transNote.set(transNOtes);
-                                  productIdList.push(productId)
-                                  productQtyList.push(product?.quantity)
+                              redirect: "follow",
+                            }
+                          )
+                            .then((response) => response.json())
+                            .then(async (result) => {
+                              if (result?.tcustomer.length > 0) {
+                                clientId = result?.tcustomer[0]?.Id;
+                                transNOtes += `Found the Customer as ID : ${clientId}\n`;
+                                templateObject.transNote.set(transNOtes);
                               } else {
-                                  transNOtes += `Not Existing Product, creating...\n`;
-                                  templateObject.transNote.set(transNOtes);
-      
-                                  let args = {
-                                    productID: product?.product?.id,
-                                    auth: token
-                                  }
-                                // get product by id from Zoho
-                                  const productListFromZOHO = await new Promise(
-                                    (resolve, reject) => {
-                                      Meteor.call(
-                                        "getZohoProductByID",
-                                        args,
-                                        (error, result) => {
-                                          if (error) {
-                                            reject(error);
-                                          } else {
-                                            resolve(result);
-                                          }
-                                        }
-                                      );
-                                    }
+                                transNOtes += `Not Existing Customer, creating...\n`;
+                                templateObject.transNote.set(transNOtes);
+                                const tempCustomerDetailtoERP = {
+                                  type: "TCustomer",
+                                  fields: {
+                                    ClientName: resultData[i].Account_Name.name,
+                                    Country:
+                                      resultData[i].Billing_Country || "",
+                                    State: resultData[i].Billing_State || "",
+                                    Street: resultData[i].Billing_Street || "",
+                                    Postcode: resultData[i].Billing_Code || "",
+                                  },
+                                };
+                                console.log(
+                                  tempCustomerDetailtoERP,
+                                  "tempCustomer"
+                                );
+                                await fetch(`${erpObject.base_url}/TCustomer`, {
+                                  method: "POST",
+                                  headers: {
+                                    Username: erpObject.user_name,
+                                    Password: erpObject.password,
+                                    Database: erpObject.database,
+                                    "Content-Type": "application/json",
+                                  },
+                                  redirect: "follow",
+                                  body: JSON.stringify(tempCustomerDetailtoERP),
+                                })
+                                  .then((response) => {
+                                    console.log(response);
+                                    response.json();
+                                  })
+                                  .then(async (result) => {
+                                    clientId = result?.fields?.ID;
+                                    transNOtes += `Added a new customer to TrueERP database with ID : ${clientId}.\n`;
+                                    templateObject.transNote.set(transNOtes);
+                                  })
+                                  .catch((error) =>
+                                    console.log("error", error)
                                   );
-                    
-                                  if (productListFromZOHO.data) {
-      
-                                    console.log(productListFromZOHO)
-                                    transNOtes += `Product ${productListFromZOHO.data[0].id} Success!\n`;
-                                    
-                                    templateObject.transNote.set(transNOtes);
-      
-                                    const productFromZoho = productListFromZOHO.data[0];
-      
-                                          const tempProductDetailtoERP = {
-                                              type: "TProductWeb",
-                                              fields:
-                                              {
-                                                  ProductType: "INV",
-                                                  ProductName: productFromZoho?.Product_Name,
-                                                  SalesDescription: productFromZoho.Description || "",
-                                                  AssetAccount: "Inventory Asset",
-                                                  CogsAccount: "Cost of Goods Sold",
-                                                  IncomeAccount: "Sales",
-                                                  PRODUCTCODE: productFromZoho.Product_Code || "",
-                                                  TaxCodePurchase: "NCG",
-                                                  TaxCodeSales: "GST",
-                                                  UOMPurchases: "Units",
-                                                  UOMSales: "Units",
-                                              }
-                                          }
-      
-                                          if(productFromZoho.GlobalRef) {
-                                            tempProductDetailtoERP.fields.GlobalRef = productFromZoho.GlobalRef
-                                          }
-      
-                                          console.log(tempProductDetailtoERP)
-      
-                                          await fetch(`${erpObject.base_url}/TProductWeb`,
-                                              {
-                                                  method: 'POST',
-                                                  headers: {
-                                                    Username: erpObject.user_name,
-                                                    Password: erpObject.password,
-                                                    Database: erpObject.database,
-                                                    "Content-Type": "application/json",
-                                                  },
-                                                  redirect: 'follow',
-                                                  body: JSON.stringify(tempProductDetailtoERP)
-                                              })
-                                              .then(response => response.json())
-                                              .then(async result => {
-                                                  const tempProductId = result?.fields?.ID
-                                                  transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
-                                                  templateObject.transNote.set(transNOtes);
-                                                  productIdList.push(tempProductId)
-                                                  productQtyList.push(product?.quantity)
-                                              })
-                                              .catch(error => console.log('error', error));
-                                  } else {
-                                    console.log(productListFromZOHO)
-                                    transNOtes += `product searching by id Failed!\n`;
-                                    transNOtes += `Failed!!!\n`;
-                                    templateObject.transNote.set(transNOtes);
-                                  }
-                                  
                               }
-                              // productQtyList.push(product?.quantity)
-                          })
-                          .catch(() => {
+                            })
+                            .catch(() => {
                               transNOtes += `Error while getting client Id from the TrueERP database.\n`;
                               templateObject.transNote.set(transNOtes);
-                          })
-      
-                  }
-      
-                  // create a new Qutoes in ERP.
-      
-                  const OrderLines = [];
-      
-                  productIdList.forEach((item, index) => {
-                      OrderLines.push({
-                          type: "TSalesOrderLine",
-                          fields: {
-                              ProductID: item,
-                              OrderQty: productQtyList[index]
+                            });
+
+                          //check if the product exists and add if not
+                          const productList = resultData[i]?.Product_Details;
+                          const productIdList = [];
+                          const productQtyList = [];
+                          transNOtes += `There are ${productList.length} products in the Product_Details.\n`;
+                          templateObject.transNote.set(transNOtes);
+
+                          for (const product of productList) {
+                            transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.product?.name}...\n`;
+                            templateObject.transNote.set(transNOtes);
+                            await fetch(
+                              `${erpObject.base_url}/TProduct?select=[ProductName]="${product?.product?.name}"`,
+                              {
+                                method: "GET",
+                                headers: {
+                                  Username: erpObject.user_name,
+                                  Password: erpObject.password,
+                                  Database: erpObject.database,
+                                  "Content-Type": "application/json",
+                                },
+                                redirect: "follow",
+                              }
+                            )
+                              .then((response) => response.json())
+                              .then(async (result) => {
+                                if (result?.tproduct.length > 0) {
+                                  const productId = result?.tproduct[0]?.Id;
+                                  transNOtes += `Found the Product as ID : ${productId}\n`;
+                                  templateObject.transNote.set(transNOtes);
+                                  productIdList.push(productId);
+                                  productQtyList.push(product?.quantity);
+                                }
+                                // } else {
+                                //   transNOtes += `Not Existing Product, creating...\n`;
+                                //   templateObject.transNote.set(transNOtes);
+
+                                //   let args = {
+                                //     productID: product?.product?.id,
+                                //     auth: token,
+                                //   };
+                                //   // get product by id from Zoho
+                                //   const productListFromZOHO = await new Promise(
+                                //     (resolve, reject) => {
+                                //       Meteor.call(
+                                //         "getZohoProductByID",
+                                //         args,
+                                //         (error, result) => {
+                                //           if (error) {
+                                //             reject(error);
+                                //           } else {
+                                //             resolve(result);
+                                //           }
+                                //         }
+                                //       );
+                                //     }
+                                //   );
+
+                                //   if (productListFromZOHO.data) {
+                                //     console.log(productListFromZOHO);
+                                //     transNOtes += `Product ${productListFromZOHO.data[0].id} Success!\n`;
+
+                                //     templateObject.transNote.set(transNOtes);
+
+                                //     const productFromZoho =
+                                //       productListFromZOHO.data[0];
+
+                                //     const tempProductDetailtoERP = {
+                                //       type: "TProductWeb",
+                                //       fields: {
+                                //         ProductType: "INV",
+                                //         ProductName:
+                                //           productFromZoho?.Product_Name,
+                                //         SalesDescription:
+                                //           productFromZoho.Description || "",
+                                //         AssetAccount: "Inventory Asset",
+                                //         CogsAccount: "Cost of Goods Sold",
+                                //         IncomeAccount: "Sales",
+                                //         PRODUCTCODE:
+                                //           productFromZoho.Product_Code || "",
+                                //         TaxCodePurchase: "NCG",
+                                //         TaxCodeSales: "GST",
+                                //         UOMPurchases: "Units",
+                                //         UOMSales: "Units",
+                                //       },
+                                //     };
+
+                                //     if (productFromZoho.GlobalRef) {
+                                //       tempProductDetailtoERP.fields.GlobalRef =
+                                //         productFromZoho.GlobalRef;
+                                //     }
+
+                                //     console.log(tempProductDetailtoERP);
+
+                                //     await fetch(
+                                //       `${erpObject.base_url}/TProductWeb`,
+                                //       {
+                                //         method: "POST",
+                                //         headers: {
+                                //           Username: erpObject.user_name,
+                                //           Password: erpObject.password,
+                                //           Database: erpObject.database,
+                                //           "Content-Type": "application/json",
+                                //         },
+                                //         redirect: "follow",
+                                //         body: JSON.stringify(
+                                //           tempProductDetailtoERP
+                                //         ),
+                                //       }
+                                //     )
+                                //       .then((response) => response.json())
+                                //       .then(async (result) => {
+                                //         const tempProductId =
+                                //           result?.fields?.ID;
+                                //         transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
+                                //         templateObject.transNote.set(transNOtes);
+                                //         productIdList.push(tempProductId);
+                                //         productQtyList.push(product?.quantity);
+                                //       })
+                                //       .catch((error) =>
+                                //         console.log("error", error)
+                                //       );
+                                //   } else {
+                                //     console.log(productListFromZOHO);
+                                //     transNOtes += `product searching by id Failed!\n`;
+                                //     transNOtes += `Failed!!!\n`;
+                                //     templateObject.transNote.set(transNOtes);
+                                //   }
+                                // }
+                                // productQtyList.push(product?.quantity)
+                              })
+                              .catch(() => {
+                                transNOtes += `Error while getting Product Id from the TrueERP database.\n`;
+                                templateObject.transNote.set(transNOtes);
+                              });
                           }
-                      })
-                  })
-                  if (OrderLines.length === 0) {
-                      continue
-                  }
-                  const QuoteData = {
-                      type: "TSalesOrder",
-                      fields: {
-                          CustomerID: clientId,
-                          Lines: OrderLines,
-                          IsBackOrder: true
+
+                          // create a new Qutoes in ERP.
+
+                          const QuoteLines = [];
+
+                          productIdList.forEach((item, index) => {
+                            QuoteLines.push({
+                              type: "TQuoteLine",
+                              fields: {
+                                ProductID: item,
+                                OrderQty: productQtyList[index],
+                              },
+                            });
+                          });
+                          if (QuoteLines.length === 0) {
+                            continue;
+                          }
+                          const QuoteData = {
+                            type: "TQuote",
+                            fields: {
+                              CustomerID: clientId,
+                              Lines: QuoteLines,
+                              IsBackOrder: true,
+                              Comments: "Quote Produced in ZOHO",
+                            },
+                          };
+
+                          if (resultData[i]?.GlobalRef) {
+                            QuoteData.fields.GlobalRef =
+                              resultData[i].GlobalRef;
+                          }
+
+                          await fetch("/api/updateTrueERP2", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              data: QuoteData,
+                              Username: erpObject.user_name,
+                              Password: erpObject.password,
+                              Database: erpObject.database,
+                              url: erpObject.base_url + "/TQuote",
+                            }),
+                          })
+                            .then((response) => response.json())
+                            .then(async (result) => {
+                              console.log(result);
+                              upload_transaction_count += 1;
+                              upload_num += 1;
+                              transNOtes += `Quotes transfer Success!\n`;
+
+                              templateObject.transNote.set(transNOtes);
+                            })
+                            .catch((error) => {
+                              console.log(error);
+                              transNOtes += `Quotes transfer Failed!\n`;
+                              transNOtes += `Failed!!!\n`;
+                              templateObject.transNote.set(transNOtes);
+                            });
+                        }
+
+                        transaction_details.push({
+                          detail_string:
+                            "Downloaded Quotes from Zoho to TrueERP",
+                          count: upload_num,
+                        });
+
+                        let tempDate = new Date();
+                        let dateString =
+                          tempDate.getUTCFullYear() +
+                          "/" +
+                          ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
+                          "/" +
+                          ("0" + tempDate.getUTCDate()).slice(-2) +
+                          " " +
+                          ("0" + tempDate.getUTCHours()).slice(-2) +
+                          ":" +
+                          ("0" + tempDate.getUTCMinutes()).slice(-2) +
+                          ":" +
+                          ("0" + tempDate.getUTCSeconds()).slice(-2);
+                        let argsDate = {
+                          id: FlowRouter.current().queryParams.id,
+                          last_ran_date: dateString,
+                        };
+                        await fetch(`/api/updateLastRanDate`, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify(argsDate),
+                        })
+                          .then((response) => response.json())
+                          .then(async (result) => {
+                            console.log(result);
+                          })
+                          .catch((err) => console.log(err));
                       }
-                  }
-      
-               
-                await fetch("/api/updateTrueERP2", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json"
-                  },
-                  body: JSON.stringify({
-                    data: QuoteData,
-                    Username: erpObject.user_name,
-                    Password: erpObject.password,
-                    Database: erpObject.database,
-                    url: erpObject.base_url + "/TSalesOrder"
-                  }),
-                })
-                  .then((response) => response.json())
-                  .then(async (result) => {
-                    console.log(result);
-                  
-                    transNOtes += `SalesOrder transfer Success!\n`;
-                  
-                    templateObject.transNote.set(transNOtes);
-                  })
-                  .catch((error) => {
-                    console.log(error);
-                    transNOtes += `SalesOrder transfer Failed!\n`;
-                    transNOtes += `Failed!!!\n`;
-                    templateObject.transNote.set(transNOtes);
-                  });
+                    })
+                    .catch((err) => {
+                      console.log(err);
+                      transNOtes += `An error occurred while receiving a Quotes from Zoho\n`;
+                      templateObject.transNote.set(transNOtes);
+                    });
+                } else {
+                  transNOtes += `There is no newly added Quote in ZOHO.\n`;
+                  templateObject.transNote.set(transNOtes);
                 }
-                let tempDate = new Date();
-                let dateString =
-                  tempDate.getUTCFullYear() +
-                  "/" +
-                  ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
-                  "/" +
-                  ("0" + tempDate.getUTCDate()).slice(-2) +
-                  " " +
-                  ("0" + tempDate.getUTCHours()).slice(-2) +
-                  ":" +
-                  ("0" + tempDate.getUTCMinutes()).slice(-2) +
-                  ":" +
-                  ("0" + tempDate.getUTCSeconds()).slice(-2);
-                let argsDate = {
-                  id: FlowRouter.current().queryParams.id,
-                  last_ran_date: dateString,
-                };
-                await fetch(`/api/updateLastRanDate`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
+              }
+
+              if (ZOHO_SalesState) {
+                transNOtes += "Processing Sales Orders.........\n";
+                templateObject.transNote.set(transNOtes);
+                const args = {
+                  auth: token,
+                  data: {
+                    module: "Sales_Orders",
+                    lstTime: lstUpdateTime,
                   },
-                  body: JSON.stringify(argsDate),
-                })
-                  .then((response) => response.json())
-                  .then(async (result) => {
-                    console.log(result);
-                  })
-                  .catch((err) => console.log(err));
-              })
-              .catch((err) => {
-                transNOtes += `An error occurred while receiving a Sales Orders from Zoho\n`;
-                templateObject.transNote.set(transNOtes);
-              });
-          }
-      
-          if (ERP_LeadsState) {
-            await fetch("https://www.zohoapis.com/crm/v2/Leads", {
-              method: "GET",
-              headers: {
-                Authorization: `Zoho-oauthtoken ${token}`,
-                "Content-Type": "application/json",
-              },
-            })
-              .then((response) => response.json())
-              .then(async (result) => {
-                responseCount = result.data.length;
-                var resultData = result.data;
-                transNOtes +=
-                  `Received ` + responseCount + `Leads information from Zoho.\n`;
-                
-                transNOtes += `Adding Leads to TrueERP \n`;
-                templateObject.transNote.set(transNOtes);
-      
-                for (let i = 0; i < responseCount; i++) {
-                  let postData = {};
-                  postData.type = "TProspect";
-                  postData.fields = {};
-                  transNOtes += `FistName [${resultData[i].First_Name}] converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.FirstName = resultData[i].First_Name || "";
-      
-                  transNOtes += `LastName [${resultData[i].Last_Name}] converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.LastName = resultData[i].Last_Name || "";
-      
-                  postData.fields.ClientName = postData.fields.LastName + postData.fields.FirstName;
-      
-      
-                  transNOtes += `Email [${resultData[i].Email}] converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.Email = resultData[i].Email || "";
-      
-                  transNOtes += `Company converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.Companyname = resultData[i].Company || "";
-      
-                  transNOtes += `Phone [${resultData[i].Phone}] converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.Phone = resultData[i].Phone || "";
-      
-                  transNOtes += `Title [${resultData[i].Title}] converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.Title = resultData[i].Title || "";
-      
-                  transNOtes += `SkypeName [${resultData[i].Skype_ID}] converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.SkypeName = resultData[i].Skype_ID || "";
-                  
-                  await fetch("/api/updateTrueERP2", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                      data: postData,
-                      Username: erpObject.user_name,
-                      Password: erpObject.password,
-                      Database: erpObject.database,
-                      url: erpObject.base_url + "/TProspect"
-                    }),
-                  })
+                };
+                const resultOrders = await new Promise((resolve, reject) => {
+                  Meteor.call(
+                    "getDatafromZohoByDate",
+                    args,
+                    (error, result) => {
+                      if (error) {
+                        reject(error);
+                      } else {
+                        resolve(result);
+                      }
+                    }
+                  );
+                });
+
+                if (resultOrders) {
+                  const ids = resultOrders.data.map((order) => {
+                    return order.id;
+                  });
+                  let combinedIds = ids.join(",");
+
+                  await fetch(
+                    `https://www.zohoapis.com/crm/v2/Sales_Orders?${combinedIds}`,
+                    {
+                      method: "GET",
+                      headers: {
+                        Authorization: `Zoho-oauthtoken ${token}`,
+                        "Content-Type": "application/json",
+                      },
+                    }
+                  )
                     .then((response) => response.json())
                     .then(async (result) => {
-                      
-                      console.log(result)
-      
-                      transNOtes += `Leads transfer Success!\n`;
-                      
+                      if (result.data.length === 0) {
+                        transNOtes += `There is no newly added Sales Order in ZOHO.\n`;
+                        templateObject.transNote.set(transNOtes);
+                      } else {
+                        responseCount = result.data.length;
+                        var resultData = result.data;
+                        // download_transaction_count += responseCount;
+                        // transaction_details.push({
+                        //   detail_string:
+                        //     "Downloaded Sales Orders from Zoho to TrueERP",
+                        //   count: responseCount,
+                        // });
+                        let formatting =
+                          responseCount > 1 ? "Sales Orders" : "Sales Order";
+                        transNOtes +=
+                          `Received ` +
+                          responseCount +
+                          ` ${formatting} from Zoho.\n`;
+
+                        transNOtes += `Adding ${formatting} to TrueERP \n`;
+                        templateObject.transNote.set(transNOtes);
+
+                        let upload_num = 0;
+
+                        for (let i = 0; i < responseCount; i++) {
+                          let tempCount = i % 10;
+                          let count =
+                            tempCount === 0
+                              ? `${i + 1}st`
+                              : tempCount === 1
+                              ? `${i + 1}nd`
+                              : tempCount === 2
+                              ? `${i + 1}rd`
+                              : `${i + 1}th`;
+                          transNOtes += `Adding ${count} Sales Order to ERP database.\n`;
+                          templateObject.transNote.set(transNOtes);
+
+                          const clientName = resultData[i]?.Account_Name?.name;
+                          let clientId;
+                          transNOtes += `Checking Customer in the TrueERP database for ClientName : ${clientName}...\n`;
+                          templateObject.transNote.set(transNOtes);
+                          await fetch(
+                            `${erpObject.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
+                            {
+                              method: "GET",
+                              headers: {
+                                Username: erpObject.user_name,
+                                Password: erpObject.password,
+                                Database: erpObject.database,
+                                "Content-Type": "application/json",
+                              },
+                              redirect: "follow",
+                            }
+                          )
+                            .then((response) => response.json())
+                            .then(async (result) => {
+                              if (result?.tcustomer.length > 0) {
+                                clientId = result?.tcustomer[0]?.Id;
+                                transNOtes += `Found the Customer as ID : ${clientId}\n`;
+                                templateObject.transNote.set(transNOtes);
+                              } else {
+                                transNOtes += `Not Existing Customer, creating...\n`;
+                                templateObject.transNote.set(transNOtes);
+                                const tempCustomerDetailtoERP = {
+                                  type: "TCustomer",
+                                  fields: {
+                                    ClientName: resultData[i].Account_Name.name,
+                                    Country:
+                                      resultData[i].Billing_Country || "",
+                                    State: resultData[i].Billing_State || "",
+                                    Street: resultData[i].Billing_Street || "",
+                                    Postcode: resultData[i].Billing_Code || "",
+                                  },
+                                };
+                                console.log(
+                                  tempCustomerDetailtoERP,
+                                  "tempCustomer"
+                                );
+                                await fetch(`${erpObject.base_url}/TCustomer`, {
+                                  method: "POST",
+                                  headers: {
+                                    Username: erpObject.user_name,
+                                    Password: erpObject.password,
+                                    Database: erpObject.database,
+                                    "Content-Type": "application/json",
+                                  },
+                                  redirect: "follow",
+                                  body: JSON.stringify(tempCustomerDetailtoERP),
+                                })
+                                  .then((response) => {
+                                    console.log(response);
+                                    response.json();
+                                  })
+                                  .then(async (result) => {
+                                    clientId = result?.fields?.ID;
+                                    transNOtes += `Added a new customer to TrueERP database with ID : ${clientId}.\n`;
+                                    templateObject.transNote.set(transNOtes);
+                                  })
+                                  .catch((error) =>
+                                    console.log("error", error)
+                                  );
+                              }
+                            })
+                            .catch(() => {
+                              transNOtes += `Error while getting client Id from the TrueERP database.\n`;
+                              templateObject.transNote.set(transNOtes);
+                            });
+
+                          //check if the product exists and add if not
+                          const productList = resultData[i]?.Product_Details;
+                          const productIdList = [];
+                          const productQtyList = [];
+                          transNOtes += `There are ${productList.length} products in the Product_Details.\n`;
+                          templateObject.transNote.set(transNOtes);
+
+                          for (const product of productList) {
+                            transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.product?.name}...\n`;
+                            templateObject.transNote.set(transNOtes);
+                            await fetch(
+                              `${erpObject.base_url}/TProduct?select=[ProductName]="${product?.product?.name}"`,
+                              {
+                                method: "GET",
+                                headers: {
+                                  Username: erpObject.user_name,
+                                  Password: erpObject.password,
+                                  Database: erpObject.database,
+                                  "Content-Type": "application/json",
+                                },
+                                redirect: "follow",
+                              }
+                            )
+                              .then((response) => response.json())
+                              .then(async (result) => {
+                                if (result?.tproduct.length > 0) {
+                                  const productId = result?.tproduct[0]?.Id;
+                                  transNOtes += `Found the Product as ID : ${productId}\n`;
+                                  templateObject.transNote.set(transNOtes);
+                                  productIdList.push(productId);
+                                  productQtyList.push(product?.quantity);
+                                }
+                                // } else {
+                                //     transNOtes += `Not Existing Product, creating...\n`;
+                                //     templateObject.transNote.set(transNOtes);
+
+                                //     let args = {
+                                //       productID: product?.product?.id,
+                                //       auth: token
+                                //     }
+                                //   // get product by id from Zoho
+                                //     const productListFromZOHO = await new Promise(
+                                //       (resolve, reject) => {
+                                //         Meteor.call(
+                                //           "getZohoProductByID",
+                                //           args,
+                                //           (error, result) => {
+                                //             if (error) {
+                                //               reject(error);
+                                //             } else {
+                                //               resolve(result);
+                                //             }
+                                //           }
+                                //         );
+                                //       }
+                                //     );
+
+                                //     if (productListFromZOHO.data) {
+
+                                //       console.log(productListFromZOHO)
+                                //       transNOtes += `Product ${productListFromZOHO.data[0].id} Success!\n`;
+
+                                //       templateObject.transNote.set(transNOtes);
+
+                                //       const productFromZoho = productListFromZOHO.data[0];
+
+                                //             const tempProductDetailtoERP = {
+                                //                 type: "TProductWeb",
+                                //                 fields:
+                                //                 {
+                                //                     ProductType: "INV",
+                                //                     ProductName: productFromZoho?.Product_Name,
+                                //                     SalesDescription: productFromZoho.Description || "",
+                                //                     AssetAccount: "Inventory Asset",
+                                //                     CogsAccount: "Cost of Goods Sold",
+                                //                     IncomeAccount: "Sales",
+                                //                     PRODUCTCODE: productFromZoho.Product_Code || "",
+                                //                     TaxCodePurchase: "NCG",
+                                //                     TaxCodeSales: "GST",
+                                //                     UOMPurchases: "Units",
+                                //                     UOMSales: "Units",
+                                //                 }
+                                //             }
+
+                                //             if(productFromZoho.GlobalRef) {
+                                //               tempProductDetailtoERP.fields.GlobalRef = productFromZoho.GlobalRef
+                                //             }
+
+                                //             console.log(tempProductDetailtoERP)
+
+                                //             await fetch(`${erpObject.base_url}/TProductWeb`,
+                                //                 {
+                                //                     method: 'POST',
+                                //                     headers: {
+                                //                       Username: erpObject.user_name,
+                                //                       Password: erpObject.password,
+                                //                       Database: erpObject.database,
+                                //                       "Content-Type": "application/json",
+                                //                     },
+                                //                     redirect: 'follow',
+                                //                     body: JSON.stringify(tempProductDetailtoERP)
+                                //                 })
+                                //                 .then(response => response.json())
+                                //                 .then(async result => {
+                                //                     const tempProductId = result?.fields?.ID
+                                //                     transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
+                                //                     templateObject.transNote.set(transNOtes);
+                                //                     productIdList.push(tempProductId)
+                                //                     productQtyList.push(product?.quantity)
+                                //                 })
+                                //                 .catch(error => console.log('error', error));
+                                //     } else {
+                                //       console.log(productListFromZOHO)
+                                //       transNOtes += `product searching by id Failed!\n`;
+                                //       transNOtes += `Failed!!!\n`;
+                                //       templateObject.transNote.set(transNOtes);
+                                //     }
+
+                                // }
+                                // productQtyList.push(product?.quantity)
+                              })
+                              .catch(() => {
+                                transNOtes += `Error while getting Product Id from the TrueERP database.\n`;
+                                templateObject.transNote.set(transNOtes);
+                              });
+                          }
+
+                          // create a new Qutoes in ERP.
+
+                          const OrderLines = [];
+
+                          productIdList.forEach((item, index) => {
+                            OrderLines.push({
+                              type: "TSalesOrderLine",
+                              fields: {
+                                ProductID: item,
+                                OrderQty: productQtyList[index],
+                              },
+                            });
+                          });
+                          if (OrderLines.length === 0) {
+                            continue;
+                          }
+                          const OrderData = {
+                            type: "TSalesOrder",
+                            fields: {
+                              CustomerID: clientId,
+                              Lines: OrderLines,
+                              IsBackOrder: true,
+                              Comments: "Sales Order Produced in ZOHO",
+                            },
+                          };
+
+                          if (resultData[i]?.GlobalRef) {
+                            OrderData.fields.GlobalRef =
+                              resultData[i].GlobalRef;
+                          }
+
+                          await fetch("/api/updateTrueERP2", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              data: OrderData,
+                              Username: erpObject.user_name,
+                              Password: erpObject.password,
+                              Database: erpObject.database,
+                              url: erpObject.base_url + "/TSalesOrder",
+                            }),
+                          })
+                            .then((response) => response.json())
+                            .then(async (result) => {
+                              console.log(result);
+                              upload_transaction_count += 1;
+                              upload_num += 1;
+                              transNOtes += `SalesOrder transfer Success!\n`;
+
+                              templateObject.transNote.set(transNOtes);
+                            })
+                            .catch((error) => {
+                              console.log(error);
+                              transNOtes += `SalesOrder transfer Failed!\n`;
+                              transNOtes += `Failed!!!\n`;
+                              templateObject.transNote.set(transNOtes);
+                            });
+                        }
+
+                        transaction_details.push({
+                          detail_string:
+                            "Downloaded Sales Orders from Zoho to TrueERP",
+                          count: upload_num,
+                        });
+
+                        let tempDate = new Date();
+                        let dateString =
+                          tempDate.getUTCFullYear() +
+                          "/" +
+                          ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
+                          "/" +
+                          ("0" + tempDate.getUTCDate()).slice(-2) +
+                          " " +
+                          ("0" + tempDate.getUTCHours()).slice(-2) +
+                          ":" +
+                          ("0" + tempDate.getUTCMinutes()).slice(-2) +
+                          ":" +
+                          ("0" + tempDate.getUTCSeconds()).slice(-2);
+                        let argsDate = {
+                          id: FlowRouter.current().queryParams.id,
+                          last_ran_date: dateString,
+                        };
+                        await fetch(`/api/updateLastRanDate`, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify(argsDate),
+                        })
+                          .then((response) => response.json())
+                          .then(async (result) => {
+                            console.log(result);
+                          })
+                          .catch((err) => console.log(err));
+                      }
+                    })
+                    .catch((err) => {
+                      transNOtes += `An error occurred while receiving a Sales Orders from Zoho\n`;
                       templateObject.transNote.set(transNOtes);
+                    });
+                } else {
+                  transNOtes += `There is no newly added Sales Order in ZOHO.\n`;
+                  templateObject.transNote.set(transNOtes);
+                }
+              }
+
+              if (ZOHO_LeadsState) {
+                transNOtes += "Processing Leads .........\n";
+                templateObject.transNote.set(transNOtes);
+                const args = {
+                  auth: token,
+                  data: {
+                    module: "Leads",
+                    lstTime: lstUpdateTime,
+                  },
+                };
+                const resultLeads = await new Promise((resolve, reject) => {
+                  Meteor.call(
+                    "getDatafromZohoByDate",
+                    args,
+                    (error, result) => {
+                      if (error) {
+                        reject(error);
+                      } else {
+                        resolve(result);
+                      }
+                    }
+                  );
+                });
+
+                if (resultLeads) {
+                  const ids = resultLeads.data.map((lead) => {
+                    return lead.id;
+                  });
+                  let combinedIds = ids.join(",");
+
+                  await fetch(
+                    `https://www.zohoapis.com/crm/v2/Leads?${combinedIds}`,
+                    {
+                      method: "GET",
+                      headers: {
+                        Authorization: `Zoho-oauthtoken ${token}`,
+                        "Content-Type": "application/json",
+                      },
+                    }
+                  )
+                    .then((response) => response.json())
+                    .then(async (result) => {
+                      if (result.data.length === 0) {
+                        transNOtes += `There is no newly added Lead in ZOHO.\n`;
+                        templateObject.transNote.set(transNOtes);
+                      } else {
+                        responseCount = result.data.length;
+                        var resultData = result.data;
+                        // download_transaction_count += responseCount;
+
+                        // transaction_details.push({
+                        //   detail_string:
+                        //     "Downloaded Leads from Zoho to TrueERP",
+                        //   count: responseCount,
+                        // });
+
+                        let formatting = responseCount > 1 ? "Leads" : "Lead";
+
+                        transNOtes +=
+                          `Received ` +
+                          responseCount +
+                          ` ${formatting} from Zoho.\n`;
+
+                        transNOtes += `Adding ${formatting} to TrueERP \n`;
+                        templateObject.transNote.set(transNOtes);
+
+                        let upload_num = 0;
+
+                        for (let i = 0; i < responseCount; i++) {
+                          let tempCount = i % 10;
+                          let count =
+                            tempCount === 0
+                              ? `${i + 1}st`
+                              : tempCount === 1
+                              ? `${i + 1}nd`
+                              : tempCount === 2
+                              ? `${i + 1}rd`
+                              : `${i + 1}th`;
+                          transNOtes += `Adding ${count} Lead to ERP database.\n`;
+                          templateObject.transNote.set(transNOtes);
+
+                          let postData = {};
+                          postData.type = "TProspect";
+                          postData.fields = {};
+
+                          postData.fields.FirstName =
+                            resultData[i]?.First_Name || "";
+
+                          postData.fields.LastName =
+                            resultData[i]?.Last_Name || "";
+
+                          transNOtes += `Lead ${resultData[i]?.Full_Name} converting ..........\n`;
+                          templateObject.transNote.set(transNOtes);
+                          postData.fields.LastName =
+                            resultData[i]?.Last_Name || "";
+
+                          postData.fields.Email = resultData[i].Email || "";
+
+                          postData.fields.Companyname =
+                            resultData[i].Company || "";
+
+                          postData.fields.Phone = resultData[i].Phone || "";
+
+                          postData.fields.Title = resultData[i].Title || "";
+
+                          postData.fields.SkypeName =
+                            resultData[i].Skype_ID || "";
+
+                          const clientName = resultData[i].Full_Name;
+
+                          if (!resultData[i].GlobalRef) {
+                            await fetch(
+                              `${erpObject.base_url}/TProspect?select=[ClientName]="${clientName}"`,
+                              {
+                                method: "GET",
+                                headers: {
+                                  Username: erpObject.user_name,
+                                  Password: erpObject.password,
+                                  Database: erpObject.database,
+                                  "Content-Type": "application/json",
+                                },
+                                redirect: "follow",
+                              }
+                            )
+                              .then((response) => response.json())
+                              .then(async (result) => {
+                                if (result?.tprospect.length > 0) {
+                                  postData.fields.GlobalRef =
+                                    result?.tprospect[0]?.GlobalRef;
+                                  transNOtes += `Found the TProspect as ClientName : ${clientName}\n`;
+                                  templateObject.transNote.set(transNOtes);
+                                } else {
+                                  postData.fields.ClientName =
+                                    resultData[i].Full_Name;
+                                }
+                              })
+                              .catch((err) => {
+                                console.log(err);
+                                postData.fields.ClientName =
+                                  resultData[i].Full_Name;
+                                transNOtes += `Confirming TProspect existence of Lead in TrueERP Failed! \n`;
+                                templateObject.transNote.set(transNOtes);
+                              });
+                          } else {
+                            postData.fields.GlobalRef = resultData[i].GlobalRef;
+                          }
+
+                          await fetch("/api/updateTrueERP2", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              data: postData,
+                              Username: erpObject.user_name,
+                              Password: erpObject.password,
+                              Database: erpObject.database,
+                              url: erpObject.base_url + "/TProspect",
+                            }),
+                          })
+                            .then((response) => response.json())
+                            .then(async (result) => {
+                              console.log(result);
+                              upload_transaction_count += 1;
+                              upload_num += 1;
+                              transNOtes += `Leads transfer Success!\n`;
+
+                              templateObject.transNote.set(transNOtes);
+                            })
+                            .catch((error) => {
+                              console.log(error);
+
+                              transNOtes += `Leads transfer Failed!\n`;
+                              transNOtes += `Failed!!!\n`;
+                              templateObject.transNote.set(transNOtes);
+                            });
+                        }
+
+                        transaction_details.push({
+                          detail_string:
+                            "Downloaded Prospects from Zoho to TrueERP",
+                          count: upload_num,
+                        });
+
+                        let tempDate = new Date();
+                        let dateString =
+                          tempDate.getUTCFullYear() +
+                          "/" +
+                          ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
+                          "/" +
+                          ("0" + tempDate.getUTCDate()).slice(-2) +
+                          " " +
+                          ("0" + tempDate.getUTCHours()).slice(-2) +
+                          ":" +
+                          ("0" + tempDate.getUTCMinutes()).slice(-2) +
+                          ":" +
+                          ("0" + tempDate.getUTCSeconds()).slice(-2);
+                        let argsDate = {
+                          id: FlowRouter.current().queryParams.id,
+                          last_ran_date: dateString,
+                        };
+                        await fetch(`/api/updateLastRanDate`, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify(argsDate),
+                        })
+                          .then((response) => response.json())
+                          .then(async (result) => {
+                            console.log(result);
+                          })
+                          .catch((err) => console.log(err));
+                      }
                     })
                     .catch((error) => {
                       console.log(error);
-      
-                      transNOtes += `Leads transfer Failed!\n`;
-                      transNOtes += `Failed!!!\n`;
+                      transNOtes += `An error occurred while receiving a Leads from Zoho\n`;
                       templateObject.transNote.set(transNOtes);
                     });
+                } else {
+                  transNOtes += `There is no newly added Lead in ZOHO.\n`;
+                  templateObject.transNote.set(transNOtes);
                 }
-                let tempDate = new Date();
-                let dateString =
-                  tempDate.getUTCFullYear() +
-                  "/" +
-                  ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
-                  "/" +
-                  ("0" + tempDate.getUTCDate()).slice(-2) +
-                  " " +
-                  ("0" + tempDate.getUTCHours()).slice(-2) +
-                  ":" +
-                  ("0" + tempDate.getUTCMinutes()).slice(-2) +
-                  ":" +
-                  ("0" + tempDate.getUTCSeconds()).slice(-2);
-                let argsDate = {
-                  id: FlowRouter.current().queryParams.id,
-                  last_ran_date: dateString,
-                };
-                await fetch(`/api/updateLastRanDate`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
+              }
+
+              if (ZOHO_CustomerState) {
+                transNOtes += "Processing Contacts .........\n";
+                templateObject.transNote.set(transNOtes);
+                const args = {
+                  auth: token,
+                  data: {
+                    module: "Contacts",
+                    lstTime: lstUpdateTime,
                   },
-                  body: JSON.stringify(argsDate),
-                })
-                  .then((response) => response.json())
-                  .then(async (result) => {
-                    console.log(result);
-                  })
-                  .catch((err) => console.log(err));
-              })
-              .catch((err) => {
-                transNOtes += `An error occurred while receiving a Leads from Zoho\n`;
-                templateObject.transNote.set(transNOtes);
-              });
-          }
-      
-          if (ERP_CustomerState) {
-      
-            Meteor.call('getAlldatafromZoho', 'Contacts', token, async (error, result) => {
-              if (error) {
-                console.log(error);
-                transNOtes += `An error occurred while receiving a Customers from Zoho\n ${error.message}`;
-                templateObject.transNote.set(transNOtes);
-              } else {
-                responseCount = result.length;
-                var resultData = result;
-                transNOtes +=
-                  `Received ` + responseCount + `Contacts information from Zoho.\n`;
-                
-                transNOtes += `Adding Contacts to TrueERP \n`;
-                templateObject.transNote.set(transNOtes);
-                
-                for (let i = 0; i < responseCount; i++) {
-                  let postData = {}
-                  postData.type = "TCustomer";
-                  postData.fields = {};
-                  transNOtes += `Contacts Email [${resultData[i].Email}] converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.Email = resultData[i].Email || "";
-      
-                  transNOtes += `First_Name [${resultData[i].First_Name}] converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.FirstName = resultData[i].First_Name || "";
-      
-                  transNOtes += `Last_Name [${resultData[i].Last_Name}] converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.LastName = resultData[i].Last_Name || "";
-      
-                  transNOtes += `Phone converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.Phone = resultData[i].Phone || "";
-      
-                  transNOtes += `Mobile converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.Mobile = resultData[i].Mobile || "";
-      
-                  transNOtes += `SkypeName converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.SkypeName = resultData[i].Skype_ID || "";
-      
-                  transNOtes += `Title converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.Title = resultData[i].Title || "";
-      
-                  transNOtes += `Faxnumber converting ..........\n`;
-                  templateObject.transNote.set(transNOtes);
-                  postData.fields.Faxnumber = resultData[i].Fax || "";
-      
-                  if(resultData[i].GlobalRef){
-                    postData.fields.GlobalRef = resultData[i].GlobalRef;
-                  } else {
-                    postData.fields.ClientName = resultData[i].Full_Name || "";
-                  };
-      
-                  await fetch("/api/updateTrueERP2", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                      data: postData,
-                      Username: erpObject.user_name,
-                      Password: erpObject.password,
-                      Database: erpObject.database,
-                      url: erpObject.base_url + "/TCustomer"
-                    }),
-                  })
+                };
+                const resultContacts = await new Promise((resolve, reject) => {
+                  Meteor.call(
+                    "getDatafromZohoByDate",
+                    args,
+                    (error, result) => {
+                      if (error) {
+                        reject(error);
+                      } else {
+                        resolve(result);
+                      }
+                    }
+                  );
+                });
+
+                if (resultContacts) {
+                  const ids = resultContacts.data.map((contact) => {
+                    return contact.id;
+                  });
+                  let combinedIds = ids.join(",");
+
+                  await fetch(
+                    `https://www.zohoapis.com/crm/v2/Contacts?${combinedIds}`,
+                    {
+                      method: "GET",
+                      headers: {
+                        Authorization: `Zoho-oauthtoken ${token}`,
+                        "Content-Type": "application/json",
+                      },
+                    }
+                  )
                     .then((response) => response.json())
                     .then(async (result) => {
-                      console.log(result);
-                      if (!result.code) {
-                        transNOtes += `Customers transfer Success!\n`;
+                      if (result.data.length === 0) {
+                        transNOtes += `There is no newly added Contact in ZOHO.\n`;
+                        templateObject.transNote.set(transNOtes);
                       } else {
-                        transNOtes += `Customers transfer Failed!\n${result.message}\n`;
+                        responseCount = result.data.length;
+                        var resultData = result.data;
+                        // download_transaction_count += responseCount;
+
+                        // transaction_details.push({
+                        //   detail_string:
+                        //     "Downloaded Contacts from Zoho to TrueERP",
+                        //   count: responseCount,
+                        // });
+
+                        let formatting =
+                          responseCount > 1 ? "Contacts" : "Contact";
+                        transNOtes +=
+                          `Received ` +
+                          responseCount +
+                          ` ${formatting} from Zoho.\n`;
+
+                        transNOtes += `Adding ${formatting} to TrueERP \n`;
+                        templateObject.transNote.set(transNOtes);
+                        let upload_num = 0;
+
+                        for (let i = 0; i < responseCount; i++) {
+                          let tempCount = i % 10;
+                          let count =
+                            tempCount === 0
+                              ? `${i + 1}st`
+                              : tempCount === 1
+                              ? `${i + 1}nd`
+                              : tempCount === 2
+                              ? `${i + 1}rd`
+                              : `${i + 1}th`;
+                          transNOtes += `Adding ${count} Contact to ERP database.\n`;
+                          templateObject.transNote.set(transNOtes);
+
+                          let postData = {};
+                          postData.type = "TCustomer";
+                          postData.fields = {};
+                          postData.fields.Email = resultData[i].Email || "";
+
+                          postData.fields.FirstName =
+                            resultData[i].First_Name || "";
+
+                          postData.fields.LastName =
+                            resultData[i].Last_Name || "";
+
+                          postData.fields.Phone = resultData[i].Phone || "";
+
+                          postData.fields.Mobile = resultData[i].Mobile || "";
+
+                          postData.fields.SkypeName =
+                            resultData[i].Skype_ID || "";
+
+                          postData.fields.Title = resultData[i].Title || "";
+
+                          postData.fields.Faxnumber = resultData[i].Fax || "";
+
+                          const clientName = resultData[i].Full_Name;
+
+                          if (!resultData[i].GlobalRef) {
+                            await fetch(
+                              `${erpObject.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
+                              {
+                                method: "GET",
+                                headers: {
+                                  Username: erpObject.user_name,
+                                  Password: erpObject.password,
+                                  Database: erpObject.database,
+                                  "Content-Type": "application/json",
+                                },
+                                redirect: "follow",
+                              }
+                            )
+                              .then((response) => response.json())
+                              .then(async (result) => {
+                                if (result.tcustomer.length > 0) {
+                                  postData.fields.GlobalRef =
+                                    result?.tcustomer[0]?.GlobalRef;
+                                  transNOtes += `Found the Customer as ClientName : ${clientName}\n`;
+                                  templateObject.transNote.set(transNOtes);
+                                } else {
+                                  postData.fields.ClientName =
+                                    resultData[i].Full_Name;
+                                }
+                              })
+                              .catch((err) => {
+                                console.log(err);
+                                postData.fields.ClientName =
+                                  resultData[i].Full_Name;
+                                transNOtes += `Confirming Customer existence in TrueERP Failed! \n`;
+                                templateObject.transNote.set(transNOtes);
+                              });
+                          } else {
+                            postData.fields.GlobalRef = resultData[i].GlobalRef;
+                          }
+
+                          await fetch("/api/updateTrueERP2", {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              data: postData,
+                              Username: erpObject.user_name,
+                              Password: erpObject.password,
+                              Database: erpObject.database,
+                              url: erpObject.base_url + "/TCustomer",
+                            }),
+                          })
+                            .then((response) => response.json())
+                            .then(async (result) => {
+                              console.log(result);
+                              upload_transaction_count += 1;
+                              upload_num += 1;
+                              transNOtes += `Customers transfer Success!\n`;
+
+                              templateObject.transNote.set(transNOtes);
+                            })
+                            .catch((error) => {
+                              console.log(error);
+                              transNOtes += `Customers transfer Failed!\n`;
+                              transNOtes += `Failed!!!\n`;
+                              templateObject.transNote.set(transNOtes);
+                            });
+                        }
+
+                        transaction_details.push({
+                          detail_string:
+                            "Downloaded Customers from Zoho to TrueERP",
+                          count: upload_num,
+                        });
+
+                        let tempDate = new Date();
+                        let dateString =
+                          tempDate.getUTCFullYear() +
+                          "/" +
+                          ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
+                          "/" +
+                          ("0" + tempDate.getUTCDate()).slice(-2) +
+                          " " +
+                          ("0" + tempDate.getUTCHours()).slice(-2) +
+                          ":" +
+                          ("0" + tempDate.getUTCMinutes()).slice(-2) +
+                          ":" +
+                          ("0" + tempDate.getUTCSeconds()).slice(-2);
+                        let argsDate = {
+                          id: FlowRouter.current().queryParams.id,
+                          last_ran_date: dateString,
+                        };
+                        await fetch(`/api/updateLastRanDate`, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify(argsDate),
+                        })
+                          .then((response) => response.json())
+                          .then(async (result) => {
+                            console.log(result);
+                          })
+                          .catch((err) => console.log(err));
                       }
-                      templateObject.transNote.set(transNOtes);
                     })
-                    .catch((error) => {
-                      transNOtes += `Customers transfer Failed!\n`;
-                      transNOtes += `Failed!!!\n`;
-                      templateObject.transNote.set(transNOtes);
-                    });
+                    .catch((err) => console.log);
+                } else {
+                  transNOtes += `There is no newly added Contact in ZOHO.\n`;
+                  templateObject.transNote.set(transNOtes);
                 }
-                let tempDate = new Date();
-                let dateString =
-                  tempDate.getUTCFullYear() +
-                  "/" +
-                  ("0" + (tempDate.getUTCMonth() + 1)).slice(-2) +
-                  "/" +
-                  ("0" + tempDate.getUTCDate()).slice(-2) +
-                  " " +
-                  ("0" + tempDate.getUTCHours()).slice(-2) +
-                  ":" +
-                  ("0" + tempDate.getUTCMinutes()).slice(-2) +
-                  ":" +
-                  ("0" + tempDate.getUTCSeconds()).slice(-2);
-                let argsDate = {
-                  id: FlowRouter.current().queryParams.id,
-                  last_ran_date: dateString,
-                };
-                await fetch(`/api/updateLastRanDate`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify(argsDate),
-                })
-                  .then((response) => response.json())
-                  .then(async (result) => {
-                    console.log(result);
-                  })
-                  .catch((err) => console.log(err));
               }
-            });
-      
-          }
+
+              account_id = 13;
+              connection_id = 7;
+              today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+
+              // let year = today.getFullYear();
+              // let month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+              // let day = String(today.getDate()).padStart(2, "0");
+
+              // let formattedDate = `${year}-${month}-${day}`;
+              formattedDate = moment(today).format("YYYY-MM-DD");
+              id = FlowRouter.current().queryParams.id;
+
+              products_num =
+                upload_transaction_count + download_transaction_count;
+
+              transaction_data.accounting_soft = account_id;
+              transaction_data.connection_soft = connection_id;
+              transaction_data.date = formattedDate;
+              transaction_data.order_num = products_num;
+              transaction_data.products = products_num;
+              transaction_data.products_num = products_num;
+              transaction_data.uploaded_num = upload_transaction_count;
+              transaction_data.downloaded_num = download_transaction_count;
+              transaction_data.connection_id = id;
+
+              insertedTransactionID = 0;
+              fetch("/api/transactionByDate", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  date: moment().format("YYYY-MM-DD"),
+                  connection_id: id,
+                  accounting_soft: account_id,
+                  connection_soft: connection_id,
+                }),
+              })
+                .then((response) => response.json())
+                .then(async (result) => {
+                  if (result != "No Result") {
+                    transaction_data.order_num =
+                      transaction_data.order_num + result.order_num;
+                    transaction_data.products_num =
+                      transaction_data.products_num + result.products_num;
+                    transaction_data.uploaded_num =
+                      transaction_data.uploaded_num + result.uploaded_num;
+                    transaction_data.downloaded_num =
+                      transaction_data.downloaded_num + result.downloaded_num;
+                    let resultId = result.id;
+                    fetch("/api/addtransaction", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        id: resultId,
+                        transaction_data: transaction_data,
+                      }),
+                    })
+                      .then((response) => response.json())
+                      .then(async (result) => {
+                        insertedTransactionID = resultId;
+                        let postData = {
+                          transaction_details: transaction_details,
+                          transactionId: insertedTransactionID,
+                          date: today,
+                        };
+                        fetch("/api/inserttransactionDetails", {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify(postData),
+                        })
+                          .then((response) => response.json())
+                          .then(async (result) => {})
+                          .catch((error) => console.log(error));
+                      })
+                      .catch((error) => console.log(error));
+                  } else {
+                    fetch("/api/inserttransaction", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify(transaction_data),
+                    })
+                      .then((response) => response.json())
+                      .then(async (result) => {
+                        insertedTransactionID = result;
+                        let postData = {
+                          transaction_details: transaction_details,
+                          transactionId: insertedTransactionID,
+                          date: today,
+                        };
+                        fetch("/api/inserttransactionDetails", {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify(postData),
+                        })
+                          .then((response) => response.json())
+                          .then(async (result) => {})
+                          .catch((error) => console.log(error));
+                      })
+                      .catch((error) => console.log(error));
+                  }
+                });
+  
+            }).catch(error => {console.log(error)})
         }
       );
 }
