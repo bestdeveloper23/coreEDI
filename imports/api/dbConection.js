@@ -230,6 +230,7 @@ Meteor.startup(() => {
   })
 
   JsonRoutes.add('post', '/api/getAccSoftt', function (req, res) {
+    console.log(req)
     jsonParser(req, res, () => {
 
       const query = `SELECT * FROM clienttrueerp WHERE id = ${req.body.id}`;
@@ -1225,7 +1226,6 @@ Meteor.startup(() => {
       maxBodyLength: Infinity,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'http://localhost:3500',  // Update with your client's URL
         'Access-Control-Allow-Credentials': 'true'
       },
       url: req.body.url + '/rest/V1/integration/admin/token',

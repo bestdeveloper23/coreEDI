@@ -277,3 +277,11 @@ a {
 .table td{
   vertical-align: middle !important;
 }
+
+.hiddensElement {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  margin: 0;
+  padding: 0;
+}

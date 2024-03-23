@@ -20,7 +20,7 @@ Template.woocommercecard.onCreated(function () {
     const postData = {
     id: FlowRouter.current().queryParams.id
     }
-    
+
     fetch('/api/transfertypesByID', {
     method: 'POST',
     headers: {
@@ -34,7 +34,7 @@ Template.woocommercecard.onCreated(function () {
             transferTypes.push(e);
         }
     });
-    
+
     await templateObject.transferTypes.set(transferTypes);
     }).catch(error => console.log(error));
 });
@@ -66,10 +66,24 @@ Template.woocommercecard.events({
         body: JSON.stringify(transfer_types)
         }).then(response => response.json()).then(async (result) => {
         if (result == 'success')
-        swal("", 'Woocommerce Data Successfully Updated', "success");
-            
+        swal({
+          title: 'Woocommerce Data Successfully Updated',
+          text: "",
+          type: 'success',
+          showCancelButton: false,
+          confirmButtonText: 'Ok'
+        }).then((resultData) => {
+          if (resultData.value) {
+          if (window.localStorage.super == 'false'){
+            FlowRouter.go('/customerscard?id=' + window.localStorage.customerId);
+          }else {
+            FlowRouter.go('/connectionlist');
+          };
+         }
+        });
+
         }).catch(error => console.log(error));
-    
+
     },
 });
 

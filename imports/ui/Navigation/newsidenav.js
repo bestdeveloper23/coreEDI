@@ -8,8 +8,6 @@ Template.newsidenav.onCreated(function () {
   templateObject.adminStatus = new ReactiveVar();
   templateObject.adminStatus.set(window.localStorage.super);
   templateObject.sideBarPositionClass.set('top');
-
-
 });
 
 Template.newsidenav.onRendered(function () {
@@ -64,5 +62,7 @@ Template.newsidenav.events({
 });
 
 Template.newsidenav.helpers({
-
+  isSuperUSer: function () {
+    return localStorage.getItem('super') || false;
+  }
 });

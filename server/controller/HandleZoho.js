@@ -108,8 +108,6 @@ Meteor.methods({
     
     'getZohoAccessToken': async function (url, username, password) {
       
-      console.log(url, username, password)
-
       try {
 
         // Create a new WebDriver instance
@@ -127,15 +125,26 @@ Meteor.methods({
         try {
             const usernameInput = await driver.findElement(By.id('login_id'));
             await usernameInput.sendKeys(username);
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            await new Promise((resolve) => setTimeout(resolve, 5000));
           } catch (error) {}
       
         try {
         const nextButton = await driver.findElement(By.id('nextbtn'));
         await nextButton.click();
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 15000));
         } catch (error) {}
-    
+
+        const signurl = await driver.getCurrentUrl();
+        const parsedUrl = new URL(signurl);
+        var datacenter = parsedUrl.hostname.split('.')[3];
+        if (!datacenter) {
+          datacenter = parsedUrl.hostname.split('.')[2];
+        } else {
+          datacenter = parsedUrl.hostname.split('.')[2] + "." + datacenter
+        }
+
+        console.log("Datacenter:", datacenter);
+
         try {
         const passwordInput = await driver.findElement(By.id('password'));
         await passwordInput.sendKeys(password);
@@ -143,11 +152,17 @@ Meteor.methods({
         await loginButton.click();
         await new Promise((resolve) => setTimeout(resolve, 10000));
         } catch (error) {}
-    
+
         try {
           const continueButton = await driver.findElement(By.className('continue_button'));
           await continueButton.click();
-          await new Promise((resolve) => setTimeout(resolve, 5000));
+          await new Promise((resolve) => setTimeout(resolve, 15000));
+        } catch (error) {}
+  
+        try {
+          const continueButton = await driver.findElement(By.className('continue_button'));
+          await continueButton.click();
+          await new Promise((resolve) => setTimeout(resolve, 15000));
         } catch (error) {}
   
         try {
@@ -170,11 +185,16 @@ Meteor.methods({
         const regex = /access_token=([^&]+)/;
         const match = currentURL.match(regex);
         const tokenID = match ? match[1] : null;
-    
+        console.log("TokenID:", tokenID)
         // Close the browser
         await driver.quit();
+
+        const response = {
+          token: tokenID,
+          datacenter: datacenter
+        }
     
-        return tokenID;
+        return response;
       } catch (error) {
         // Handle any errors that occur during the automation process
         console.error(error);
@@ -182,7 +202,7 @@ Meteor.methods({
       }
     },
 
-    'getAlldatafromZoho': async function (module, accessToken) {
+    'getAlldatafromZoho': async function (module, accessToken, datacenter = 'com') {
       try {
         let allProducts = [];
         let nextPage = 1;
@@ -191,7 +211,7 @@ Meteor.methods({
         // Continue fetching pages until there are no more products
         while (true) {
           // Make a GET request to fetch products for the current page
-          const response = await axios.get(`https://www.zohoapis.com/crm/v2/${module}?page=${nextPage}&per_page=${perPage}`, {
+          const response = await axios.get(`https://www.zohoapis.${datacenter}/crm/v2/${module}?page=${nextPage}&per_page=${perPage}`, {
             headers: {
               Authorization: `Zoho-oauthtoken ${accessToken}`, // Replace accessToken with your actual access token
             },
@@ -219,7 +239,7 @@ Meteor.methods({
 
     'getDatafromZohoByDate': async function (reqData) {
       try {
-        const response = await axios.get(`https://www.zohoapis.com/crm/v6/${reqData.data.module}/search?criteria=(Modified_Time:greater_than:${reqData.data.lstTime})`, {
+        const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v6/${reqData.data.module}/search?criteria=(Modified_Time:greater_than:${reqData.data.lstTime})`, {
           headers: {
             Authorization: `Zoho-oauthtoken ${reqData.auth}`,
             "Content-Type": "application/json",
@@ -235,7 +255,7 @@ Meteor.methods({
 
     'getZohoCurrentUser': async function (reqData) {
       try {
-        const response = await axios.get(`https://www.zohoapis.com/crm/v2/users?type=CurrentUser`, {
+        const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/users?type=CurrentUser`, {
           headers: {
             Authorization: `Zoho-oauthtoken ${reqData.auth}`,
             "Content-Type": "application/json",
@@ -251,7 +271,7 @@ Meteor.methods({
 
     'updateZohoCustomers': async function(reqData) {
       try {
-        const response = await axios.post("https://www.zohoapis.com/crm/v2/Contacts/upsert",
+        const response = await axios.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Contacts/upsert`,
           {
             data: reqData.data,
           }, {
@@ -271,7 +291,7 @@ Meteor.methods({
 
     'getzohoDatasforLatest': async function(reqData) {
       try {
-        const response = await axios.get(`https://www.zohoapis.com/crm/v2/${reqData.data.module}/search?criteria=Modified_Time.after:${reqData.data.lastRanDate}`, {
+        const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/${reqData.data.module}/search?criteria=Modified_Time.after:${reqData.data.lastRanDate}`, {
           headers: {
             Authorization: `Zoho-oauthtoken ${reqData.auth}`,
             "Content-Type": "application/json",
@@ -287,7 +307,7 @@ Meteor.methods({
 
     'getZohoCustomers': async function (reqData) {
       try {
-        const response = await axios.get("https://www.zohoapis.com/crm/v2/Contacts", {
+        const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Contacts`, {
           headers: {
             Authorization: `Zoho-oauthtoken ${reqData.auth}`,
             "Content-Type": "application/json",
@@ -304,7 +324,7 @@ Meteor.methods({
     'updateZohoAccounts': async function (reqData) {
       try {
         const response = await axios.post(
-          "https://www.zohoapis.com/crm/v2/Accounts/upsert",
+          `https://www.zohoapis.${reqData.datacenter}/crm/v2/Accounts/upsert`,
           {
             data: reqData.data,
           }, {
@@ -326,7 +346,7 @@ Meteor.methods({
       const accountName = reqData.Account_Name;
       try {
         const response = await axios.get(
-          `https://www.zohoapis.com/crm/v2/Accounts/search?criteria=Account_Name:equals:${accountName}`,
+          `https://www.zohoapis.${reqData.datacenter}/crm/v2/Accounts/search?criteria=Account_Name:equals:${accountName}`,
           {
             headers: {
               Authorization: `Zoho-oauthtoken ${reqData.auth}`,
@@ -346,7 +366,7 @@ Meteor.methods({
     'addZohoAccounts': async function (reqData) {
       try {
         const response = await axios.post(
-          `https://www.zohoapis.com/crm/v2/Accounts`,
+          `https://www.zohoapis.${reqData.datacenter}/crm/v2/Accounts`,
           {
             data: reqData.data
           },
@@ -370,7 +390,7 @@ Meteor.methods({
     'addZohoProduct': async function (reqData) {
       try {
         const response = await axios.post(
-          "https://www.zohoapis.com/crm/v2/Products",
+          `https://www.zohoapis.${reqData.datacenter}/crm/v2/Products`,
           {
             data: reqData.data,
           },
@@ -395,7 +415,7 @@ Meteor.methods({
       try {
         const productName = reqData.productName;
         const response = await axios.get(
-          `https://www.zohoapis.com/crm/v2/Products/search?criteria=Product_Name:equals:${productName}`,
+          `https://www.zohoapis.${reqData.datacenter}/crm/v2/Products/search?criteria=Product_Name:equals:${productName}`,
           {
             headers: {
               Authorization: `Zoho-oauthtoken ${reqData.auth}`,
@@ -415,7 +435,7 @@ Meteor.methods({
       try {
         const productID = reqData.productID;
         const response = await axios.get(
-          `https://www.zohoapis.com/crm/v2/Products/search?criteria=id:equals:${productID}`,
+          `https://www.zohoapis.${reqData.datacenter}/crm/v2/Products/search?criteria=id:equals:${productID}`,
           {
             headers: {
               Authorization: `Zoho-oauthtoken ${reqData.auth}`,
@@ -434,7 +454,7 @@ Meteor.methods({
     'updateZohoProducts': async function (reqData) {
       try {
         const response = await axios.post(
-          "https://www.zohoapis.com/crm/v2/Products/upsert",
+          `https://www.zohoapis.${reqData.datacenter}/crm/v2/Products/upsert`,
           {
             data: reqData.data,
           }, {
@@ -456,7 +476,7 @@ Meteor.methods({
     'getZohoOrders': async function (reqData) {
       try {
         const response = await axios.get(
-          "https://www.zohoapis.com/crm/v2/Sales_Orders",
+          `https://www.zohoapis.${reqData.datacenter}/crm/v2/Sales_Orders`,
           {
             headers: {
               Authorization: `Zoho-oauthtoken ${reqData.auth}`,
@@ -473,7 +493,7 @@ Meteor.methods({
     'updateZohoOrders': async function (reqData) {
       try {
         const response = await axios.post(
-          "https://www.zohoapis.com/crm/v2/Sales_Orders/upsert",
+          `https://www.zohoapis.${reqData.datacenter}/crm/v2/Sales_Orders/upsert`,
           {
             data: reqData.data,
           }, {
@@ -491,7 +511,7 @@ Meteor.methods({
 
     'getZohoQuotes': async function (reqData) {
       try {
-        const response = await axios.get("https://www.zohoapis.com/crm/v2/Quotes", {
+        const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Quotes`, {
           headers: {
             Authorization: `Zoho-oauthtoken ${reqData.auth}`,
             "Content-Type": "application/json",
@@ -505,7 +525,7 @@ Meteor.methods({
 
     'updateZohoQuotes': async function (reqData) {
       try {
-        const response = await axios.post("https://www.zohoapis.com/crm/v2/Quotes/upsert",
+        const response = await axios.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Quotes/upsert`,
           {
             data: reqData.data,
           }, {
@@ -524,8 +544,9 @@ Meteor.methods({
     },
 
     'checkFieldExistence': async function (reqData) {
+      console.log(reqData.auth)
       try {
-        const response = await axios.get(`https://www.zohoapis.com/crm/v2/settings/fields?module=${reqData.module}`, {
+        const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/settings/fields?module=${reqData.module}`, {
           headers: {
             Authorization: `Zoho-oauthtoken ${reqData.auth}`,
             "Content-Type": "application/json",
@@ -541,7 +562,7 @@ Meteor.methods({
 
     'addcustomFields': async function (reqData) {
       try {
-        const response = await axios.post(`https://www.zohoapis.com/crm/v2/settings/fields?module=${reqData.module}`, reqData.data, {
+        const response = await axios.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/settings/fields?module=${reqData.module}`, reqData.data, {
           headers: {
             Authorization: `Zoho-oauthtoken ${reqData.auth}`,
             "Content-Type": "application/json",

@@ -426,6 +426,7 @@
                     class="dropdown-toggle liHeader customerLiHeader"><i class="fas fa-user-friends faHeader"></i>
                     Customers </a>
             </li>
+            {{#if equals isSuperUSer 'true'}}
             <li class="employeeLi" id="sidenavemployees">
                 <a id="employeelist" data-toggle="collapse" aria-expanded="false"
                     class="dropdown-toggle liHeader employeeLiHeader"><i class="fa fa-user faHeader"></i> Employees </a>
@@ -435,7 +436,7 @@
                     class="dropdown-toggle liHeader connectionLiHeader"><i class="fas fa-link faHeader"></i> Connections
                 </a>
             </li>
-            <!-- {{/if}} -->
+            {{/if}}
             <li class="logoutLi">
                 <a class="nav-link logOut liHeader" onclick="logOutFunc()"><i
                         class="fas fa-sign-out-alt faHeader"></i><span> Log Out</span></a>
@@ -445,7 +446,6 @@
     <script>
         function logOutFunc() {
             window.open('/', '_self');
-            CloudUser.update({ _id: localStorage.getItem('mycloudLogonID') }, { $set: { userMultiLogon: false } });
         };
     </script>
 </template>

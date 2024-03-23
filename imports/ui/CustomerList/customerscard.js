@@ -32,6 +32,9 @@ templateObject.connectionType = new ReactiveVar("");
 templateObject.renderTransactionDetail = new ReactiveVar(true);
 templateObject.transferTypes2 = new ReactiveVar([]);
 
+templateObject.woCategories = new ReactiveVar([]);
+
+
 var today = new Date();
 templateObject.todayDate.set(('0' + today.getDate()).slice(-2) + '/' + ('0' + (today.getMonth() + 1)).slice(-2) + '/' + today.getFullYear());
 templateObject.getDataTableList = function (data) {
@@ -534,6 +537,13 @@ $('.connectionTab').removeClass('active');
 $('.customerTab').trigger('click');
 }
 
+
+templateObject.setLogFunction = async function(logitem) {
+  await templateObject.transNote.set(logitem);
+    var textarea = $('#transNotes');
+    textarea.scrollTop(textarea[0].scrollHeight);
+};
+
 // Meteor.call('getCustomerFromId', FlowRouter.current().queryParams, (err, result) => {
 //     if (err) swal("","Oooooops something went wrong!", "error")
 //     else {
@@ -576,7 +586,7 @@ $('#edtCustomerMobile').val(result[0].Mobile)
 $('#edtCustomerFax').val(result[0].fax)
 $("#edtCustomerSkypeID").val(result[0].skypeID)
 $("#edtCustomerWebsite").val(result[0].website)
-$('#logonPasswrod').val(result[0].logon_password)
+$('#logonPassword').val(result[0].logon_password)
 $('#logonName').val(result[0].logon_name)
 
 $('#updateCustomer').show()
@@ -745,7 +755,7 @@ const fetchMProduct = (templateObject, lstUpdateTime, base_api_url, tempAccount,
 
 text += `\n Job MAGENTO_SYNCH_PRODUCT \n`;
 text += 'Magento send Products to TrueERP Queued.\n';
-templateObject.transNote.set(text);
+templateObject.setLogFunction(text);
 
 let productCount, tempResponse;
 let product_url = `${base_api_url}/rest/all/V1/products/?searchCriteria[filter_groups][0][filters][0][field]=updated_at&searchCriteria[filter_groups][0][filters][0][value]=${lstUpdateTime}&searchCriteria[filter_groups][0][filters][0][condition_type]=gt`;
@@ -761,10 +771,10 @@ console.error('Error:', error);
 productCount = response.data.total_count;
 tempResponse = response.data.items;
 // Process the response data here
-// templateObject.transNote.set(JSON.stringify(response.data.items));
+// templateObject.setLogFunction(JSON.stringify(response.data.items));
 // if (!productCount) {
 //     // text += `Obtained 0 products to synch from Magento to TrueERP.\n`;
-//     // templateObject.transNote.set(text);
+//     // templateObject.setLogFunction(text);
 //     // fetchOrder(templateObject, lstUpdateTime, base_api_url, tempAccount, token, selConnectionId, text);
 // } else {
 //     if (productCount == 1)
@@ -773,11 +783,11 @@ tempResponse = response.data.items;
 //         text += `Obtained ${productCount} product to synch from Magento to TrueERP.\n`;
 // }
 
-templateObject.transNote.set(text);
+templateObject.setLogFunction(text);
 
 // text += `\n Job TRUEERP_SYNCH_PRODUCT \n`;
 // text += 'Magento send Products to TrueERP Queued.\n';
-// templateObject.transNote.set(text);
+// templateObject.setLogFunction(text);
 
 let jsonData;
 
@@ -824,14 +834,14 @@ if (error)
 console.error('Error:', error);
 else {
 text += `Obtained ${productCount} products to synch from Magento to TrueERP\n`
-templateObject.transNote.set(text);
+templateObject.setLogFunction(text);
 fetchProduct(templateObject, lstUpdateTime, base_api_url, tempAccount, token, selConnectionId, text);
 }
 });
 }
 if (productCount == 0) {
 text += `Obtained ${productCount} products to synch from Magento to TrueERP\n`
-templateObject.transNote.set(text);
+templateObject.setLogFunction(text);
 fetchProduct(templateObject, lstUpdateTime, base_api_url, tempAccount, token, selConnectionId, text);
 }
 
@@ -855,10 +865,10 @@ const fetchProduct = (templateObject, lstUpdateTime, base_api_url, tempAccount, 
 //         productCount = response.data.total_count;
 //         tempResponse = response.data.items;
 //         // Process the response data here
-//         // templateObject.transNote.set(JSON.stringify(response.data.items));
+//         // templateObject.setLogFunction(JSON.stringify(response.data.items));
 //         if(!productCount){
 //             text += `There are No Products to Receive\n`;
-//             templateObject.transNote.set(text);
+//             templateObject.setLogFunction(text);
 //             fetchOrder(templateObject, lstUpdateTime, base_api_url, tempAccount, token, selConnectionId, text);
 //         } else {
 //             if(productCount == 1)
@@ -867,7 +877,7 @@ const fetchProduct = (templateObject, lstUpdateTime, base_api_url, tempAccount, 
 //                 text += `${productCount} Products Successfully Received from Magento\n`;
 //         }
 //
-//         templateObject.transNote.set(text);
+//         templateObject.setLogFunction(text);
 //
 //         let jsonData;
 //
@@ -916,7 +926,7 @@ const fetchProduct = (templateObject, lstUpdateTime, base_api_url, tempAccount, 
 //                     console.error('Error:', error);
 //                 else {
 //                     text += `1 Product Successfully Added to TrueERP with ID Number ${response.data.fields.ID}\n`
-//                     templateObject.transNote.set(text);
+//                     templateObject.setLogFunction(text);
 //                 }
 //             });
 //         }
@@ -927,11 +937,11 @@ const fetchProduct = (templateObject, lstUpdateTime, base_api_url, tempAccount, 
 
 text += "\nJob TRUEERP_SYNCH_PRODUCT\n";
 text += "TrueERP send Products to Magento Queued.\n";
-templateObject.transNote.set(text);
+templateObject.setLogFunction(text);
 
 
 let productCount, tempResponse;
-let product_url = tempAccount.base_url + "/erpapi/TProduct?select=[MsTimeStamp]>\"" + lstUpdateTime + "\"&ListType=Detail";
+let product_url = tempAccount.base_url + "/erpapi/TProduct?select=[MsTimeStamp]>\"" + lstUpdateTime + "\"&[PublishOnWeb]=true&ListType=Detail";
 HTTP.call('GET', product_url, {
 headers: {
 'Username': `${tempAccount.user_name}`,
@@ -946,10 +956,10 @@ productCount = response.data.tproduct.length;
 tempResponse = response.data.tproduct;
 
 // Process the response data here
-// templateObject.transNote.set(JSON.stringify(response.data.items));
+// templateObject.setLogFunction(JSON.stringify(response.data.items));
 // if (!productCount) {
 //     text += `Obtained 0 products to synch from ERP to Magento\n`;
-//     templateObject.transNote.set(text);
+//     templateObject.setLogFunction(text);
 //     // fetchOrder(templateObject, lstUpdateTime, base_api_url, tempAccount, token, selConnectionId, text);
 // } else {
 //     if (productCount == 1)
@@ -958,7 +968,7 @@ tempResponse = response.data.tproduct;
 //         text += `${productCount} Products Successfully Received from TrueERP\n`;
 // }
 
-templateObject.transNote.set(text);
+templateObject.setLogFunction(text);
 
 let jsonData;
 let responseCount = 0;
@@ -1028,11 +1038,11 @@ responseCount++;
 if (error) {
 console.error('Error:', error);
 text += `An Error Occurred While Adding a Product to Magento\n`
-templateObject.transNote.set(text);
+templateObject.setLogFunction(text);
 }
 else {
 text += `Obtained ${productCount} products to synch from ERP to Magento\n`
-templateObject.transNote.set(text);
+templateObject.setLogFunction(text);
 }
 if (responseCount == productCount) {
 // fetchOrder(templateObject, lstUpdateTime, base_api_url, tempAccount, token, selConnectionId, text);
@@ -1041,7 +1051,7 @@ if (responseCount == productCount) {
 }
 if (productCount == 0) {
 text += `Obtained ${productCount} products to synch from ERP to Magento\n`
-templateObject.transNote.set(text);
+templateObject.setLogFunction(text);
 }
 fetchOrder(templateObject, lstUpdateTime, base_api_url, tempAccount, token, selConnectionId, text);
 }
@@ -1054,7 +1064,7 @@ let itemCount = 0, tempResponse, tempConnection;
 
 text += "\nJob MAGENTO_SYNCH_ORDER\n";
 text += "Magento send Invoices to ERP Queued\n";
-templateObject.transNote.set(text);
+templateObject.setLogFunction(text);
 
 // let order_url = `${base_api_url}/rest/V1/orders?searchCriteria[filter_groups][0][filters][0][field]=updated_at&searchCriteria[filter_groups][0][filters][0][value]=${lstUpdateTime}&searchCriteria[filter_groups][0][filters][0][condition_type]=gt`;
 HTTP.call('POST', '/api/getMOrders', {
@@ -1070,10 +1080,10 @@ console.error('Error:', error);
 itemCount = response.data.total_count;
 tempResponse = response.data.items;
 // Process the response data here
-// templateObject.transNote.set(JSON.stringify(response.data.items));
+// templateObject.setLogFunction(JSON.stringify(response.data.items));
 // if (!itemCount) {
 //     text += `There are no Sales Orders to receive on your Magento website\n`;
-//     templateObject.transNote.set(text);
+//     templateObject.setLogFunction(text);
 // } else {
 //     if (itemCount == 1)
 //         text += `${itemCount} Sales Order successfully received from Magento\n`;
@@ -1081,7 +1091,7 @@ tempResponse = response.data.items;
 //         text += `${itemCount} Sales Orders successfully received from Magento\n`;
 // }
 
-// templateObject.transNote.set(text);
+// templateObject.setLogFunction(text);
 
 let jsonData;
 
@@ -1182,19 +1192,19 @@ if (error)
 console.error('Error:', error);
 else {
 text += `Obtained ${itemCount} Invoices to synch from Magento to ERP`
-templateObject.transNote.set(text);
+templateObject.setLogFunction(text);
 // HTTP.call('POST', '/addTransaction', { data: tempResponse[i] },
 // (error, response) => {
 //     if (error) console.debug(error);
 //     text += ` Transaction saved to CoreEDI Store.`;
-//     templateObject.transNote.set(text);
+//     templateObject.setLogFunction(text);
 // })
 }
 });
 }
 if (itemCount == 0) {
 text += `Obtained 0 Invoices to synch from Magento to ERP`
-templateObject.transNote.set(text);
+templateObject.setLogFunction(text);
 }
 }
 });
@@ -1205,7 +1215,7 @@ const fetchWooProduct = async (templateObject, lstUpdateTime, tempAccount, url, 
 //getting newly added customer from ERP database
 transNOtes += "\nJob TRUEERP_SYNCH_PRODUCTS\n";
 transNOtes += "TrueERP send Products to WooCommerce Queued\n";
-await fetch(`${tempAccount.base_url}/erpapi/TProduct?select=[MsTimeStamp]>"${lstUpdateTime}"&ListType=Detail`,
+await fetch(`${tempAccount.base_url}/erpapi/TProduct?select=[MsTimeStamp]>"${lstUpdateTime}"&[PublishOnWeb]=true&ListType=Detail`,
 {
 method: 'GET',
 headers: {
@@ -1220,28 +1230,30 @@ redirect: 'follow'
 const newProductsFromERP = result.tproduct
 if (newProductsFromERP.length === 0) {
 transNOtes += `Obtained 0 products to synch from TrueERP to WooCommerce\n`;
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 fetchWooOrder(templateObject, lstUpdateTime, tempAccount, url, token, selConnectionId, transNOtes)
 return;
 }
 else {
 // transNOtes += `Found ${newProductsFromERP.length} newly added product(s) in ERP database.\n`;
-// templateObject.transNote.set(transNOtes);
+// templateObject.setLogFunction(transNOtes);
 let newProductsFromERPCount = 0
 console.log(newProductsFromERP)
 
 for (const newProductFromERP of newProductsFromERP) {
 // transNOtes += `Got ${++newProductsFromERPCount}th Product data with Id: ${newProductFromERP.Id} and MsTimeStamp: ${newProductFromERP.MsTimeStamp} from ERP.\n`;
-// templateObject.transNote.set(transNOtes);
+// templateObject.setLogFunction(transNOtes);
 // const uomSalesName = esult?.fields?.UOMSales
 const bodyToAddWoocommerce = {
 name: newProductFromERP?.fields?.ProductName,
 permalink: newProductFromERP?.fields?.Hyperlink,
-// type: result?.fields?.ProductType,
+//type: result?.fields?.ProductGroup2,
 description: newProductFromERP?.fields?.SalesDescription,
 short_description: newProductFromERP?.fields?.SalesDescription,
 sku: newProductFromERP?.fields?.SKU,
-price: newProductFromERP?.fields?.WHOLESALEPRICE,
+price: newProductFromERP?.fields?.SellQty1PriceInc,
+regular_price: `${newProductFromERP?.fields?.SellQty1PriceInc}`||'0',
+// sale_price: newProductFromERP?.fields?.SellQty1PriceInc||0,
 total_sales: newProductFromERP?.fields?.SellQTY1 + newProductFromERP?.fields?.SellQTY2 + newProductFromERP?.fields?.SellQTY3,
 weight: `"${newProductFromERP?.fields?.NetWeightKg}"`,
 // dimensions: {
@@ -1261,7 +1273,7 @@ weight: `"${newProductFromERP?.fields?.NetWeightKg}"`,
 const axios = require('axios');
 // transNOtes += `(Detail) Product name: ${bodyToAddWoocommerce?.name}, Price: ${bodyToAddWoocommerce?.price}, Description: ${bodyToAddWoocommerce?.description}.\n`;
 // transNOtes += `Adding ${newProductsFromERPCount}th Product to Woocommerce.\n`;
-// templateObject.transNote.set(transNOtes);
+// templateObject.setLogFunction(transNOtes);
 await axios.post(url + "/wp-json/wc/v3/products", bodyToAddWoocommerce, {
 headers: {
   'Authorization': `Bearer ${token}`,
@@ -1273,19 +1285,19 @@ headers: {
 })
 .catch((err) => {
   // transNOtes += `[Error] Already existing product..\n`;
-  // templateObject.transNote.set(transNOtes);
+  // templateObject.setLogFunction(transNOtes);
 })
 
 }
 transNOtes += `Obtained ${newProductsFromERPCount} products to synch from TrueERP to WooCommerce\n`;
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 fetchWooOrder(templateObject, lstUpdateTime, tempAccount, url, token, selConnectionId, transNOtes)
 
 }
 })
 .catch(() => {
 transNOtes += `Obtained 0 products to synch from TrueERP to WooCommerce\n`;
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 })
 // let productCount, tempResponse;
 // let product_url = `${tempAccount.base_url}/TProduct?select=[MsTimeStamp]>"` + `${lstUpdateTime}"&ListType=Detail`;
@@ -1303,10 +1315,10 @@ templateObject.transNote.set(transNOtes);
 //         tempResponse = response.data.tproduct;
 
 //         // Process the response data here
-//         // templateObject.transNote.set(JSON.stringify(response.data.items));
+//         // templateObject.setLogFunction(JSON.stringify(response.data.items));
 //         if (!productCount) {
 //             text += `There are No Products to Receive\n`;
-//             templateObject.transNote.set(text);
+//             templateObject.setLogFunction(text);
 //             fetchWooOrder(templateObject, lstUpdateTime, tempAccount, base_url, key, secret, selConnectionId, text);
 //         } else {
 //             if (productCount == 1)
@@ -1315,7 +1327,7 @@ templateObject.transNote.set(transNOtes);
 //                 text += `${productCount} Products Successfully Received from TrueERP\n`;
 //         }
 
-//         templateObject.transNote.set(text);
+//         templateObject.setLogFunction(text);
 
 //         let jsonData;
 //         let responseCount = 0;
@@ -1339,11 +1351,11 @@ templateObject.transNote.set(transNOtes);
 //                 if (error) {
 //                     console.error('Error:', error);
 //                     text += `An Error Occurred While Adding a Product to WooCommerce\n`
-//                     templateObject.transNote.set(text);
+//                     templateObject.setLogFunction(text);
 //                 }
 //                 else {
 //                     text += `1 Product Successfully Added to WooCommerce with ID Number ${response.data.id}\n`
-//                     templateObject.transNote.set(text);
+//                     templateObject.setLogFunction(text);
 //                 }
 //                 if (responseCount == productCount) {
 //                     fetchWooOrder(templateObject, lstUpdateTime, tempAccount, base_url, key, secret, selConnectionId, text);
@@ -1370,7 +1382,7 @@ const axios = require('axios');
 //     } else {
 //         if (response.data.length === 0) {
 //             transNOtes += `Obtained 0 invoices to synch from WooCommerce to ERP\n`;
-//             templateObject.transNote.set(transNOtes);
+//             templateObject.setLogFunction(transNOtes);
 //             return;
 //         }
 //         const filteredOrders = response.data.filter(order => {
@@ -1381,22 +1393,22 @@ const axios = require('axios');
 //         itemCount = filteredOrders.length;
 //         tempResponse = filteredOrders;
 //         // Process the response data here
-//         // templateObject.transNote.set(JSON.stringify(response.data.items));
+//         // templateObject.setLogFunction(JSON.stringify(response.data.items));
 //         if (!itemCount) {
 //             transNOtes += `Obtained 0 invoices to synch from WooCommerce to ERP\n`;
-//             templateObject.transNote.set(transNOtes);
+//             templateObject.setLogFunction(transNOtes);
 //         } else {
 //             if (itemCount == 1) {
 //                 transNOtes += `Obtained One invoice to synch from WooCommerce to ERP\n`;
-//                 templateObject.transNote.set(transNOtes);
+//                 templateObject.setLogFunction(transNOtes);
 //             }
 //             else {
 //                 transNOtes += `Obtained ${itemCount} invoices to synch from WooCommerce to ERP\n`;
-//                 templateObject.transNote.set(transNOtes);
+//                 templateObject.setLogFunction(transNOtes);
 //             }
 //         }
 
-//         templateObject.transNote.set(text);
+//         templateObject.setLogFunction(text);
 
 //         let jsonData;
 
@@ -1446,7 +1458,7 @@ const axios = require('axios');
 //                     console.error('Error:', error);
 //                 else {
 //                     text += `1 Sales Order Successfully Added to TrueERP with ID Number ${response.data.fields.ID}\n`
-//                     templateObject.transNote.set(text);
+//                     templateObject.setLogFunction(text);
 //                 }
 //             });
 //         }
@@ -1462,11 +1474,11 @@ headers: {
 const ordersFromWoocommerce = response.data
 if (ordersFromWoocommerce.length === 0) {
 transNOtes += `Obtained 0 invoices to synch from WooCommerce to ERP\n`;
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 }
 else {
 // transNOtes += `Found ${ordersFromWoocommerce.length} newly added order(s) in the Woocommerce Website.\n`;
-// templateObject.transNote.set(transNOtes);
+// templateObject.setLogFunction(transNOtes);
 let count = 0
 for (const orderFromWoocommerce of ordersFromWoocommerce) {
 // transNOtes += `Checking ${++count}th Order from the Woocommerce Website\n`;
@@ -1475,13 +1487,13 @@ for (const orderFromWoocommerce of ordersFromWoocommerce) {
 //     transNOtes += `(Line Detail)    Product Id: ${line?.product_id}, Product Name: "${line?.name}", Product Price: ${line?.price}\n`;
 // }
 // transNOtes += `Adding ${count}th Order to ERP database.\n`;
-// templateObject.transNote.set(transNOtes);
+// templateObject.setLogFunction(transNOtes);
 
 //check if the customer exists and add if not
 const clientName = orderFromWoocommerce?.billing?.first_name + " " + orderFromWoocommerce?.billing?.last_name
 let clientId
 // transNOtes += `Checking Customer in the ERP database for ClientName : ${clientName}...\n`;
-// templateObject.transNote.set(transNOtes);
+// templateObject.setLogFunction(transNOtes);
 await fetch(`${tempAccount.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
 {
   method: 'GET',
@@ -1493,10 +1505,10 @@ await fetch(`${tempAccount.base_url}/TCustomer?select=[ClientName]="${clientName
   if (result?.tcustomer.length > 0) {
       clientId = result?.tcustomer[0]?.Id
       // transNOtes += `Found the Customer as ID : ${clientId}\n`;
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
   } else {
       // transNOtes += `Not Existing Customer, creating...\n`;
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
       const tempCustomerDetailtoERP = {
           type: "TCustomer",
           fields: {
@@ -1525,14 +1537,14 @@ await fetch(`${tempAccount.base_url}/TCustomer?select=[ClientName]="${clientName
           .then(async result => {
               clientId = result?.fields?.ID
               // transNOtes += `Added a new customer to ERP database with ID : ${clientId}.\n`;
-              // templateObject.transNote.set(transNOtes);
+              // templateObject.setLogFunction(transNOtes);
           })
           .catch(error => console.log('error', error));
   }
 })
 .catch(() => {
   // transNOtes += `Error while getting client Id from the ERP database.\n`;
-  // templateObject.transNote.set(transNOtes);
+  // templateObject.setLogFunction(transNOtes);
 })
 
 //check if the product exists and add if not
@@ -1540,11 +1552,11 @@ const productList = orderFromWoocommerce?.line_items
 const productIdList = []
 const productQtyList = []
 // transNOtes += `There are ${productList.length} products in the Invoice line.\n`;
-// templateObject.transNote.set(transNOtes);
+// templateObject.setLogFunction(transNOtes);
 
 for (const product of productList) {
 // transNOtes += `Checking Product in the ERP database for ProductName : ${product?.name}...\n`;
-// templateObject.transNote.set(transNOtes);
+// templateObject.setLogFunction(transNOtes);
 await fetch(`${tempAccount.base_url}/TProduct?select=[ProductName]="${product?.name}"`,
   {
       method: 'GET',
@@ -1556,12 +1568,12 @@ await fetch(`${tempAccount.base_url}/TProduct?select=[ProductName]="${product?.n
       if (result?.tproduct.length > 0) {
           const productId = result?.tproduct[0]?.Id
           // transNOtes += `Found the Product as ID : ${productId}\n`;
-          // templateObject.transNote.set(transNOtes);
+          // templateObject.setLogFunction(transNOtes);
           productIdList.push(productId)
           productQtyList.push(product?.quantity)
       } else {
           // transNOtes += `Not Existing Product, creating...\n`;
-          // templateObject.transNote.set(transNOtes);
+          // templateObject.setLogFunction(transNOtes);
 
           //getting product by id from
         //   await axios.get(`${url}/wp-json/wc/v3/products/${product.product_id}`, {
@@ -1613,7 +1625,7 @@ await fetch(`${tempAccount.base_url}/TProduct?select=[ProductName]="${product?.n
         //               .then(async result => {
         //                   const tempProductId = result?.fields?.ID
         //                   // transNOtes += `Added a new product to ERP database with ID : ${tempProductId}.\n`;
-        //                   // templateObject.transNote.set(transNOtes);
+        //                   // templateObject.setLogFunction(transNOtes);
         //                   productIdList.push(tempProductId)
         //                   productQtyList.push(product?.quantity)
         //               })
@@ -1624,7 +1636,7 @@ await fetch(`${tempAccount.base_url}/TProduct?select=[ProductName]="${product?.n
   })
   .catch(() => {
       // transNOtes += `Error while getting client Id from the ERP database.\n`;
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
   })
 
 }
@@ -1663,25 +1675,25 @@ await fetch(`${tempAccount.base_url}/TinvoiceEx`,
   const addedId = result?.fields?.ID
   count++;
   transNOtes += `Added a new Invoice to ERP database with ID: ${addedId}.\n`;
-  templateObject.transNote.set(transNOtes);
+  templateObject.setLogFunction(transNOtes);
 })
 .catch(error => console.log('error', error));
 
 }
 
 transNOtes += `Obtained ${count} invoices to synch from WooCommerce to ERP\n`;
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 }
 })
 .catch(() => {
 transNOtes += `Obtained 0 invoices to synch from WooCommerce to ERP\n`;
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 })
 
 
 //update the last sync time
 // transNOtes += `-----------------------------------------------------------\n`;
-// templateObject.transNote.set(transNOtes);
+// templateObject.setLogFunction(transNOtes);
 
 let nowInSydney = moment().tz("Australia/Brisbane").format("YYYY-MM-DD HH:mm:ss");
 let args = {
@@ -1697,8 +1709,8 @@ body: JSON.stringify(args)
 })
 .then(response => response.json())
 .then(async (result) => {
-transNOtes += `\nUpdated Last Sync Time as ${moment(nowInSydney).format("DD/MMYYYY HH:mm:ss")}.\n`;
-templateObject.transNote.set(transNOtes);
+transNOtes += `\nUpdated Last Sync Time as ${moment(nowInSydney).format("DD/MM/YYYY HH:mm:ss")}.\n`;
+templateObject.setLogFunction(transNOtes);
 })
 .catch((err) => console.log(err))
 }
@@ -1706,7 +1718,7 @@ templateObject.transNote.set(transNOtes);
 const fetchMagentoCustomerJob = (templateObject, lstUpdateTime, base_api_url, tempConnection, tempConnectionSoftware, tempAccount, token, selConnectionId, transNOtes) => {
 transNOtes += "Job MAGENTO_SYNCH_CUSTOMERS\n";
 transNOtes += "Magento send Customers to TrueERP Queued\n"
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 
 let customerCount;
 let customer_url = '/api/getMCustomers';
@@ -1719,7 +1731,7 @@ lstUpdateTime: lstUpdateTime
 }, (error, response) => {
 if (error) {
 console.error('Error:', error);
-templateObject.transNote.set(transNOtes + '\n' + error + ':: Error Occurred While Attempting to get the Magento Customers\n');
+templateObject.setLogFunction(transNOtes + '\n' + error + ':: Error Occurred While Attempting to get the Magento Customers\n');
 } else {
 customerCount = response.data.total_count;
 tempResponse = response.data.items;
@@ -1754,7 +1766,7 @@ body: JSON.stringify(postData)
 
   if (!customerCount) {
       transNOtes += `Obtained 0 Customers to synch from Magento to TrueERP.\n`;
-      templateObject.transNote.set(transNOtes);
+      templateObject.setLogFunction(transNOtes);
       // fetchMProduct(templateObject, lstUpdateTime, tempConnectionSoftware.base_api_url, tempAccount, token, selConnectionId, transNOtes);
       let tempDate = new Date();
       let dateString =
@@ -1783,13 +1795,13 @@ body: JSON.stringify(postData)
       if (customerCount == 1) {
           transNOtes = transNOtes +
               'Obtained one Customer to synch from Magento to TrueERP.\n';
-          templateObject.transNote.set(transNOtes);
+          templateObject.setLogFunction(transNOtes);
           transNOtes += "Customer Data: (" + tempResponse[0].firstname + ' ' + tempResponse[0].lastname + ", " + tempResponse[0].email + "), Updated At: " + tempResponse[0].updated_at + "\n";
-          templateObject.transNote.set(transNOtes);
+          templateObject.setLogFunction(transNOtes);
           // fetchMProduct(templateObject, lstUpdateTime, tempConnectionSoftware.base_api_url, tempAccount, token, selConnectionId, transNOtes);
       } else {
           transNOtes += 'Obtained ' + customerCount + ' Customers to synch from Magento to TrueERP.\n';
-          templateObject.transNote.set(transNOtes);
+          templateObject.setLogFunction(transNOtes);
           // fetchMProduct(templateObject, lstUpdateTime, tempConnectionSoftware.base_api_url, tempAccount, token, selConnectionId, transNOtes);
       }
   }
@@ -1797,7 +1809,7 @@ body: JSON.stringify(postData)
   let responseCount = 0;
   transNOtes += '\nJob TRUEERP_SYNCH_CUSTOMERS\n';
   transNOtes += "TrueERP send Customers to Magento Queued\n";
-  templateObject.transNote.set(transNOtes);
+  templateObject.setLogFunction(transNOtes);
 
   for (let i = 0; i < customerCount; i++) {
       jsonData = {
@@ -1814,52 +1826,52 @@ body: JSON.stringify(postData)
       jsonData.fields.ClientName = tempResponse[i].firstname + ' ' + tempResponse[i].lastname || "";
       // transNOtes = tempNote + 'Full-Name formating.... \n';
       // await sleep(300);
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
       jsonData.fields.Title = tempResponse[i].gender == 1 ? "Mrs" : "Mr" || "";
       // transNOtes = tempNote + 'Converting Title .............. \n';
       // await sleep(300);
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
       jsonData.fields.FirstName = tempResponse[i].firstname || "";
       // transNOtes = tempNote + 'Converting FirstName ..... \n';
       // await sleep(300);
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
       jsonData.fields.LastName = tempResponse[i].lastname || "";
       // transNOtes = tempNote + 'Converting LastName .................. \n';
       // await sleep(300);
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
       jsonData.fields.Street = tempResponse[i].addresses[0] ? tempResponse[i].addresses[0].street[0] : "";
       // transNOtes = tempNote + 'Converting Street Address1 ............... \n';
       // await sleep(300);
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
       jsonData.fields.Street2 = tempResponse[i].addresses[0] ? tempResponse[i].addresses[0].street[1] : "";
       // transNOtes = tempNote + 'Converting Street Address2 ...... \n';
       // await sleep(300);
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
       jsonData.fields.Postcode = tempResponse[i].addresses[0] ? tempResponse[i].addresses[0].postcode : "";
       // transNOtes = tempNote + 'Converting Post Code ............................... \n';
       // await sleep(300);
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
       jsonData.fields.State = tempResponse[i].addresses[0] ? (tempResponse[i].addresses[0].region.region_code ? tempResponse[i].addresses[0].region.region_code : "") : "";
       // transNOtes = tempNote + 'Converting State Address ....... \n';
       // await sleep(300);
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
       jsonData.fields.Country = tempResponse[i].addresses[0] ? tempResponse[i].addresses[0].country_id : "";
       // transNOtes = tempNote + 'Converting Country .............................. \n';
       // await sleep(300);
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
       jsonData.fields.Phone = tempResponse[i].addresses[0] ? tempResponse[i].addresses[0].telephone : "";
       // transNOtes = tempNote + 'Converting Phone Number .................... \n';
       // await sleep(300);
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
       jsonData.fields.Email = tempResponse[i].email;
       // transNOtes = tempNote + 'Converting Email Address ................................. \n';
       // await sleep(300);
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
 
 
       // transNOtes = tempNote + 'Successfully converted customer-' + i + ' to TrueERP format. \n';
       // await sleep(300);
-      // templateObject.transNote.set(transNOtes);
+      // templateObject.setLogFunction(transNOtes);
 
       fetch(tempAccount.base_url + '/erpapi/TCustomer', {
           method: 'POST',
@@ -1875,7 +1887,7 @@ body: JSON.stringify(postData)
           .then(async (result) => {
               responseCount++;
               // transNOtes += `Customer(${jsonData.fields.ClientName}, ${jsonData.fields.Email}) Successfully Added to TrueERP -  ID: ${result.fields.ID}, GlobalRef: ${result.fields.GlobalRef})\n`
-              // templateObject.transNote.set(transNOtes);
+              // templateObject.setLogFunction(transNOtes);
               if (responseCount == updatedCustomer.length) {
                   let tempDate = new Date();
                   let dateString =
@@ -1906,7 +1918,7 @@ body: JSON.stringify(postData)
           })
           .catch(error => {
               // transNOtes += `An Error Occurred While Adding a Customer( ` + tempResponse[i].firstname + ' ' + tempResponse[i].lastname + ` ) to TrueERP\n`
-              // templateObject.transNote.set(transNOtes);
+              // templateObject.setLogFunction(transNOtes);
 
           });
   }
@@ -1929,11 +1941,11 @@ body: JSON.stringify(postData)
           responseCount = result.tcustomer.length;
           var resultData = result.tcustomer;
           // transNOtes += `Successfully received ` + responseCount + ` customer data from TrueERP. \nCustomer data: \n`;
-          // templateObject.transNote.set(transNOtes);
+          // templateObject.setLogFunction(transNOtes);
           for (let i = 0; i < responseCount; i++) {
               // transNOtes += "[ " + Number(i + 1) + " ]:  {\" " + resultData[i]['ClientName'] + ", " + resultData[i]['GlobalRef'] + " \", Updated At: " + resultData[i]['MsTimeStamp'] + " }\n";
               // await sleep(50);
-              // templateObject.transNote.set(transNOtes);
+              // templateObject.setLogFunction(transNOtes);
 
               if (new Date(resultData[i]['MsTimeStamp']).valueOf() >= new Date(lstUpdateTime).valueOf()) {
                   updatedCustomer.push(i);
@@ -1946,7 +1958,7 @@ body: JSON.stringify(postData)
               // for (let i = 0; i < updatedCustomer.length; i++) {
               //     transNOtes += "[ " + Number(updatedCustomer[i] + 1) + " ]:  {\" " + resultData[updatedCustomer[i]]['ClientName'] + ", " + resultData[updatedCustomer[i]]['GlobalRef'] + " \", Updated At: " + resultData[updatedCustomer[i]]['MsTimeStamp'] + " }\n";
               //     await sleep(100);
-              //     templateObject.transNote.set(transNOtes);
+              //     templateObject.setLogFunction(transNOtes);
               // }
 
               for (let i = 0; i < updatedCustomer.length; i++) {
@@ -1981,9 +1993,9 @@ body: JSON.stringify(postData)
                       if (error) console.log(error);
                       else {
                           transNOtes += 'Obtained ' + updatedCustomer.length + ' Customers to synch from TrueERP to Magento.\n';
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                           // Process the response data here
-                          // templateObject.transNote.set(JSON.stringify(response.data.items));
+                          // templateObject.setLogFunction(JSON.stringify(response.data.items));
                           await sleep(100);
                       }
                       // customerCount = response.data;
@@ -1994,7 +2006,7 @@ body: JSON.stringify(postData)
               // fetchProduct(templateObject, lstUpdateTime, tempConnectionSoftware.base_api_url, tempAccount, token, selConnectionId, transNOtes);
           } else {
               transNOtes += 'Obtained 0 Customers to synch from TrueERP to Magento.\n';
-              templateObject.transNote.set(transNOtes);
+              templateObject.setLogFunction(transNOtes);
               // fetchProduct(templateObject, lstUpdateTime, tempConnectionSoftware.base_api_url, tempAccount, token, selConnectionId, transNOtes);
           }
 
@@ -2023,14 +2035,14 @@ body: JSON.stringify(postData)
               .then(async (result) => {
                   // transNOtes += `Connection Datebase updated!\n`;
                   // transNOtes += `SUCCESS!!!`;
-                  // templateObject.transNote.set(transNOtes);
+                  // templateObject.setLogFunction(transNOtes);
               })
               .catch((err) => console.log(err))
       })
       .catch(error => {
           console.log(error)
           transNOtes += `An Error occurred while add TrueERP customer data to Magento Website.\n`;
-          templateObject.transNote.set(transNOtes);
+          templateObject.setLogFunction(transNOtes);
 
       });
 })
@@ -2061,7 +2073,7 @@ console.error('Error:', error);
 } else {
 if (response.data.length === 0) {
 transNOtes += "Obtained 0 products to synch from WooCommerce to ERP\n"
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 fetchWooProduct(templateObject, lstUpdateTime, tempAccount, url, token, selConnectionId, transNOtes)
 return;
 }
@@ -2073,10 +2085,10 @@ return updatedDate > last;
 productCount = filteredProducts.length;
 tempResponse1 = filteredProducts;
 // Process the response data here
-// templateObject.transNote.set(JSON.stringify(response.data.items));
+// templateObject.setLogFunction(JSON.stringify(response.data.items));
 if (!productCount) {
 transNOtes += "Obtained 0 products to synch from WooCommerce to ERP\n"
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 fetchWooProduct(templateObject, lstUpdateTime, tempAccount, url, token, selConnectionId, transNOtes);
 return;
 } else {
@@ -2130,7 +2142,7 @@ fetchWooProduct(templateObject, lstUpdateTime, tempAccount, url, token, selConne
 //         console.error('Error:', error);
 //     else {
 //         transNOtes += `Obtained ${productCount} products to synch from WooCommerce to ERP\n`;
-//         templateObject.transNote.set(transNOtes);
+//         templateObject.setLogFunction(transNOtes);
 //         fetchWooProduct(templateObject, lstUpdateTime, tempAccount, url, token, selConnectionId, transNOtes)
 //     }
 // });
@@ -2158,7 +2170,7 @@ redirect: 'follow'
 const newCustomerFromERP = result.tcustomer
 if (newCustomerFromERP.length === 0) {
 transNOtes += `Obtained 0 Customers to synch from TrueERP to WooCommerce.\n`;
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 fetchWooProduct2(templateObject, lstUpdateTime, tempAccount, url, token, selConnectionId, transNOtes)
 }
 else {
@@ -2205,14 +2217,14 @@ headers: {
 })
 }
 transNOtes += `Obtained ${newCustomersFromERPCount++} Customers to synch from TrueERP to WooCommerce.\n`;
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 fetchWooProduct2(templateObject, lstUpdateTime, tempAccount, url, token, selConnectionId, transNOtes)
 
 }
 })
 .catch((error) => {
 transNOtes += `${error}\n`;
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 })
 }
 
@@ -2233,7 +2245,7 @@ console.error('Error:', error);
 } else {
 if (response.data.length === 0) {
 transNOtes += "Obtained 0 customers to synch from WooCommerce to ERP\n"
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 fetchWooCustomer(templateObject, lstUpdateTime, tempAccount, tempConnectionSoftware.base_url, token, selConnectionId, transNOtes)
 return;
 }
@@ -2245,10 +2257,10 @@ return updatedDate > last;
 customerCount = filteredCustomer.length;
 tempResponse = filteredCustomer;
 // Process the response data here
-// templateObject.transNote.set(JSON.stringify(response.data.items));
+// templateObject.setLogFunction(JSON.stringify(response.data.items));
 if (customerCount === 0) {
 transNOtes += "Obtained 0 customers to synch from WooCommerce to ERP\n"
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 fetchWooCustomer(templateObject, lstUpdateTime, tempAccount, tempConnectionSoftware.base_url, token, selConnectionId, transNOtes)
 return;
 // fetchWooOrder(templateObject, lstUpdateTime, tempAccount, base_url, key, secret, selConnectionId, text);
@@ -2302,18 +2314,18 @@ jsonData = {
 //         console.error('Error:', error);
 //     else {
 //         transNOtes += `Obtained ${customerCount} customers to synch from WooCommerce to ERP\n`;
-//         templateObject.transNote.set(transNOtes);
+//         templateObject.setLogFunction(transNOtes);
 //         fetchWooCustomer(templateObject, lstUpdateTime, tempAccount, tempConnectionSoftware.base_url, token, selConnectionId, transNOtes)
 //     }
 // });
 }
 transNOtes += `Obtained ${customerCount} customers to synch from WooCommerce to ERP\n`;
-templateObject.transNote.set(transNOtes);
+templateObject.setLogFunction(transNOtes);
 fetchWooCustomer(templateObject, lstUpdateTime, tempAccount, tempConnectionSoftware.base_url, token, selConnectionId, transNOtes)
 }
 });
 // transNOtes += "Obtained 0 customers to synch from WooCommerce to ERP\n"
-// templateObject.transNote.set(transNOtes);
+// templateObject.setLogFunction(transNOtes);
 
 //getting newly added customer from ERP database
 }
@@ -2480,9 +2492,9 @@ await onError();
 }
 
 export const RunNow = async (customDate, selConnectionId = '') => {
-Template.instance().transNote.set('');
+Template.instance().setLogFunction('');
 var templateObject = Template.instance();
-templateObject.transNote.set('');
+templateObject.setLogFunction('');
 var transNOtes = '';
 // let selConnectionId = templateObject.selConnectionId.get();
 let lstUpdateTime = new Date();
@@ -2518,6 +2530,7 @@ body: JSON.stringify(postData)
 .then(response => response.json())
 .then(async (connectionResult) => {
 lstUpdateTime = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").subtract(1, 'hours').format("YYYY-MM-DD HH:mm:ss");
+// lstUpdateTime = connectionResult[0].last_ran_date !=''? moment(connectionResult[0].last_ran_date).format("YYYY-MM-DD HH:mm:ss"): connectionResult[0].last_ran_date;
 var lstUpdateTimeUTC = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").format("YYYY-MM-DDTHH:mm:ss")
 if (customDate != '') {
 lstUpdateTime = customDate
@@ -2620,7 +2633,7 @@ fetch('/api/MagentoByID', {
                       const axios = require('axios')
 
                       transNOtes += 'Got token for Magento.\n';
-                      templateObject.transNote.set(transNOtes);
+                      templateObject.setLogFunction(transNOtes);
                       // Make the second POST request using the obtained token
                       const trueERPResponse = await fetch(`/api/TrueERPByID`, {
                           method: 'POST',
@@ -2637,11 +2650,11 @@ fetch('/api/MagentoByID', {
 
                       transNOtes += `Last Sync Time: ${moment(lstUpdateTime).format("DD/MM/YYYY HH:mm:ss")}\n`;
                       // transNOtes += `Last Sync Time: 01/01/2024\n`;
-                      templateObject.transNote.set(transNOtes);
+                      templateObject.setLogFunction(transNOtes);
                       async function runPerFiveMinutes() {
                           //getting newly added customer from ERP database
                           transNOtes += `-----------------------------------------------------------\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                           await fetch(`${tempAccount.base_url}/TCustomer?select=[MsTimeStamp]>"${lstUpdateTime}"`,
                               {
                                   method: 'GET',
@@ -2653,87 +2666,117 @@ fetch('/api/MagentoByID', {
                                   const newCustomersFromERP = result.tcustomer
                                   if (newCustomersFromERP.length === 0) {
                                       transNOtes += `There is no newly added Customer in TrueERP.\n`;
-                                      templateObject.transNote.set(transNOtes);
+                                      templateObject.setLogFunction(transNOtes);
                                   }
                                   else {
+                                    let upload_num = 0;
                                       transNOtes += `Found ${newCustomersFromERP.length} newly added customer(s) in TrueERP database.\n`;
-                                      templateObject.transNote.set(transNOtes);
+                                      templateObject.setLogFunction(transNOtes);
                                       let newCustomersFromERPCount = 0
 
                                       for (const newCustomerFromERP of newCustomersFromERP) {
-                                          await fetch(`${tempAccount.base_url}/TCustomer/${newCustomerFromERP.Id}`,
-                                              {
-                                                  method: 'GET',
-                                                  headers: myHeaders,
-                                                  redirect: 'follow'
-                                              })
-                                              .then(response => response.json())
-                                              .then(async result => {
-                                                  transNOtes += `Got ${++newCustomersFromERPCount} Customer data with Id: ${newCustomerFromERP.Id} and MsTimeStamp: ${newCustomerFromERP.MsTimeStamp} from TrueERP.\n`;
-                                                  templateObject.transNote.set(transNOtes);
-                                                  const bodyToAddMagento = {
-                                                      email: result?.fields?.Email,
-                                                      first_name: result?.fields?.FirstName,
-                                                      last_name: result?.fields?.LastName,
-                                                      role: "customer",
-                                                      username: result?.fields?.FirstName + " " + result?.fields?.LastName,
-                                                      billing: {
-                                                          first_name: result?.fields?.FirstName || "",
-                                                          last_name: result?.fields?.LastName || "",
-                                                          company: result?.fields?.Company || "",
-                                                          address_1: result?.fields?.Street || "",
-                                                          address_2: result?.fields?.Street2 || "",
-                                                          // city: result?.fields?.Contacts[0]?.fields?.ContactCity,
-                                                          postcode: result?.fields?.Postcode || "",
-                                                          country: result?.fields?.Country || "",
-                                                          state: result?.fields?.State || "",
-                                                          email: result?.fields?.Email || "",
-                                                          phone: result?.fields?.Phone || ""
-                                                      },
-                                                      shipping: {
-                                                          first_name: result?.fields?.FirstName || "",
-                                                          last_name: result?.fields?.LastName || "",
-                                                          company: result?.fields?.Company || "",
-                                                          address_1: result?.fields?.Street || "",
-                                                          address_2: result?.fields?.Street2 || "",
-                                                          // city: result?.fields?.Contacts[0]?.fields?.ContactCity,
-                                                          postcode: result?.fields?.Postcode || "",
-                                                          country: result?.fields?.Country || "",
-                                                          state: result?.fields?.State || "",
-                                                          phone: result?.fields?.Phone || ""
-                                                      }
+
+                                        transNOtes += `Got ${++newCustomersFromERPCount} Customer data with Id: ${newCustomerFromERP.fields?.ID} and MsTimeStamp: ${newCustomerFromERP.MsTimeStamp} from TrueERP.\n`;
+                                        templateObject.setLogFunction(transNOtes);
+                                        const bodyToAddMagento = {
+                                          email:
+                                            newCustomerFromERP?.fields?.Email ||
+                                            newCustomerFromERP?.fields?.FirstName + "@email.com" ||
+                                            "",
+                                          firstname: newCustomerFromERP?.fields?.FirstName,
+                                          lastname: newCustomerFromERP?.fields?.LastName,
+                                          prefix: "TrueERP",
+                                          dob: "1990-01-01",
+              
+                                        };
+              
+                                        transNOtes += `(Detail) First name: ${bodyToAddMagento?.firstname}, Last name: ${bodyToAddMagento?.lastname}, Email: ${bodyToAddMagento?.email}.\n`;
+                                        transNOtes += `Adding ${newCustomersFromERPCount} Customer to Magento.\n`;
+                                        templateObject.setLogFunction(transNOtes);
+                                        
+                                        let jsonCustomerData = {
+                                          customer: bodyToAddMagento,
+                                        };
+              
+                                        try {
+
+                                          const existingCustomer = await new Promise((resolve, reject) => {
+                                            Meteor.call('findMagentoCustomerByEmail', url, bodyToAddMagento.email, token, (error, result) => {
+                                              if (error) {
+                                                reject(error);
+                                              } else {
+                                                resolve(result);
+                                              }
+                                            });
+                                          });
+                
+                                          if (existingCustomer) {
+                                            // Customer already exists, update the customer
+                                            try {
+                                              const customerResult = await new Promise((resolve, reject) => {
+                                                Meteor.call("updateMagentoCustomer", url, existingCustomer.id, jsonCustomerData, token, (error, result) => {
+                                                  if (error) {
+                                                    reject(error);
+                                                  } else {
+                                                    resolve(result);
                                                   }
-                                                  transNOtes += `(Detail) First name: ${bodyToAddMagento?.first_name}, Last name: ${bodyToAddMagento?.last_name}, Email: ${bodyToAddMagento?.email}.\n`;
-                                                  transNOtes += `Adding ${newCustomersFromERPCount} Customer to Magento.\n`;
-                                                  templateObject.transNote.set(transNOtes);
+                                                });
+                                              });
+                                            
+                                              if (customerResult) {
+                                                upload_transaction_count ++;
+                                                upload_num ++;
+                                                transNOtes += `Successfully updated ${newCustomersFromERPCount} Customer to Magento with ID: ${newCustomerFromERP.fields?.ID}.\n`;
+                                                templateObject.setLogFunction(transNOtes);
+                                              } else {
+                                                transNOtes += `[Error] Failed to update customer.\n`;
+                                                templateObject.setLogFunction(transNOtes);
+                                              }
+                                            } catch (error) {
+                                              transNOtes += `[Error] ${error}\n`;
+                                              templateObject.setLogFunction(transNOtes);
+                                              }
+                                            
+                                          } else {
+                                            // Customer does not exist, add the new customer
+                                            try {
+                                              const customerResult = await new Promise((resolve, reject) => {
+                                                Meteor.call("addOrUpdateMagentoCustomer", url, token, jsonCustomerData, (error, result) => {
+                                                  if (error) {
+                                                    reject(error);
+                                                  } else {
+                                                    resolve(result);
+                                                  }
+                                                });
+                                              });
+                                            
+                                              if (customerResult) {
+                                                upload_transaction_count ++;
+                                                upload_num ++;
+                                                transNOtes += `Successfully added ${newCustomersFromERPCount} Customer to Magento with ID: ${newCustomerFromERP.fields?.ID}.\n`;
+                                                templateObject.setLogFunction(transNOtes);
+                                              } else {
+                                                transNOtes += `[Error] Failed to add customer.\n`;
+                                                templateObject.setLogFunction(transNOtes);
+                                              }
+                                            } catch (error) {
+                                              transNOtes += `[Error] ${error}\n`;
+                                              templateObject.setLogFunction(transNOtes);
+                                              if(error="A customer with the same email address already exists in an associated website"){
+                                                console.log("I will fix soon")
+                                              }
+                                            }
+                                          }
+                                        } catch (error) {
+                                          console.error('Failed to find customer:', error);
+                                        }
 
-                                                  await axios.post(`${url}/rest/V1/customers`, bodyToAddMagento, {
-                                                      headers: {
-                                                          'Authorization': `Bearer ${token}`,
-                                                          'Content-Type': 'application/json',
-                                                          'Access-Control-Allow-Origin': 'https://login.coreedi.com',  // Update with your client's URL
-                                                          'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-                                                          'Access-Control-Allow-Credentials': 'true'
-                                                      },
-                                                      withCredentials: true
-                                                  })
-                                                      .then(async (response) => {
-                                                          const id = response.data.id
-                                                          if (id) {
-                                                              transNOtes += `Successfully added ${newCustomersFromERPCount} Customer to Magento with ID: ${id}.\n`;
-                                                              templateObject.transNote.set(transNOtes);
-                                                          } else {
-                                                              transNOtes += `[Error] Already existing user..\n`;
-                                                              templateObject.transNote.set(transNOtes);
-                                                          }
-                                                      })
-                                                      .catch((err) => {
-                                                          // transNOtes += `[Error] Already existing user..\n`;
-                                                          transNOtes += `Added a new customer to Magento.\n`;
-                                                          templateObject.transNote.set(transNOtes);
-                                                      })
+                                        transaction_details.push({
+                                          detail_string:
+                                            "Uploaded Customers from TrueERP to Magento",
+                                          count: upload_num,
+                                        });
 
-                                              })
                                       }
 
                                   }
@@ -2741,13 +2784,13 @@ fetch('/api/MagentoByID', {
                               .catch(() => {
                                   // transNOtes += `There is no newly added Customer.\n`;
                                   transNOtes += `Added a new customer to Magento.\n`;
-                                  templateObject.transNote.set(transNOtes);
+                                  templateObject.setLogFunction(transNOtes);
                               })
 
                           //getting newly added products from ERP database
                           transNOtes += `-----------------------------------------------------------\n`;
-                          templateObject.transNote.set(transNOtes);
-                          await fetch(`${tempAccount.base_url}/TProduct?select=[MsTimeStamp]>"${lstUpdateTime}"`,
+                          templateObject.setLogFunction(transNOtes);
+                          await fetch(`${tempAccount.base_url}/TProduct?listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"&[PublishOnWeb]=true`,
                               {
                                   method: 'GET',
                                   headers: myHeaders,
@@ -2758,72 +2801,78 @@ fetch('/api/MagentoByID', {
                                   const newProductsFromERP = result.tproduct
                                   if (newProductsFromERP.length === 0) {
                                       transNOtes += `There is no newly added Product in TrueERP.\n`;
-                                      templateObject.transNote.set(transNOtes);
+                                      templateObject.setLogFunction(transNOtes);
                                   }
                                   else {
+                                    let upload_num = 0;
                                       transNOtes += `Found ${newProductsFromERP.length} newly added product(s) in TrueERP database.\n`;
-                                      templateObject.transNote.set(transNOtes);
+                                      templateObject.setLogFunction(transNOtes);
                                       let newProductsFromERPCount = 0
 
                                       for (const newProductFromERP of newProductsFromERP) {
-                                          await fetch(`${tempAccount.base_url}/TProduct/${newProductFromERP.Id}`,
-                                              {
-                                                  method: 'GET',
-                                                  headers: myHeaders,
-                                                  redirect: 'follow'
-                                              })
-                                              .then(response => response.json())
-                                              .then(async result => {
-                                                  transNOtes += `Got ${++newProductsFromERPCount} Product data with Id: ${newProductFromERP.Id} and MsTimeStamp: ${newProductFromERP.MsTimeStamp} from TrueERP.\n`;
-                                                  templateObject.transNote.set(transNOtes);
-                                                  // const uomSalesName = esult?.fields?.UOMSales
-                                                  const bodyToAddMagento = {
-                                                      name: result?.fields?.ProductName,
-                                                      permalink: result?.fields?.Hyperlink,
-                                                      // type: result?.fields?.ProductType,
-                                                      description: result?.fields?.SalesDescription,
-                                                      short_description: result?.fields?.SalesDescription,
-                                                      sku: result?.fields?.SKU,
-                                                      price: result?.fields?.WHOLESALEPRICE,
-                                                      total_sales: result?.fields?.SellQTY1 + result?.fields?.SellQTY2 + result?.fields?.SellQTY3,
-                                                      weight: `"${result?.fields?.NetWeightKg}"`
-                                                  }
-                                                  transNOtes += `(Detail) Product name: ${bodyToAddMagento?.name}, Price: ${bodyToAddMagento?.price}, Description: ${bodyToAddMagento?.description}.\n`;
-                                                  transNOtes += `Adding ${newProductsFromERPCount} Product to Magento.\n`;
-                                                  templateObject.transNote.set(transNOtes);
-                                                  await axios.post(`${url}/rest/V1/products`, bodyToAddMagento, {
-                                                      headers: {
-                                                          'Authorization': `Bearer ${token}`,
-                                                      }
-                                                  })
-                                                      .then(async (response) => {
-                                                          const id = response.data.id
-                                                          if (id) {
-                                                              transNOtes += `Successfully added ${newProductsFromERPCount} Product to Magento with ID: ${id}.\n`;
-                                                              templateObject.transNote.set(transNOtes);
-                                                          } else {
-                                                              transNOtes += `[Error] Already existing product..\n`;
-                                                              templateObject.transNote.set(transNOtes);
-                                                          }
-                                                      })
-                                                      .catch((err) => {
-                                                          transNOtes += `[Error] Already existing product..\n`;
-                                                          templateObject.transNote.set(transNOtes);
-                                                      })
+                                
+                                        transNOtes += `Got ${++newProductsFromERPCount} Product data with Id: ${newProductFromERP?.fields?.ID} and MsTimeStamp: ${newProductFromERP?.fields?.MsTimeStamp} from TrueERP.\n`;
+                                        templateObject.setLogFunction(transNOtes);
 
-                                              })
+                                        /* Add Cateory To WooCommerce */
+                                        const bodyToAddMagento = {
+                                          name: newProductFromERP?.fields?.ProductName,
+                                          sku: newProductFromERP?.fields?.SKU || newProductFromERP?.fields?.GlobalRef,
+                                          price: newProductFromERP?.fields?.WHOLESALEPRICE,
+                                          attribute_set_id: 4,
+                                        };
+                                        transNOtes += `(Detail) Product name: ${bodyToAddMagento?.name}, Price: ${bodyToAddMagento?.price}\n`;
+                                        transNOtes += `Adding ${newProductsFromERPCount} Product to Magento.\n`;
+                                        templateObject.setLogFunction(transNOtes);
+            
+                                        let jsonProductData = {
+                                          product: bodyToAddMagento
+                                        }
+            
+                                        console.log(token)
+                                        try {
+                                          const productResult = await new Promise((resolve, reject) => {
+                                            Meteor.call("addOrUpdateMagentoProduct", url, token, jsonProductData, (error, result) => {
+                                              if (error) {
+                                                reject(error);
+                                              } else {
+                                                resolve(result);
+                                              }
+                                            });
+                                          });
+                                        
+                                          if (productResult) {
+                                            upload_transaction_count ++;
+                                            upload_num ++;
+                                            transNOtes += `Successfully added ${newProductsFromERPCount} Product to Magento with ID: ${newProductFromERP?.fields?.ID}.\n`;
+                                            templateObject.setLogFunction(transNOtes);
+                                          } else {
+                                            transNOtes += `[Error] Failed to add product.\n`;
+                                            templateObject.setLogFunction(transNOtes);
+                                          }
+                                        } catch (error) {
+                                          transNOtes += `[Error] ${error}\n`;
+                                          templateObject.setLogFunction(transNOtes);
+                                        }
+
                                       }
+
+                                      transaction_details.push({
+                                        detail_string:
+                                          "Uploaded Products from TrueERP to Magento",
+                                        count: upload_num,
+                                      });
 
                                   }
                               })
                               .catch(() => {
                                   transNOtes += `There is no newly added product.\n`;
-                                  templateObject.transNote.set(transNOtes);
+                                  templateObject.setLogFunction(transNOtes);
                               })
 
                           //Getting newly added orders from woocommerce
                           transNOtes += `-----------------------------------------------------------\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                           await axios.get(`${url}/wp-json/wc/v3/orders?modified_after=${lstUpdateTimeUTC}`, {
                               headers: {
                                   'Authorization': `Bearer ${token}`,
@@ -2833,11 +2882,11 @@ fetch('/api/MagentoByID', {
                                   const ordersFromWoocommerce = response.data
                                   if (ordersFromWoocommerce.length === 0) {
                                       transNOtes += `There is no newly added Order in the Woocommerce Website.\n`;
-                                      templateObject.transNote.set(transNOtes);
+                                      templateObject.setLogFunction(transNOtes);
                                   }
                                   else {
                                       transNOtes += `Found ${ordersFromWoocommerce.length} newly added order(s) in the Woocommerce Website.\n`;
-                                      templateObject.transNote.set(transNOtes);
+                                      templateObject.setLogFunction(transNOtes);
                                       let count = 0
                                       for (const orderFromWoocommerce of ordersFromWoocommerce) {
                                           transNOtes += `Checking ${++count} Order from the Woocommerce Website\n`;
@@ -2846,13 +2895,13 @@ fetch('/api/MagentoByID', {
                                               transNOtes += `(Line Detail)    Product Id: ${line?.product_id}, Product Name: "${line?.name}", Product Price: ${line?.price}\n`;
                                           }
                                           // transNOtes += `Adding ${count}th Order to ERP database.\n`;
-                                          templateObject.transNote.set(transNOtes);
+                                          templateObject.setLogFunction(transNOtes);
 
                                           //check if the customer exists and add if not
                                           const clientName = orderFromWoocommerce?.billing?.first_name + " " + orderFromWoocommerce?.billing?.last_name
                                           let clientId
                                           transNOtes += `Checking Customer in the TrueERP database for ClientName : ${clientName}...\n`;
-                                          templateObject.transNote.set(transNOtes);
+                                          templateObject.setLogFunction(transNOtes);
                                           await fetch(`${tempAccount.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
                                               {
                                                   method: 'GET',
@@ -2864,10 +2913,10 @@ fetch('/api/MagentoByID', {
                                                   if (result?.tcustomer.length > 0) {
                                                       clientId = result?.tcustomer[0]?.Id
                                                       transNOtes += `Found the Customer as ID : ${clientId}\n`;
-                                                      templateObject.transNote.set(transNOtes);
+                                                      templateObject.setLogFunction(transNOtes);
                                                   } else {
                                                       transNOtes += `Not Existing Customer, creating...\n`;
-                                                      templateObject.transNote.set(transNOtes);
+                                                      templateObject.setLogFunction(transNOtes);
                                                       const tempCustomerDetailtoERP = {
                                                           type: "TCustomer",
                                                           fields: {
@@ -2896,14 +2945,14 @@ fetch('/api/MagentoByID', {
                                                           .then(async result => {
                                                               clientId = result?.fields?.ID
                                                               transNOtes += `Added a new customer to TrueERP database with ID : ${clientId}.\n`;
-                                                              templateObject.transNote.set(transNOtes);
+                                                              templateObject.setLogFunction(transNOtes);
                                                           })
                                                           .catch(error => console.log('error', error));
                                                   }
                                               })
                                               .catch(() => {
                                                   transNOtes += `Error while getting client Id from the TrueERP database.\n`;
-                                                  templateObject.transNote.set(transNOtes);
+                                                  templateObject.setLogFunction(transNOtes);
                                               })
 
                                           //check if the product exists and add if not
@@ -2911,11 +2960,11 @@ fetch('/api/MagentoByID', {
                                           const productIdList = []
                                           const productQtyList = []
                                           transNOtes += `There are ${productList.length} products in the Invoice line.\n`;
-                                          templateObject.transNote.set(transNOtes);
+                                          templateObject.setLogFunction(transNOtes);
 
                                           for (const product of productList) {
                                               transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.name}...\n`;
-                                              templateObject.transNote.set(transNOtes);
+                                              templateObject.setLogFunction(transNOtes);
                                               await fetch(`${tempAccount.base_url}/TProduct?select=[ProductPrintName]="${product?.name}"`,
                                                   {
                                                       method: 'GET',
@@ -2927,12 +2976,12 @@ fetch('/api/MagentoByID', {
                                                       if (result?.tproduct.length > 0) {
                                                           const productId = result?.tproduct[0]?.Id
                                                           transNOtes += `Found the Product as ID : ${productId}\n`;
-                                                          templateObject.transNote.set(transNOtes);
+                                                          templateObject.setLogFunction(transNOtes);
                                                           productIdList.push(productId)
                                                           productQtyList.push(product?.quantity)
                                                       } else {
                                                         //   transNOtes += `Not Existing Product, creating...\n`;
-                                                        //   templateObject.transNote.set(transNOtes);
+                                                        //   templateObject.setLogFunction(transNOtes);
 
                                                           //getting product by id from
                                                         //   await axios.get(`${url}/wp-json/wc/v3/products/${product.product_id}`, {
@@ -2984,7 +3033,7 @@ fetch('/api/MagentoByID', {
                                                         //         //       .then(async result => {
                                                         //         //           const tempProductId = result?.fields?.ID
                                                         //         //         //   transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
-                                                        //         //         //   templateObject.transNote.set(transNOtes);
+                                                        //         //         //   templateObject.setLogFunction(transNOtes);
                                                         //         //           productIdList.push(tempProductId)
                                                         //         //           productQtyList.push(product?.quantity)
                                                         //         //       })
@@ -2995,7 +3044,7 @@ fetch('/api/MagentoByID', {
                                                   })
                                                   .catch(() => {
                                                       transNOtes += `Error while getting client Id from the TrueERP database.\n`;
-                                                      templateObject.transNote.set(transNOtes);
+                                                      templateObject.setLogFunction(transNOtes);
                                                   })
 
                                           }
@@ -3033,7 +3082,7 @@ fetch('/api/MagentoByID', {
                                               .then(async result => {
                                                   const addedId = result?.fields?.ID
                                                   transNOtes += `Added a new Invoice to TrueERP database with ID: ${addedId}.\n`;
-                                                  templateObject.transNote.set(transNOtes);
+                                                  templateObject.setLogFunction(transNOtes);
                                               })
                                               .catch(error => console.log('error', error));
                                       }
@@ -3041,13 +3090,13 @@ fetch('/api/MagentoByID', {
                               })
                               .catch(() => {
                                   transNOtes += `There is no newly added Orders in the Woocommerce Website.\n`;
-                                  templateObject.transNote.set(transNOtes);
+                                  templateObject.setLogFunction(transNOtes);
                               })
 
 
                           //update the last sync time
                           transNOtes += `-----------------------------------------------------------\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
 
                           let nowInSydney = moment().tz("Australia/Brisbane").format("YYYY-MM-DD HH:mm:ss");
                           let args = {
@@ -3063,8 +3112,8 @@ fetch('/api/MagentoByID', {
                           })
                               .then(response => response.json())
                               .then(async (result) => {
-                                  transNOtes += `Updated Last Sync Time as ${moment(nowInSydney).format("DD/MMYYYY HH:mm:ss")}.\n`;
-                                  templateObject.transNote.set(transNOtes);
+                                  transNOtes += `Updated Last Sync Time as ${moment(nowInSydney).format("DD/MM/YYYY HH:mm:ss")}.\n`;
+                                  templateObject.setLogFunction(transNOtes);
                               })
                               .catch((err) => console.log(err))
                       }
@@ -3075,6 +3124,8 @@ fetch('/api/MagentoByID', {
   .catch(error => console.log(error));
 }
 else if (connectionType == "WooCommerce") {
+let constCategoryFromWoo = "";
+let woCategoryID = '';
 let postData = {
   id: tempConnection.customer_id,
 };
@@ -3114,7 +3165,7 @@ fetch(`/api/WooCommerceByID`, {
                   .then(response => response.json())
                   .then(async (result) => {
                       tempAccount = result[0];
-                      transNOtes = ""
+                      transNOtes = "";
                       var myHeaders = new Headers();
                       myHeaders.append("Database", `${tempAccount.database}`);
                       myHeaders.append("Username", `${tempAccount.user_name}`);
@@ -3146,12 +3197,23 @@ fetch(`/api/WooCommerceByID`, {
                               token = response.data.token
 
                               transNOtes += 'Got token for WooCommerce.\n';
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                           })
 
                         let postData1 = {
                             id: selConnectionId
-                        }
+                        };
+
+                        //Get Categories:
+                          await axios.get(`${url}/wp-json/wc/v3/products/categories`, {
+                              headers: {
+                                  'Authorization': `Bearer ${token}`,
+                              }
+                          }).then(async (response) => {
+                              constCategoryFromWoo = response.data;
+                              templateObject.woCategories.set(constCategoryFromWoo);
+                              console.log(response);
+                          });
 
                         fetch('/api/transfertypesByID', {
                             method: 'POST',
@@ -3185,13 +3247,13 @@ fetch(`/api/WooCommerceByID`, {
                                 }
                             }
 
-                            transNOtes += `Last Sync Time as ${moment(lstUpdateTime).format("DD/MMYYYY HH:mm:ss")}.\n`;
-                            templateObject.transNote.set(transNOtes);
+                            transNOtes += `Last Sync Time as ${moment(lstUpdateTime).format("DD/MM/YYYY HH:mm:ss")}.\n`;
+                            templateObject.setLogFunction(transNOtes);
                             async function runPerFiveMinutes() {
                                 if(customer_status){
                                 //getting newly added customer from ERP database
                                 transNOtes += `-----------------------------------------------------------\n`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
                                 await fetch(`${tempAccount.base_url}/TCustomer?select=[MsTimeStamp]>"${lstUpdateTime}"`,
                                     {
                                         method: 'GET',
@@ -3204,11 +3266,11 @@ fetch(`/api/WooCommerceByID`, {
 
                                         if (newCustomersFromERP.length === 0) {
                                             transNOtes += `There is no newly added Customer in TrueERP.\n`;
-                                            templateObject.transNote.set(transNOtes);
+                                            templateObject.setLogFunction(transNOtes);
                                         }
                                         else {
                                             transNOtes += `Found ${newCustomersFromERP.length} newly added customer(s) in TrueERP database.\n`;
-                                            templateObject.transNote.set(transNOtes);
+                                            templateObject.setLogFunction(transNOtes);
                                             let newCustomersFromERPCount = 0
 
                                             for (const newCustomerFromERP of newCustomersFromERP) {
@@ -3221,7 +3283,7 @@ fetch(`/api/WooCommerceByID`, {
                                                     .then(response => response.json())
                                                     .then(async result => {
                                                         transNOtes += `Got ${++newCustomersFromERPCount} Customer data with Id: ${newCustomerFromERP.Id} and MsTimeStamp: ${newCustomerFromERP.MsTimeStamp} from TrueERP.\n`;
-                                                        templateObject.transNote.set(transNOtes);
+                                                        templateObject.setLogFunction(transNOtes);
                                                         const bodyToAddWoocommerce = {
                                                             email: result?.fields?.Email,
                                                             first_name: result?.fields?.FirstName,
@@ -3256,7 +3318,7 @@ fetch(`/api/WooCommerceByID`, {
                                                         }
                                                         transNOtes += `(Detail) First name: ${bodyToAddWoocommerce?.first_name}, Last name: ${bodyToAddWoocommerce?.last_name}, Email: ${bodyToAddWoocommerce?.email}.\n`;
                                                         transNOtes += `Adding ${newCustomersFromERPCount} Customer to Woocommerce.\n`;
-                                                        templateObject.transNote.set(transNOtes);
+                                                        templateObject.setLogFunction(transNOtes);
                                                         await axios.post(`${url}/wp-json/wc/v3/customers`, bodyToAddWoocommerce, {
                                                             headers: {
                                                                 'Authorization': `Bearer ${token}`,
@@ -3266,15 +3328,15 @@ fetch(`/api/WooCommerceByID`, {
                                                                 const id = response.data.id
                                                                 if (id) {
                                                                     transNOtes += `Successfully added ${newCustomersFromERPCount} Customer to Woocommerce with ID: ${id}.\n`;
-                                                                    templateObject.transNote.set(transNOtes);
+                                                                    templateObject.setLogFunction(transNOtes);
                                                                 } else {
-                                                                    transNOtes += `[Error] Already existing user..\n`;
-                                                                    templateObject.transNote.set(transNOtes);
+                                                                    transNOtes += `[Error] Already existing customer..\n`;
+                                                                    templateObject.setLogFunction(transNOtes);
                                                                 }
                                                             })
                                                             .catch((err) => {
-                                                                transNOtes += `[Error] Already existing user..\n`;
-                                                                templateObject.transNote.set(transNOtes);
+                                                                transNOtes += `[Error] Already existing customer..\n`;
+                                                                templateObject.setLogFunction(transNOtes);
                                                             })
 
                                                     })
@@ -3284,14 +3346,14 @@ fetch(`/api/WooCommerceByID`, {
                                     })
                                     .catch(() => {
                                         transNOtes += `There is no newly added Customer.\n`;
-                                        templateObject.transNote.set(transNOtes);
+                                        templateObject.setLogFunction(transNOtes);
                                     })
                                 }
                                 if(product_status){
                                 //getting newly added products from ERP database
                                 transNOtes += `-----------------------------------------------------------\n`;
-                                templateObject.transNote.set(transNOtes);
-                                await fetch(`${tempAccount.base_url}/TProduct?select=[MsTimeStamp]>"${lstUpdateTime}"`,
+                                templateObject.setLogFunction(transNOtes);
+                                await fetch(`${tempAccount.base_url}/TProduct?select=[MsTimeStamp]>"${lstUpdateTime}"&[PublishOnWeb]=true`,
                                     {
                                         method: 'GET',
                                         headers: myHeaders,
@@ -3304,11 +3366,11 @@ fetch(`/api/WooCommerceByID`, {
 
                                         if (newProductsFromERP.length === 0) {
                                             transNOtes += `There is no newly added Product in TrueERP.\n`;
-                                            templateObject.transNote.set(transNOtes);
+                                            templateObject.setLogFunction(transNOtes);
                                         }
                                         else {
                                             transNOtes += `Found ${newProductsFromERP.length} newly added product(s) in TrueERP database.\n`;
-                                            templateObject.transNote.set(transNOtes);
+                                            templateObject.setLogFunction(transNOtes);
                                             let newProductsFromERPCount = 0
 
                                             for (const newProductFromERP of newProductsFromERP) {
@@ -3321,42 +3383,72 @@ fetch(`/api/WooCommerceByID`, {
                                                     .then(response => response.json())
                                                     .then(async result => {
                                                         transNOtes += `Got ${++newProductsFromERPCount} Product data with Id: ${newProductFromERP.Id} and MsTimeStamp: ${newProductFromERP.MsTimeStamp} from TrueERP.\n`;
-                                                        templateObject.transNote.set(transNOtes);
+                                                        templateObject.setLogFunction(transNOtes);
+
+                                                        /* Add Cateory To WooCommerce */
+                                                        const filteredArray = $.grep(constCategoryFromWoo, function(objCat) {
+                                                            return objCat.name.toUpperCase().includes(result?.fields?.ProductGroup2.toUpperCase());
+                                                        });
+
+                                                        if(filteredArray == '' && result?.fields?.ProductGroup2 != ''){
+                                                          const addMissingCategoriesWo = {
+                                                              name: result?.fields?.ProductGroup2,
+                                                              slug: result?.fields?.ProductGroup2,
+                                                              parent: 0,
+                                                              display: "default"
+                                                          };
+
+                                                          await axios.post(`${url}/wp-json/wc/v3/products/categories`, addMissingCategoriesWo, {
+                                                              headers: {
+                                                                  'Authorization': `Bearer ${token}`,
+                                                              }
+                                                          }).then(async (response) => {
+                                                                woCategoryID = response.data.id;
+                                                                console.log(woCategoryID);
+                                                              transNOtes += `Successfully added ${result?.fields?.ProductGroup2} Category to Woocommerce with ID: ${woCategoryID}.\n`;
+                                                          });
+
+                                                        }else{
+                                                          woCategoryID = filteredArray[0]?.id||0;
+                                                        };
+                                                        /* Add Cateory To WooCommerce */
                                                         // const uomSalesName = esult?.fields?.UOMSales
                                                         const bodyToAddWoocommerce = {
                                                             name: result?.fields?.ProductName,
                                                             permalink: result?.fields?.Hyperlink,
-                                                            // type: result?.fields?.ProductType,
+                                                            //type: result?.fields?.ProductGroup2,
                                                             description: result?.fields?.SalesDescription,
                                                             short_description: result?.fields?.SalesDescription,
                                                             sku: result?.fields?.SKU,
-                                                            price: result?.fields?.WHOLESALEPRICE,
+                                                            price: result?.fields?.SellQty1PriceInc,
+                                                            regular_price: `${result?.fields?.SellQty1PriceInc}`||'0',
+                                                            categories:[{id:woCategoryID}],
+                                                            // sale_price: `${result?.fields?.SellQty1PriceInc}`||'0',
                                                             total_sales: result?.fields?.SellQTY1 + result?.fields?.SellQTY2 + result?.fields?.SellQTY3,
                                                             weight: `"${result?.fields?.NetWeightKg}"`
-                                                        }
+                                                        };
                                                         products.push(bodyToAddWoocommerce?.name)
 
                                                         transNOtes += `(Detail) Product name: ${bodyToAddWoocommerce?.name}, Price: ${bodyToAddWoocommerce?.price}, Description: ${bodyToAddWoocommerce?.description}.\n`;
                                                         transNOtes += `Adding ${newProductsFromERPCount} Product to Woocommerce.\n`;
-                                                        templateObject.transNote.set(transNOtes);
+                                                        templateObject.setLogFunction(transNOtes);
                                                         await axios.post(`${url}/wp-json/wc/v3/products`, bodyToAddWoocommerce, {
                                                             headers: {
                                                                 'Authorization': `Bearer ${token}`,
                                                             }
-                                                        })
-                                                            .then(async (response) => {
+                                                        }).then(async (response) => {
                                                                 const id = response.data.id
                                                                 if (id) {
                                                                     transNOtes += `Successfully added ${newProductsFromERPCount} Product to Woocommerce with ID: ${id}.\n`;
-                                                                    templateObject.transNote.set(transNOtes);
+                                                                    templateObject.setLogFunction(transNOtes);
                                                                 } else {
                                                                     transNOtes += `[Error] Already existing product..\n`;
-                                                                    templateObject.transNote.set(transNOtes);
+                                                                    templateObject.setLogFunction(transNOtes);
                                                                 }
                                                             })
                                                             .catch((err) => {
                                                                 transNOtes += `[Error] Already existing product..\n`;
-                                                                templateObject.transNote.set(transNOtes);
+                                                                templateObject.setLogFunction(transNOtes);
                                                             })
 
                                                     })
@@ -3366,13 +3458,13 @@ fetch(`/api/WooCommerceByID`, {
                                     })
                                     .catch(() => {
                                         transNOtes += `There is no newly added product.\n`;
-                                        templateObject.transNote.set(transNOtes);
+                                        templateObject.setLogFunction(transNOtes);
                                     })
                                 }
 
                                 //Getting newly added orders from woocommerce
                                 transNOtes += `-----------------------------------------------------------\n`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
                                 await axios.get(`${url}/wp-json/wc/v3/orders?modified_after=${lstUpdateTimeUTC}`, {
                                     headers: {
                                         'Authorization': `Bearer ${token}`,
@@ -3384,26 +3476,27 @@ fetch(`/api/WooCommerceByID`, {
 
                                         if (ordersFromWoocommerce.length === 0) {
                                             transNOtes += `There is no newly added Order in the Woocommerce Website.\n`;
-                                            templateObject.transNote.set(transNOtes);
+                                            templateObject.setLogFunction(transNOtes);
                                         }
                                         else {
                                             transNOtes += `Found ${ordersFromWoocommerce.length} newly added order(s) in the Woocommerce Website.\n`;
-                                            templateObject.transNote.set(transNOtes);
+                                            templateObject.setLogFunction(transNOtes);
                                             let count = 0
                                             for (const orderFromWoocommerce of ordersFromWoocommerce) {
+
                                                 transNOtes += `Checking ${++count} Order from the Woocommerce Website\n`;
                                                 transNOtes += `(Billing Detail) First name: ${orderFromWoocommerce?.billing?.first_name}, Last name: ${orderFromWoocommerce?.billing?.last_name}, Postcode: ${orderFromWoocommerce?.billing?.postcode}.\n`;
                                                 for (const line of orderFromWoocommerce?.line_items) {
                                                     transNOtes += `(Line Detail)    Product Id: ${line?.product_id}, Product Name: "${line?.name}", Product Price: ${line?.price}\n`;
                                                 }
                                                 // transNOtes += `Adding ${count}th Order to ERP database.\n`;
-                                                templateObject.transNote.set(transNOtes);
+                                                templateObject.setLogFunction(transNOtes);
 
                                                 //check if the customer exists and add if not
                                                 const clientName = orderFromWoocommerce?.billing?.first_name + " " + orderFromWoocommerce?.billing?.last_name
                                                 let clientId
                                                 transNOtes += `Checking Customer in the TrueERP database for ClientName : ${clientName}...\n`;
-                                                templateObject.transNote.set(transNOtes);
+                                                templateObject.setLogFunction(transNOtes);
                                                 await fetch(`${tempAccount.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
                                                     {
                                                         method: 'GET',
@@ -3415,10 +3508,10 @@ fetch(`/api/WooCommerceByID`, {
                                                         if (result?.tcustomer.length > 0) {
                                                             clientId = result?.tcustomer[0]?.Id
                                                             transNOtes += `Found the Customer as ID : ${clientId}\n`;
-                                                            templateObject.transNote.set(transNOtes);
+                                                            templateObject.setLogFunction(transNOtes);
                                                         } else {
                                                             transNOtes += `Not Existing Customer, creating...\n`;
-                                                            templateObject.transNote.set(transNOtes);
+                                                            templateObject.setLogFunction(transNOtes);
                                                             const tempCustomerDetailtoERP = {
                                                                 type: "TCustomer",
                                                                 fields: {
@@ -3447,14 +3540,14 @@ fetch(`/api/WooCommerceByID`, {
                                                                 .then(async result => {
                                                                     clientId = result?.fields?.ID
                                                                     transNOtes += `Added a new customer to TrueERP database with ID : ${clientId}.\n`;
-                                                                    templateObject.transNote.set(transNOtes);
+                                                                    templateObject.setLogFunction(transNOtes);
                                                                 })
                                                                 .catch(error => console.log('error', error));
                                                         }
                                                     })
                                                     .catch(() => {
                                                         transNOtes += `Error while getting client Id from the TrueERP database.\n`;
-                                                        templateObject.transNote.set(transNOtes);
+                                                        templateObject.setLogFunction(transNOtes);
                                                     })
 
                                                 //check if the product exists and add if not
@@ -3463,12 +3556,12 @@ fetch(`/api/WooCommerceByID`, {
                                                 const productQtyList = []
                                                 download_transaction_count = productList.length
                                                 transNOtes += `There are ${productList.length} products in the Invoice line.\n`;
-                                                templateObject.transNote.set(transNOtes);
+                                                templateObject.setLogFunction(transNOtes);
 
                                                 for (const product of productList) {
                                                     transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.name}...\n`;
                                                     products.push(product?.name)
-                                                    templateObject.transNote.set(transNOtes);
+                                                    templateObject.setLogFunction(transNOtes);
                                                     await fetch(`${tempAccount.base_url}/TProduct?select=[ProductPrintName]="${product?.name}"`,
                                                         {
                                                             method: 'GET',
@@ -3480,12 +3573,12 @@ fetch(`/api/WooCommerceByID`, {
                                                             if (result?.tproduct.length > 0) {
                                                                 const productId = result?.tproduct[0]?.Id
                                                                 transNOtes += `Found the Product as ID : ${productId}\n`;
-                                                                templateObject.transNote.set(transNOtes);
+                                                                templateObject.setLogFunction(transNOtes);
                                                                 productIdList.push(productId)
                                                                 productQtyList.push(product?.quantity)
                                                             } else {
                                                                 // transNOtes += `Not Existing Product, creating...\n`;
-                                                                // templateObject.transNote.set(transNOtes);
+                                                                // templateObject.setLogFunction(transNOtes);
 
                                                                 //getting product by id from
                                                                 // await axios.get(`${url}/wp-json/wc/v3/products/${product.product_id}`, {
@@ -3537,7 +3630,7 @@ fetch(`/api/WooCommerceByID`, {
                                                                 //         //     .then(async result => {
                                                                 //         //         const tempProductId = result?.fields?.ID
                                                                 //         //         // transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
-                                                                //         //         // templateObject.transNote.set(transNOtes);
+                                                                //         //         // templateObject.setLogFunction(transNOtes);
                                                                 //         //         productIdList.push(tempProductId)
                                                                 //         //         productQtyList.push(product?.quantity)
                                                                 //         //     })
@@ -3548,7 +3641,7 @@ fetch(`/api/WooCommerceByID`, {
                                                         })
                                                         .catch(() => {
                                                             transNOtes += `Error while getting client Id from the TrueERP database.\n`;
-                                                            templateObject.transNote.set(transNOtes);
+                                                            templateObject.setLogFunction(transNOtes);
                                                         })
 
                                                 }
@@ -3586,21 +3679,82 @@ fetch(`/api/WooCommerceByID`, {
                                                     .then(async result => {
                                                         const addedId = result?.fields?.ID
                                                         transNOtes += `Added a new Invoice to TrueERP database with ID: ${addedId}.\n`;
-                                                        templateObject.transNote.set(transNOtes);
+                                                        templateObject.setLogFunction(transNOtes);
                                                     })
                                                     .catch(error => console.log('error', error));
+
+
                                             }
+
+                                            //Save Transaction Here
+
+                                            let account_id = tempConnection.account_id;
+                                            let connection_id = tempConnection.connection_id;
+                                            let today = new Date();
+
+                                            let year = today.getFullYear();
+                                            let month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+                                            let day = String(today.getDate()).padStart(2, '0');
+
+                                            let formattedDate = `${year}-${month}-${day}`;
+                                            products_num = upload_transaction_count + download_transaction_count
+                                            let transaction_data = {
+                                                'accounting_soft': account_id,
+                                                'connection_soft': connection_id,
+                                                'date': formattedDate,
+                                                'order_num': order_transaction_count||0,
+                                                'products': products||'',
+                                                'products_num': products_num||0,
+                                                'uploaded_num': upload_transaction_count||0,
+                                                'downloaded_num': download_transaction_count||0,
+                                                'connection_id': selConnectionId
+                                            }
+                                            transaction_details.push({
+                                                detail_string: 'Uploaded products from TrueERP to WooCommerce',
+                                                count: upload_transaction_count
+                                            })
+                                            transaction_details.push({
+                                                detail_string: 'Orders from WooCommerce to TrueERP',
+                                                count: order_transaction_count
+                                            })
+
+                                            let insertedTransactionID = 0;
+                                            fetch('/api/inserttransaction', {
+                                                method: 'POST',
+                                                headers: {
+                                                'Content-Type': 'application/json'
+                                                },
+                                                body: JSON.stringify(transaction_data)
+                                                }).then(response => response.json()).then(async (result) => {
+                                                    insertedTransactionID = result
+                                                    let postData = {
+                                                        'transaction_details': transaction_details,
+                                                        'transactionId': insertedTransactionID
+                                                    }
+                                                    fetch('/api/inserttransactionDetails', {
+                                                        method: 'POST',
+                                                        headers: {
+                                                        'Content-Type': 'application/json'
+                                                        },
+                                                        body: JSON.stringify(postData)
+                                                        }).then(response => response.json())
+                                                          .then(async (result) => {
+
+                                                        }).catch(error => console.log(error));
+                                            }).catch(error => console.log(error));
                                         }
+
+
                                     })
                                     .catch(() => {
                                         transNOtes += `There is no newly added Orders in the Woocommerce Website.\n`;
-                                        templateObject.transNote.set(transNOtes);
+                                        templateObject.setLogFunction(transNOtes);
                                     })
 
 
                                 //update the last sync time
                                 transNOtes += `-----------------------------------------------------------\n`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
 
                                 let nowInSydney = moment().tz("Australia/Brisbane").format("YYYY-MM-DD HH:mm:ss");
                                 let args = {
@@ -3616,69 +3770,12 @@ fetch(`/api/WooCommerceByID`, {
                                 })
                                 .then(response => response.json())
                                 .then(async (result) => {
-                                    transNOtes += `Updated Last Sync Time as ${moment(nowInSydney).format("DD/MMYYYY HH:mm:ss")}.\n`;
-                                    templateObject.transNote.set(transNOtes);
+                                    transNOtes += `Updated Last Sync Time as ${moment(nowInSydney).format("DD/MM/YYYY HH:mm:ss")}.\n`;
+                                    templateObject.setLogFunction(transNOtes);
                                 })
                                 .catch((err) => console.log(err));
 
-                                let account_id = tempConnection.account_id;
-                                let connection_id = tempConnection.connection_id;
-                                let today = new Date();
 
-                                let year = today.getFullYear();
-                                let month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
-                                let day = String(today.getDate()).padStart(2, '0');
-
-                                let formattedDate = `${year}-${month}-${day}`;
-                                products_num = upload_transaction_count + download_transaction_count
-                                let transaction_data = {
-                                    'accounting_soft': account_id,
-                                    'connection_soft': connection_id,
-                                    'date': formattedDate,
-                                    'order_num': order_transaction_count||0,
-                                    'products': products||'',
-                                    'products_num': products_num||0,
-                                    'uploaded_num': upload_transaction_count||0,
-                                    'downloaded_num': download_transaction_count||0,
-                                    'connection_id': selConnectionId
-                                }
-                                // transaction_details.push({
-                                //     detail_string: 'downloaded products from TrueERP to WooCommerce',
-                                //     count: download_transaction_count
-                                // });
-                                transaction_details.push({
-                                    detail_string: 'Uploaded products from TrueERP to WooCommerce',
-                                    count: upload_transaction_count
-                                })
-                                transaction_details.push({
-                                    detail_string: 'Orders from WooCommerce to TrueERP',
-                                    count: order_transaction_count
-                                })
-
-                                let insertedTransactionID = 0;
-                                fetch('/api/inserttransaction', {
-                                    method: 'POST',
-                                    headers: {
-                                    'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify(transaction_data)
-                                    }).then(response => response.json()).then(async (result) => {
-                                        insertedTransactionID = result
-                                        let postData = {
-                                            'transaction_details': transaction_details,
-                                            'transactionId': insertedTransactionID
-                                        }
-                                        fetch('/api/inserttransactionDetails', {
-                                            method: 'POST',
-                                            headers: {
-                                            'Content-Type': 'application/json'
-                                            },
-                                            body: JSON.stringify(postData)
-                                            }).then(response => response.json())
-                                              .then(async (result) => {
-
-                                            }).catch(error => console.log(error));
-                                }).catch(error => console.log(error));
 
                             }
                             runPerFiveMinutes()
@@ -3704,11 +3801,9 @@ fetch(`/api/AustraliaPOSTByID`, {
       'Content-Type': 'application/json'
   },
   body: JSON.stringify(postData)
-})
-  .then(response => response.json())
-  .then(async (result) => {
+}).then(response => response.json()).then(async (result) => {
       tempConnectionSoftware = result[0];
-
+      transNOtes = "";
       let postData = {
           id: tempConnection.account_id,
       };
@@ -3718,9 +3813,7 @@ fetch(`/api/AustraliaPOSTByID`, {
               'Content-Type': 'application/json'
           },
           body: JSON.stringify(postData)
-      })
-          .then(response => response.json())
-          .then(async (result) => {
+      }).then(response => response.json()).then(async (result) => {
               let postData = {
                   id: tempConnection.customer_id,
               };
@@ -3740,11 +3833,11 @@ fetch(`/api/AustraliaPOSTByID`, {
                       myHeaders.append("Username", `${tempAccount.user_name}`);
                       myHeaders.append("Password", `${tempAccount.password}`);
 
-                      transNOtes += `Last Sync Time as ${moment(lstUpdateTime).format("DD/MMYYYY HH:mm:ss")}.\n`;
-                      templateObject.transNote.set(transNOtes);
+                      transNOtes += `Last Sync Time as ${moment(lstUpdateTime).format("DD/MM/YYYY HH:mm:ss")}.\n`;
+                      templateObject.setLogFunction(transNOtes);
                       // Getting backorders invoice from ERP machine
                       transNOtes += `-----------------------------------------------------------\n`;
-                      templateObject.transNote.set(transNOtes);
+                      templateObject.setLogFunction(transNOtes);
                       await fetch(`${tempAccount.base_url}/Tinvoice?select=[MsTimeStamp]>"${lstUpdateTime}"`,
                           {
                               method: 'GET',
@@ -3757,7 +3850,7 @@ fetch(`/api/AustraliaPOSTByID`, {
                               const tempInvoiceList = result?.tinvoice
                               if (tempInvoiceList?.length === 0) {
                                   transNOtes += `There is no newly added Back Order Invoice in the ERP database.\n`;
-                                  templateObject.transNote.set(transNOtes);
+                                  templateObject.setLogFunction(transNOtes);
                               }
                               else {
                                   for (const tempInvoice of tempInvoiceList) {
@@ -3772,11 +3865,11 @@ fetch(`/api/AustraliaPOSTByID`, {
                                               if (result?.fields?.IsBackOrder) {
                                                   if (result?.fields?.Shipping !== "Aust Post") {
                                                       transNOtes += `${++backOrderInvoiceCount} Back Order Invoice from TrueERP Database with InvoiceID : ${result?.fields?.ID} Isn't through Australia POST, skipping...\n`;
-                                                      templateObject.transNote.set(transNOtes);
+                                                      templateObject.setLogFunction(transNOtes);
                                                   }
                                                   else {
                                                       transNOtes += `${++backOrderInvoiceCount} Back Order Invoice from TrueERP Database with InvoiceID : ${result?.fields?.ID}.\n`;
-                                                      templateObject.transNote.set(transNOtes);
+                                                      templateObject.setLogFunction(transNOtes);
 
                                                       const invoiceDetail = result?.fields
 
@@ -3788,14 +3881,14 @@ fetch(`/api/AustraliaPOSTByID`, {
                                                       for (const tempInvoiceLine of tempInvoiceLines) {
                                                           // if (tempInvoiceLine?.fields?.QtyShipped === 0) {
                                                           //     transNOtes += `No QtyShipped, skipping...\n`;
-                                                          //     templateObject.transNote.set(transNOtes);
+                                                          //     templateObject.setLogFunction(transNOtes);
                                                           //     continue
                                                           // }
                                                           const uomNameProductKey = tempInvoiceLine?.fields?.UOMNameProductKey
                                                           const lineTaxCode = tempInvoiceLine?.fields?.LineTaxCode
 
                                                           transNOtes += `Unit of Measure : ${uomNameProductKey}\n`;
-                                                          templateObject.transNote.set(transNOtes);
+                                                          templateObject.setLogFunction(transNOtes);
                                                           await fetch(`${tempAccount.base_url}/TUnitOfMeasure?listtype=detail&select=[KeyValue]="${uomNameProductKey}"`,
                                                               {
                                                                   method: 'GET',
@@ -3991,7 +4084,7 @@ fetch(`/api/AustraliaPOSTByID`, {
                                                                         const trackingNumber = result.data.shipments[0]?.items[0]?.tracking_details?.article_id;
                                                                         transNOtes += `Deliver cost : ${deliverCost}AUD\n`;
                                                                         transNOtes += `Tracking Number : ${trackingNumber}\n`;
-                                                                        templateObject.transNote.set(transNOtes);
+                                                                        templateObject.setLogFunction(transNOtes);
                                                                         console.log(tempInvoice);
                                                                         const updateObj = {
                                                                             "type": "TInvoice",
@@ -4012,7 +4105,7 @@ fetch(`/api/AustraliaPOSTByID`, {
                                                                             .then(response => response.json())
                                                                             .then(async result => {
                                                                                 transNOtes += `Updated the Invoice with ID : ${tempInvoice?.Id}\n`;
-                                                                                templateObject.transNote.set(transNOtes);
+                                                                                templateObject.setLogFunction(transNOtes);
                                                                                 // Create Bill
                                                                                 let billTotal = (deliverCost * 1.1);
 
@@ -4062,184 +4155,14 @@ fetch(`/api/AustraliaPOSTByID`, {
                                                                                     }).then(response => response.json()).then(async result => {
                                                                                         if (result?.fields?.ID) {
                                                                                             transNOtes += `Created a Bill with ID : ${result?.fields?.ID}\n`;
-                                                                                            templateObject.transNote.set(transNOtes);
+                                                                                            templateObject.setLogFunction(transNOtes);
                                                                                         }
                                                                                     })
                                                                             });
                                                                       }
                                                                   });
 
-                                                                  /*
-                                                                  await fetch("https://digitalapi.auspost.com.au/test/shipping/v1/shipments", {
-                                                                      method: 'POST',
-                                                                      headers: austHeaders,
-                                                                      body: JSON.stringify(testBedObj)
-                                                                  }).then(response => response.json()).then(async result => {
-                                                                          console.log(result);
-                                                                          const deliverCost = result?.shipments[0]?.shipment_summary?.total_cost * multiplier
-                                                                          const trackingNumber = result.shipments[0]?.items[0]?.tracking_details?.article_id
-                                                                          transNOtes += `Deliver cost : ${deliverCost}AUD\n`;
-                                                                          transNOtes += `Tracking Number : ${trackingNumber}\n`;
-                                                                          templateObject.transNote.set(transNOtes);
-                                                                          console.log(tempInvoice);
-                                                                          const updateObj = {
-                                                                              "type": "TInvoice",
-                                                                              "fields": {
-                                                                                  "ID": tempInvoice?.Id||0,
-                                                                                  "Shipping": "Aust Post",
-                                                                                  "ShippingCost": deliverCost,
-                                                                                  "ConNote": trackingNumber
-                                                                              }
-                                                                          }
-                                                                          await fetch(`${tempAccount.base_url}/Tinvoice`,
-                                                                              {
-                                                                                  method: 'POST',
-                                                                                  headers: myHeaders,
-                                                                                  redirect: 'follow',
-                                                                                  body: JSON.stringify(updateObj)
-                                                                              })
-                                                                              .then(response => response.json())
-                                                                              .then(async result => {
-                                                                                  transNOtes += `Updated the Invoice with ID : ${tempInvoice?.Id}\n`;
-                                                                                  templateObject.transNote.set(transNOtes);
-                                                                                  // Create Bill
-                                                                                  const billObj = {
-                                                                                      "type": "TBill",
-                                                                                      "fields": {
-                                                                                          "SupplierName": "Australia Post 6894736",
-                                                                                          "Lines": [
-                                                                                              {
-                                                                                                  "type": "TBillLine",
-                                                                                                  "fields": {
-                                                                                                      "AccountName": "Australia Post",
-                                                                                                      "ProductDescription": "",
-                                                                                                      "CustomerJob": "",
-                                                                                                      "LineCost": deliverCost,
-                                                                                                      "LineTaxCode": "NCG",
-                                                                                                      "LineClassName": "Default",
-                                                                                                      "CustomField10": "",
-                                                                                                      "CustomField9": "",
-                                                                                                      "CustomerJobID": invoiceDetail?.CustomerID,
-                                                                                                  }
-                                                                                              }
-                                                                                          ],
-                                                                                          "OrderTo": "Accountant 101 Pty Ltd\n101 Accounting Lane\nHoustin\nTexas 789123\nUnited States",
-                                                                                          // "OrderDate": "2023-12-21",
-                                                                                          "Deleted": false,
-                                                                                          "SupplierInvoiceNumber": `${tempInvoice?.Id}`,
-                                                                                          "ConNote": `${trackingNumber}`,
-                                                                                          "TermsName": "30 Days",
-                                                                                          "Shipping": "Australia Post",
-                                                                                          "Comments": "",
-                                                                                          "SalesComments": "",
-                                                                                          "OrderStatus": "",
-                                                                                          "BillTotal": deliverCost * 1.1,
-                                                                                          "TotalAmountInc": deliverCost * 1.1
-                                                                                      }
-                                                                                  }
 
-                                                                                  console.log("billObj", JSON.stringify(billObj))
-
-                                                                                  await fetch(`${tempAccount.base_url}/TBill`,
-                                                                                      {
-                                                                                          method: 'POST',
-                                                                                          headers: myHeaders,
-                                                                                          redirect: 'follow',
-                                                                                          body: JSON.stringify(billObj)
-                                                                                      })
-                                                                                      .then(response => response.json())
-                                                                                      .then(async result => {
-                                                                                          if (result?.fields?.ID) {
-                                                                                              transNOtes += `Created a Bill with ID : ${result?.fields?.ID}\n`;
-                                                                                              templateObject.transNote.set(transNOtes);
-                                                                                          }
-                                                                                      })
-                                                                              })
-                                                                      })
-                                                                      */
-                                                                  // //////////////////////////////////////////
-                                                                  // const apiKey = tempConnectionSoftware?.api_key;
-                                                                  // const baseUrl = tempConnectionSoftware?.base_url;
-                                                                  // const apiUrl = baseUrl + '/postage/parcel/domestic/calculate.json';
-                                                                  // const params = {
-                                                                  //     "length": length / 10,
-                                                                  //     "width": width / 10,
-                                                                  //     "height": height / 10,
-                                                                  //     "weight": weight,
-                                                                  //     "from_postcode": shipPostcode,
-                                                                  //     "to_postcode": invoicePostcode,
-                                                                  //     "service_code": "AUS_PARCEL_REGULAR"
-                                                                  // };
-                                                                  // // Convert the parameters to a query string
-                                                                  // const queryString = new URLSearchParams(params).toString();
-                                                                  // // Append the query string to the URL
-                                                                  // const fullUrl = `${apiUrl}?${queryString}`;
-                                                                  // const headers = new Headers({
-                                                                  //     "Auth-key": apiKey
-                                                                  // });
-                                                                  // await fetch(fullUrl, {
-                                                                  //     method: 'GET',
-                                                                  //     headers: headers,
-                                                                  // })
-                                                                  //     .then(response => response.json())
-                                                                  //     .then(async result => {
-                                                                  //         const deliverCost = result.postage_result.total_cost * multiplier
-                                                                  //         transNOtes += `Deliver cost : ${deliverCost}AUD\n`;
-                                                                  //         transNOtes += `Tracking Number : LH106650404AU\n`;
-                                                                  //         templateObject.transNote.set(transNOtes);
-                                                                  //         console.log("Hello")
-                                                                  //         // Create Bill
-                                                                  //         const billObj = {
-                                                                  //             "type": "TBill",
-                                                                  //             "fields": {
-                                                                  //                 "SupplierName": "Australia Post 6894736",
-                                                                  //                 "Lines": [
-                                                                  //                     {
-                                                                  //                         "type": "TBillLine",
-                                                                  //                         "fields": {
-                                                                  //                             "AccountName": "Australia Post",
-                                                                  //                             "ProductDescription": "",
-                                                                  //                             "CustomerJob": "",
-                                                                  //                             "LineCost": deliverCost,
-                                                                  //                             "LineTaxCode": "NCG",
-                                                                  //                             "LineClassName": "Default",
-                                                                  //                             "CustomField10": "",
-                                                                  //                             "CustomField9": "",
-                                                                  //                             "CustomerJobID": invoiceDetail?.CustomerID,
-                                                                  //                         }
-                                                                  //                     }
-                                                                  //                 ],
-                                                                  //                 "OrderTo": "Accountant 101 Pty Ltd\n101 Accounting Lane\nHoustin\nTexas 789123\nUnited States",
-                                                                  //                 // "OrderDate": "2023-12-21",
-                                                                  //                 "Deleted": false,
-                                                                  //                 "SupplierInvoiceNumber": `${tempInvoice?.Id}`,
-                                                                  //                 "ConNote": "LH106650404AU",
-                                                                  //                 "TermsName": "30 Days",
-                                                                  //                 "Shipping": "Australia Post",
-                                                                  //                 "Comments": "",
-                                                                  //                 "SalesComments": "",
-                                                                  //                 "OrderStatus": "",
-                                                                  //                 "BillTotal": deliverCost * 1.1,
-                                                                  //                 "TotalAmountInc": deliverCost * 1.1
-                                                                  //             }
-                                                                  //         }
-
-                                                                  //         console.log("billObj", billObj)
-                                                                  //         await fetch(`${tempAccount.base_url}/TBill`,
-                                                                  //             {
-                                                                  //                 method: 'POST',
-                                                                  //                 headers: myHeaders,
-                                                                  //                 redirect: 'follow',
-                                                                  //                 body: JSON.stringify(billObj)
-                                                                  //             })
-                                                                  //             .then(response => response.json())
-                                                                  //             .then(async result => {
-                                                                  //                 if (result?.fields?.ID) {
-                                                                  //                     transNOtes += `Created a Bill with ID : ${result?.fields?.ID}\n`;
-                                                                  //                     templateObject.transNote.set(transNOtes);
-                                                                  //                 }
-                                                                  //             })
-                                                                  //     })
                                                               })
                                                       }
                                                   }
@@ -4250,12 +4173,32 @@ fetch(`/api/AustraliaPOSTByID`, {
                           })
                           .catch(() => {
                               transNOtes += `There is no newly added Back Order Invoice.\n`;
-                              templateObject.transNote.set(transNOtes);
-                          })
+                              templateObject.setLogFunction(transNOtes);
+                          });
+
+                          let tempDate = new Date();
+                          // let dateString = moment().tz("Australia/Brisbane").format("YYYY-MM-DD HH:mm:ss");
+                          let dateString = tempDate.getFullYear() + "/" + ("0" + (tempDate.getMonth() + 1)).slice(-2) + "/" + ("0" + tempDate.getDate()).slice(-2) + " " +
+                            ("0" + tempDate.getHours()).slice(-2) + ":" + ("0" + tempDate.getMinutes()).slice(-2) + ":" + ("0" + tempDate.getSeconds()).slice(-2);
+                            console.log(dateString);
+                          let argsDate = {
+                            id: selConnectionId,
+                            last_ran_date: dateString,
+                          };
+                          await fetch(`/api/updateLastRanDate`, {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(argsDate),
+                          }).then((response) => response.json()).then(async (result) => {
+                            transNOtes += `Updated Last Sync Time as ${dateString}.\n`;
+                            templateObject.setLogFunction(transNOtes);
+                          }).catch((err) => console.log(err));
 
                       // //update the last sync time
                       // transNOtes += `-----------------------------------------------------------\n`;
-                      // templateObject.transNote.set(transNOtes);
+                      // templateObject.setLogFunction(transNOtes);
 
                       // let nowInSydney = moment().tz("Australia/Brisbane").format("YYYY-MM-DD HH:mm:ss");
                       // let args = {
@@ -4272,14 +4215,13 @@ fetch(`/api/AustraliaPOSTByID`, {
                       //     .then(response => response.json())
                       //     .then(async (result) => {
                       //         transNOtes += `Updated Last Sync Time as ${nowInSydney}.\n`;
-                      //         templateObject.transNote.set(transNOtes);
+                      //         templateObject.setLogFunction(transNOtes);
                       //     })
                       //     .catch((err) => console.log(err))
 
                   })
                   .catch((err) => console.log(err))
-          })
-          .catch((err) => console.log(err))
+          }).catch((err) => console.log(err))
   })
   .catch((err) => console.log(err))
 }
@@ -4297,7 +4239,7 @@ else if (connectionType == "Zoho") {
 
       var responseCount = 0;
       let customerCount = 0;
-      
+
       HTTP.call(
         "post",
         "/api/getAccSoftt",
@@ -4310,7 +4252,7 @@ else if (connectionType == "Zoho") {
           let erpObject;
           if (error) {
             transNOtes += "Can't connect to TrueERP database\n";
-            templateObject.transNote.set(transNOtes);
+            templateObject.setLogFunction(transNOtes);
             return;
           } else {
             erpObject = res.data[0];
@@ -4342,7 +4284,10 @@ else if (connectionType == "Zoho") {
               const authorizationUrl = `https://accounts.zoho.com/oauth/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}&response_type=token`;
 
               let token = '';
-              
+              let datacenter = 'com';
+              transNOtes += 'Getting token for Zoho\n';
+              templateObject.setLogFunction(transNOtes);
+
               const tokenPromise = await new Promise((resolve, reject) => {
                 Meteor.call("getZohoAccessToken", authorizationUrl, ZOHO_USERNAME, ZOHO_PASSWORD, (error, result) => {
                   if (error) {
@@ -4352,19 +4297,46 @@ else if (connectionType == "Zoho") {
                   }
                 });
               });
-              
+
               if (tokenPromise) {
-                token = tokenPromise
+                token = tokenPromise.token;
+                datacenter = tokenPromise.datacenter;
+                transNOtes += 'Got token for Zoho.\n';
+                templateObject.setLogFunction(transNOtes);
               }
 
-              console.log(token);
+              const resultUser = await new Promise(
+                (resolve, reject) => {
+                  Meteor.call(
+                    "getZohoCurrentUser",
+                    {auth: token, datacenter: datacenter},
+                    (error, result) => {
+                      if (error) {
+                        reject(error);
+                      } else {
+                        resolve(result);
+                      }
+                    }
+                  )
+                }
+              )
+
+              if (resultUser) {
+                lstUpdateTime = encodeURIComponent(moment(connectionResult[0].last_ran_date).tz(result.users[0].time_zone).subtract(1, 'hours').format("YYYY-MM-DDTHH:mm:ssZ"))
+              }
+
+
+              transNOtes += `Last Sync Time as ${moment(lstUpdateTime).format("DD/MM/YYYY HH:mm:ss")}.\n`;
+              templateObject.setLogFunction(transNOtes);
 
               if (ERP_SalesState) {
+                transNOtes += `-----------------------------------------------------------\n`;
+                                templateObject.setLogFunction(transNOtes);
                 await fetch(
                   erpObject.base_url +
                     // "/TSalesOrder?PropertyList=Lines,ClientName,OrderNumber,CustomerID,CreationDate,ClientName,DueDate,InvoicePrintDesc,ID&select=[MsTimeStamp]>"${lstUpdateTime}"`,
-                    `/TSalesOrder?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
-                  // `/TSalesOrder?Listtype=detail&limitCount=3`,
+                    // `/TSalesOrder?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
+                  `/TSalesOrder?Listtype=detail&limitCount=3`,
                   {
                     method: "GET",
                     headers: {
@@ -4379,7 +4351,7 @@ else if (connectionType == "Zoho") {
                   .then(async (result) => {
                     if (result.tsalesorder.length === 0) {
                       transNOtes += `There is no newly added Sales Order in TrueERP.\n`;
-                      templateObject.transNote.set(transNOtes);
+                      templateObject.setLogFunction(transNOtes);
                     } else {
                       responseCount = result.tsalesorder.length;
                       var resultData = result.tsalesorder;
@@ -4397,17 +4369,18 @@ else if (connectionType == "Zoho") {
                         ` ${formatting} from TrueERP.\n`;
 
                       transNOtes += `Adding ${formatting} to Zoho CRM \n`;
-                      templateObject.transNote.set(transNOtes);
+                      templateObject.setLogFunction(transNOtes);
                       function sleep(ms) {
                         return new Promise((resolve) =>
                           setTimeout(resolve, ms || DEF_DELAY)
                         );
                       }
 
-                      
+
                       const reqData = {
                         auth: token,
                         module: "Sales_Orders",
+                        datacenter: datacenter,
                         fieldName: "GlobalRef",
                         data: {
                           fields: [
@@ -4457,25 +4430,29 @@ else if (connectionType == "Zoho") {
 
                           if (resultPromise.data) {
                             transNOtes += `${reqData.module} field has been added in Sales_Orders module!\n`;
-                            templateObject.transNote.set(transNOtes);
+                            templateObject.setLogFunction(transNOtes);
                           } else {
                             console.log(resultPromise);
                             transNOtes += `${reqData.module} field adding Failed!\n`;
-                            templateObject.transNote.set(transNOtes);
+                            templateObject.setLogFunction(transNOtes);
                           }
                         }
                       } else if (!resultPromise) {
                         transNOtes += `${reqData.fieldName} field already exists!\n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
                       } else {
                         console.error("Error:", resultPromise);
                         transNOtes += `Checking Field existing Failed!\n`;
                         transNOtes += `Failed!!!\n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
                       }
 
                       let postData = [];
                       for (let i = 0; i < responseCount; i++) {
+                        let tempCount = i%10;
+                        let count = tempCount === 0 ? `${i+1}st` : tempCount === 1 ? `${i+1}nd` : tempCount === 2 ? `${i+1}rd` : `${i+1}th`;
+                        transNOtes += `Adding ${count} Sales Order to ERP database.\n`;
+                        templateObject.setLogFunction(transNOtes);
                         const productList = [];
                         if (!resultData[i].fields.Lines) {
                           continue;
@@ -4487,6 +4464,7 @@ else if (connectionType == "Zoho") {
                         ) {
                           const productreqData = {
                             auth: token,
+                            datacenter: datacenter,
                             productName: resultData[i]?.fields?.Lines[
                               j
                             ]?.fields?.ProductName.replace(/[\[\]()]/g, ""),
@@ -4515,7 +4493,6 @@ else if (connectionType == "Zoho") {
 
                           if (resultPromiseProductDetect.data) {
                             if (resultPromiseProductDetect.data.length > 0) {
-                              transNOtes += `Product Name "${productreqData.productName}" already exits in ZOHO\n`;
                               productList.push({
                                 product: {
                                   name: resultData[i]?.fields?.Lines[j]?.fields
@@ -4548,6 +4525,7 @@ else if (connectionType == "Zoho") {
                                         ?.GlobalRef,
                                   },
                                 ],
+                                datacenter: datacenter
                               };
 
                               const resultPromiseProduct = await new Promise(
@@ -4568,7 +4546,7 @@ else if (connectionType == "Zoho") {
 
                               if (resultPromiseProduct.data) {
                                 transNOtes += `${addProduct2Zotorequest.data[0].Product_Name} has been added in ZOHO\n`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
                                 productList.push({
                                   product: {
                                     name: resultData[i]?.fields?.Lines[j]
@@ -4584,7 +4562,7 @@ else if (connectionType == "Zoho") {
                                 });
                               } else {
                                 transNOtes += `${resultPromiseProduct}`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
                               }
                             }
                           } else {
@@ -4606,6 +4584,7 @@ else if (connectionType == "Zoho") {
                                       ?.GlobalRef,
                                 },
                               ],
+                              datacenter: datacenter
                             };
 
                             const resultPromiseProduct = await new Promise(
@@ -4626,7 +4605,7 @@ else if (connectionType == "Zoho") {
 
                             if (resultPromiseProduct.data) {
                               transNOtes += `${addProduct2Zotorequest.data[0].Product_Name} has been added in ZOHO\n`;
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                               productList.push({
                                 product: {
                                   name: resultData[i]?.fields?.Lines[j]?.fields
@@ -4643,16 +4622,15 @@ else if (connectionType == "Zoho") {
                             } else {
                               console.log(resultPromiseProduct);
                               transNOtes += `${resultPromiseProduct}`;
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                             }
                           }
                         }
 
                         const accountreqData = {
                           auth: token,
-                          Account_Name: resultData[
-                            i
-                          ]?.fields?.ClientName.replace(/[\[\]()]/g, ""),
+                          datacenter: datacenter,
+                          Account_Name: resultData[i]?.fields?.ClientName.replace(/[\[\]()]/g, ""),
                         };
                         if (!accountreqData.Account_Name) {
                           accountreqData.Account_Name = "Temp Account";
@@ -4678,7 +4656,7 @@ else if (connectionType == "Zoho") {
                         if (resultPromiseAccountDetect.data) {
                           if (resultPromiseAccountDetect.data.length > 0) {
                             transNOtes += `Account Name "${accountreqData.Account_Name}" already exists in ZOHO\n`;
-                            templateObject.transNote.set(transNOtes);
+                            templateObject.setLogFunction(transNOtes);
                             accountID = resultPromiseAccountDetect.data[0].id;
                           } else {
                             const addAccount2Zotorequest = {
@@ -4693,6 +4671,7 @@ else if (connectionType == "Zoho") {
                                   ),
                                 },
                               ],
+                              datacenter: datacenter
                             };
 
                             const resultPromiseAccount = await new Promise(
@@ -4713,12 +4692,12 @@ else if (connectionType == "Zoho") {
 
                             if (resultPromiseAccount.data) {
                               transNOtes += `Account ${addAccount2Zotorequest.data[0].Account_Name} has been added in ZOHO\n`;
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                               accountID = resultPromiseAccount.data[0].id;
                             } else {
                               console.log(error);
                               transNOtes += `${error.message}`;
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                             }
                           }
                         } else {
@@ -4733,6 +4712,7 @@ else if (connectionType == "Zoho") {
                                   ) || "TEST NAME",
                               },
                             ],
+                            datacenter: datacenter
                           };
 
                           const resultPromiseAccount = await new Promise(
@@ -4753,7 +4733,7 @@ else if (connectionType == "Zoho") {
 
                           if (resultPromiseAccount.data) {
                             transNOtes += `Account ${addAccount2Zotorequest.data[0].Account_Name} has been added in ZOHO\n`;
-                            templateObject.transNote.set(transNOtes);
+                            templateObject.setLogFunction(transNOtes);
                             accountID = resultPromiseAccount.data[0].id;
                           } else {
                             console.log(resultPromiseAccount);
@@ -4780,6 +4760,7 @@ else if (connectionType == "Zoho") {
                       let args = {
                         auth: token,
                         data: postData,
+                        datacenter: datacenter
                       };
 
                       const batchSize = 100;
@@ -4822,12 +4803,12 @@ else if (connectionType == "Zoho") {
                           } else {
                             transNOtes += `Sales Order transfer Failed!\n${result.message}\n`;
                           }
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                         } else {
                           console.log(resultSalesOrder);
                           transNOtes += `Sales Order transfer Failed!\n`;
                           transNOtes += `Failed!!!\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                         }
                       }
                       transaction_details.push({
@@ -4870,15 +4851,17 @@ else if (connectionType == "Zoho") {
                   .catch((error) => {
                     console.log(error);
                     transNOtes += `An error occurred while receiving Sales_Orders from TrueERP database\n`;
-                    templateObject.transNote.set(transNOtes);
+                    templateObject.setLogFunction(transNOtes);
                   });
               }
 
               if (ERP_CustomerState) {
+                transNOtes += `-----------------------------------------------------------\n`;
+                                templateObject.setLogFunction(transNOtes);
                 await fetch(
                   erpObject.base_url +
-                    `/TCustomer?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
-                  // `/TCustomer?PropertyList=ClientName,Email,FirstName,LastName,Phone,Mobile,SkypeName,Title,Faxnumber,Country,State,Street,Postcode,Billcountry,BillState,BillPostcode,BillStreet&limitCount=3`,
+                    // `/TCustomer?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
+                  `/TCustomer?PropertyList=ClientName,Email,FirstName,LastName,Phone,Mobile,SkypeName,Title,Faxnumber,Country,State,Street,Postcode,Billcountry,BillState,BillPostcode,BillStreet&limitCount=3`,
                   {
                     method: "GET",
                     headers: {
@@ -4893,7 +4876,7 @@ else if (connectionType == "Zoho") {
                   .then(async (result) => {
                     if (result.tcustomer.length === 0) {
                       transNOtes += `There is no newly added Customer in TrueERP.\n`;
-                      templateObject.transNote.set(transNOtes);
+                      templateObject.setLogFunction(transNOtes);
                     } else {
                       responseCount = result.tcustomer.length;
                       var resultData = result.tcustomer;
@@ -4911,20 +4894,21 @@ else if (connectionType == "Zoho") {
                         ` ${formatting} from TrueERP.\n`;
 
                       transNOtes += `Adding ${formatting} to Zoho CRM \n`;
-                      templateObject.transNote.set(transNOtes);
+                      templateObject.setLogFunction(transNOtes);
                       function sleep(ms) {
                         return new Promise((resolve) =>
                           setTimeout(resolve, ms || DEF_DELAY)
                         );
                       }
 
-                      
+
 
                       // fields existence checking
 
                       const reqData = {
                         auth: token,
                         module: "Contacts",
+                        datacenter: datacenter,
                         fieldName: "GlobalRef",
                         data: {
                           fields: [
@@ -4974,25 +4958,30 @@ else if (connectionType == "Zoho") {
 
                           if (resultPromise.data) {
                             transNOtes += `${reqData.module} field has been added in Contacts module!\n`;
-                            templateObject.transNote.set(transNOtes);
+                            templateObject.setLogFunction(transNOtes);
                           } else {
                             console.log(resultPromise);
                             transNOtes += `${reqData.module} field adding Failed!\n`;
-                            templateObject.transNote.set(transNOtes);
+                            templateObject.setLogFunction(transNOtes);
                           }
                         }
                       } else if (!resultPromise) {
                         transNOtes += `${reqData.fieldName} field already exists!\n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
                       } else {
                         console.error("Error:", resultPromise);
                         transNOtes += `Checking Field existing Failed!\n`;
                         transNOtes += `Failed!!!\n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
                       }
 
                       let postData = [];
                       for (let i = 0; i < responseCount; i++) {
+
+                        let tempCount = i%10;
+                        let count = tempCount === 0 ? `${i+1}st` : tempCount === 1 ? `${i+1}nd` : tempCount === 2 ? `${i+1}rd` : `${i+1}th`;
+                        transNOtes += `Adding ${count} Customer to ERP database.\n`;
+                        templateObject.setLogFunction(transNOtes);
                         tempData = {};
 
                         let tempNote = transNOtes;
@@ -5006,7 +4995,7 @@ else if (connectionType == "Zoho") {
                         transNOtes =
                           tempNote +
                           `Customer ${resultData[i]?.LastName} formating.... \n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
 
                         //Phone converting
                         tempData.Phone = resultData[i].Phone || "";
@@ -5042,7 +5031,7 @@ else if (connectionType == "Zoho") {
 
                         if (!resultData[i].LastName) {
                           transNOtes += `Customer ID ${resultData[i].Id} not imported as no Last name\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                           continue;
                         } else {
                           postData.push(tempData);
@@ -5052,6 +5041,7 @@ else if (connectionType == "Zoho") {
                       let args = {
                         auth: token,
                         data: postData,
+                        datacenter: datacenter
                       };
 
                       const batchSize = 100;
@@ -5088,12 +5078,12 @@ else if (connectionType == "Zoho") {
                           upload_transaction_count += resultPromise.data.length;
                           upload_num = resultPromise.data.length;
                           transNOtes += `Customers transfer Success!\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                         } else {
                           console.log(resultPromise);
                           transNOtes += `Customers transfer Failed!\n`;
                           transNOtes += `Failed!!!\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                         }
                       }
 
@@ -5139,14 +5129,16 @@ else if (connectionType == "Zoho") {
                   .catch((error) => {
                     console.log(error);
                     transNOtes += `An error occurred while receiving a Customer from TrueERP database\n`;
-                    templateObject.transNote.set(transNOtes);
+                    templateObject.setLogFunction(transNOtes);
                   });
               }
 
               if (ERP_ProductsState) {
+                transNOtes += `-----------------------------------------------------------\n`;
+                                templateObject.setLogFunction(transNOtes);
                 await fetch(
                   erpObject.base_url +
-                    `/TProduct?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
+                    `/TProduct?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"&[PublishOnWeb]=true`,
                   // `/TProduct?PropertyList=ProductName,PRODUCTCODE,ProductDescription,Active,SalesDescription,TotalQtyonOrder,TotalQtyInStock,WHOLESALEPRICE&limitCount=3`,
                   {
                     method: "GET",
@@ -5162,7 +5154,7 @@ else if (connectionType == "Zoho") {
                   .then(async (result) => {
                     if (result.tproduct.length === 0) {
                       transNOtes += `There is no newly added Products in TrueERP.\n`;
-                      templateObject.transNote.set(transNOtes);
+                      templateObject.setLogFunction(transNOtes);
                     } else {
                       responseCount = result.tproduct.length;
                       var resultData = result.tproduct;
@@ -5181,18 +5173,19 @@ else if (connectionType == "Zoho") {
                         ` ${formatting} from TrueERP.\n`;
 
                       transNOtes += `Adding ${formatting} to Zoho CRM \n`;
-                      templateObject.transNote.set(transNOtes);
+                      templateObject.setLogFunction(transNOtes);
                       function sleep(ms) {
                         return new Promise((resolve) =>
                           setTimeout(resolve, ms || DEF_DELAY)
                         );
                       }
 
-                      
+
 
                       const reqData = {
                         auth: token,
                         module: "Products",
+                        datacenter: datacenter,
                         fieldName: "GlobalRef",
                         data: {
                           fields: [
@@ -5242,25 +5235,30 @@ else if (connectionType == "Zoho") {
 
                           if (resultPromise.data) {
                             transNOtes += `${reqData.module} field has been added in Products module!\n`;
-                            templateObject.transNote.set(transNOtes);
+                            templateObject.setLogFunction(transNOtes);
                           } else {
                             console.log(resultPromise);
                             transNOtes += `${reqData.module} field adding Failed!\n`;
-                            templateObject.transNote.set(transNOtes);
+                            templateObject.setLogFunction(transNOtes);
                           }
                         }
                       } else if (!resultPromise) {
                         transNOtes += `${reqData.fieldName} field already exists!\n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
                       } else {
                         console.error("Error:", resultPromise);
                         transNOtes += `Checking Field existing Failed!\n`;
                         transNOtes += `Failed!!!\n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
                       }
 
                       let postData = [responseCount];
                       for (let i = 0; i < responseCount; i++) {
+
+                        let tempCount = i%10;
+                        let count = tempCount === 0 ? `${i+1}st` : tempCount === 1 ? `${i+1}nd` : tempCount === 2 ? `${i+1}rd` : `${i+1}th`;
+                        transNOtes += `Adding ${count} Product to ERP database.\n`;
+                        templateObject.setLogFunction(transNOtes);
                         // postData[i] = {};
 
                         let tempNote = transNOtes;
@@ -5280,6 +5278,7 @@ else if (connectionType == "Zoho") {
                       let args = {
                         auth: token,
                         data: postData,
+                        datacenter: datacenter
                       };
 
                       const batchSize = 100;
@@ -5316,11 +5315,11 @@ else if (connectionType == "Zoho") {
                             resultProductsPromise.data.length;
                           upload_num += resultProductsPromise.data.length;
                           transNOtes += `Products transfer Success!\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                         } else {
                           console.log(resultProductsPromise);
                           transNOtes += `Products transfer Failed!\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                         }
                       }
 
@@ -5363,15 +5362,17 @@ else if (connectionType == "Zoho") {
                   .catch((error) => {
                     console.log(error);
                     transNOtes += `An error occurred while receiving a Products from TrueERP database\n`;
-                    templateObject.transNote.set(transNOtes);
+                    templateObject.setLogFunction(transNOtes);
                   });
               }
 
               if (ERP_QuotesState) {
+                transNOtes += `-----------------------------------------------------------\n`;
+                                templateObject.setLogFunction(transNOtes);
                 await fetch(
                   erpObject.base_url +
-                    `/TQuote?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
-                  // `/TQuote?Listtype=detail&limitCount=3`,
+                    // `/TQuote?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
+                  `/TQuote?Listtype=detail&limitCount=3`,
                   {
                     method: "GET",
                     headers: {
@@ -5386,7 +5387,7 @@ else if (connectionType == "Zoho") {
                   .then(async (result) => {
                     if (result.tquote.length === 0) {
                       transNOtes += `There is no newly added Quote in TrueERP.\n`;
-                      templateObject.transNote.set(transNOtes);
+                      templateObject.setLogFunction(transNOtes);
                     } else {
                       responseCount = result.tquote.length;
                       var resultData = result.tquote;
@@ -5403,18 +5404,19 @@ else if (connectionType == "Zoho") {
                         ` ${formatting} from TrueERP.\n`;
 
                       transNOtes += `Adding ${formatting} to Zoho CRM \n`;
-                      templateObject.transNote.set(transNOtes);
+                      templateObject.setLogFunction(transNOtes);
                       function sleep(ms) {
                         return new Promise((resolve) =>
                           setTimeout(resolve, ms || DEF_DELAY)
                         );
                       }
 
-                      
+
 
                       const reqData = {
                         auth: token,
                         module: "Quotes",
+                        datacenter: datacenter,
                         fieldName: "GlobalRef",
                         data: {
                           fields: [
@@ -5464,25 +5466,30 @@ else if (connectionType == "Zoho") {
 
                           if (resultPromise.data) {
                             transNOtes += `${reqData.module} field has been added in Quotes module!\n`;
-                            templateObject.transNote.set(transNOtes);
+                            templateObject.setLogFunction(transNOtes);
                           } else {
                             console.log(resultPromise);
                             transNOtes += `${reqData.module} field adding Failed!\n`;
-                            templateObject.transNote.set(transNOtes);
+                            templateObject.setLogFunction(transNOtes);
                           }
                         }
                       } else if (!resultPromise) {
                         transNOtes += `${reqData.fieldName} field already exists!\n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
                       } else {
                         console.error("Error:", resultPromise);
                         transNOtes += `Checking Field existing Failed!\n`;
                         transNOtes += `Failed!!!\n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
                       }
 
                       let postData = [];
                       for (let i = 0; i < responseCount; i++) {
+
+                        let tempCount = i%10;
+                        let count = tempCount === 0 ? `${i+1}st` : tempCount === 1 ? `${i+1}nd` : tempCount === 2 ? `${i+1}rd` : `${i+1}th`;
+                        transNOtes += `Adding ${count} Quote to ERP database.\n`;
+                        templateObject.setLogFunction(transNOtes);
                         const productList = [];
                         if (!resultData[i].fields.Lines) {
                           continue;
@@ -5494,6 +5501,7 @@ else if (connectionType == "Zoho") {
                         ) {
                           const productreqData = {
                             auth: token,
+                            datacenter: datacenter,
                             productName: resultData[i]?.fields?.Lines[
                               j
                             ]?.fields?.ProductName.replace(/[\[\]()]/g, ""),
@@ -5522,7 +5530,7 @@ else if (connectionType == "Zoho") {
 
                           if (resultPromiseProductDetect.data) {
                             if (resultPromiseProductDetect.data.length > 0) {
-                              transNOtes += `Product Name "${productreqData.productName}" already exits in ZOHO\n`;
+
                               productList.push({
                                 product: {
                                   name: resultData[i]?.fields?.Lines[j]?.fields
@@ -5555,6 +5563,7 @@ else if (connectionType == "Zoho") {
                                         ?.GlobalRef,
                                   },
                                 ],
+                                datacenter: datacenter
                               };
 
                               const resultPromiseProduct = await new Promise(
@@ -5577,7 +5586,7 @@ else if (connectionType == "Zoho") {
                                 transNOtes +=
                                   `${addProduct2Zotorequest.data[0].Product_Name}` +
                                   ` has been added in ZOHO\n`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
                                 productList.push({
                                   product: {
                                     name: resultData[i]?.fields?.Lines[j]
@@ -5593,7 +5602,7 @@ else if (connectionType == "Zoho") {
                                 });
                               } else {
                                 transNOtes += `${resultPromiseProduct}`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
                               }
                             }
                           } else {
@@ -5615,6 +5624,7 @@ else if (connectionType == "Zoho") {
                                       ?.GlobalRef,
                                 },
                               ],
+                              datacenter: datacenter
                             };
 
                             const resultPromiseProduct = await new Promise(
@@ -5635,7 +5645,7 @@ else if (connectionType == "Zoho") {
 
                             if (resultPromiseProduct.data) {
                               transNOtes += `${addProduct2Zotorequest.data[0].Product_Name} has been added in ZOHO\n`;
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                               productList.push({
                                 product: {
                                   name: resultData[i]?.fields?.Lines[j]?.fields
@@ -5652,16 +5662,15 @@ else if (connectionType == "Zoho") {
                             } else {
                               console.log(resultPromiseProduct);
                               transNOtes += `${resultPromiseProduct}`;
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                             }
                           }
                         }
 
                         const accountreqData = {
                           auth: token,
-                          Account_Name: resultData[
-                            i
-                          ]?.fields?.ClientName.replace(/[\[\]()]/g, ""),
+                          datacenter: datacenter,
+                          Account_Name: resultData[i]?.fields?.ClientName.replace(/[\[\]()]/g, ""),
                         };
                         if (!accountreqData.Account_Name) {
                           accountreqData.Account_Name = "Temp Account";
@@ -5687,7 +5696,7 @@ else if (connectionType == "Zoho") {
                         if (resultPromiseAccountDetect.data) {
                           if (resultPromiseAccountDetect.data.length > 0) {
                             transNOtes += `Account Name "${accountreqData.Account_Name}" already exists in ZOHO\n`;
-                            templateObject.transNote.set(transNOtes);
+                            templateObject.setLogFunction(transNOtes);
                             accountID = resultPromiseAccountDetect.data[0].id;
                           } else {
                             const addAccount2Zotorequest = {
@@ -5702,6 +5711,7 @@ else if (connectionType == "Zoho") {
                                   ),
                                 },
                               ],
+                              datacenter: datacenter
                             };
 
                             const resultPromiseAccount = await new Promise(
@@ -5722,12 +5732,12 @@ else if (connectionType == "Zoho") {
 
                             if (resultPromiseAccount.data) {
                               transNOtes += `Account ${addAccount2Zotorequest.data[0].Account_Name} has been added in ZOHO\n`;
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                               accountID = resultPromiseAccount.data[0].id;
                             } else {
                               console.log(error);
                               transNOtes += `${error.message}`;
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                             }
                           }
                         } else {
@@ -5740,6 +5750,7 @@ else if (connectionType == "Zoho") {
                                 ]?.fields?.ClientName.replace(/[\[\]()]/g, ""),
                               },
                             ],
+                            datacenter: datacenter
                           };
 
                           const resultPromiseAccount = await new Promise(
@@ -5760,7 +5771,7 @@ else if (connectionType == "Zoho") {
 
                           if (resultPromiseAccount.data) {
                             transNOtes += `Account ${addAccount2Zotorequest.data[0].Account_Name} has been added in ZOHO\n`;
-                            templateObject.transNote.set(transNOtes);
+                            templateObject.setLogFunction(transNOtes);
                             accountID = resultPromiseAccount.data[0].id;
                           } else {
                             console.log(resultPromiseAccount);
@@ -5785,6 +5796,7 @@ else if (connectionType == "Zoho") {
                       let args = {
                         auth: token,
                         data: postData,
+                        datacenter: datacenter
                       };
 
                       const batchSize = 100;
@@ -5826,12 +5838,12 @@ else if (connectionType == "Zoho") {
                           } else {
                             transNOtes += `Quotes transfer Failed!\n${result.message}\n`;
                           }
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                         } else {
                           console.log(resultQuotes);
                           transNOtes += `Quotes transfer Failed!\n`;
                           transNOtes += `Failed!!!\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                         }
                       }
                       transaction_details.push({
@@ -5873,7 +5885,7 @@ else if (connectionType == "Zoho") {
                   .catch((error) => {
                     console.log(error);
                     transNOtes += `An error occurred while receiving a Quotes from TrueERP database\n`;
-                    templateObject.transNote.set(transNOtes);
+                    templateObject.setLogFunction(transNOtes);
                   });
               }
 
@@ -5994,7 +6006,7 @@ else if (connectionType == "Zoho") {
               transaction_details = [];
 
               await fetch(
-                "https://www.zohoapis.com/crm/v2/users?type=CurrentUser",
+                "https://www.zohoapis.${datacenter}/crm/v2/users?type=CurrentUser",
                 {
                   method: "GET",
                   headers: {
@@ -6019,14 +6031,17 @@ else if (connectionType == "Zoho") {
                 });
 
               if (ZOHO_QuotesState) {
+                transNOtes += `-----------------------------------------------------------\n`;
+                templateObject.setLogFunction(transNOtes);
                 transNOtes += "Processing Quotes.........\n";
-                templateObject.transNote.set(transNOtes);
+                templateObject.setLogFunction(transNOtes);
                 const args = {
                   auth: token,
                   data: {
                     module: "Quotes",
                     lstTime: lstUpdateTime,
                   },
+                  datacenter: datacenter
                 };
                 const resultQuotes = await new Promise((resolve, reject) => {
                   Meteor.call(
@@ -6049,7 +6064,7 @@ else if (connectionType == "Zoho") {
                   let combinedIds = ids.join(",");
 
                   await fetch(
-                    `https://www.zohoapis.com/crm/v2/Quotes?${combinedIds}`,
+                    `https://www.zohoapis.${datacenter}/crm/v2/Quotes?${combinedIds}`,
                     {
                       method: "GET",
                       headers: {
@@ -6062,7 +6077,7 @@ else if (connectionType == "Zoho") {
                     .then(async (result) => {
                       if (result.data.length === 0) {
                         transNOtes += `There is no newly added Quote in ZOHO.\n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
                       } else {
                         responseCount = result.data.length;
                         var resultData = result.data;
@@ -6073,7 +6088,7 @@ else if (connectionType == "Zoho") {
                           ` ${formatting} from Zoho.\n`;
 
                         transNOtes += `Adding ${formatting} to TrueERP \n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
 
                         let upload_num = 0;
 
@@ -6089,11 +6104,11 @@ else if (connectionType == "Zoho") {
                               : `${i + 1}th`;
                           transNOtes += `Adding ${count} Quote to ERP database.\n`;
                           console.log(count, tempCount, transNOtes);
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                           const clientName = resultData[i]?.Account_Name?.name;
                           let clientId;
                           transNOtes += `Checking Customer in the TrueERP database for ClientName : ${clientName}...\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                           await fetch(
                             `${erpObject.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
                             {
@@ -6112,10 +6127,10 @@ else if (connectionType == "Zoho") {
                               if (result?.tcustomer.length > 0) {
                                 clientId = result?.tcustomer[0]?.Id;
                                 transNOtes += `Found the Customer as ID : ${clientId}\n`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
                               } else {
                                 transNOtes += `Not Existing Customer, creating...\n`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
                                 const tempCustomerDetailtoERP = {
                                   type: "TCustomer",
                                   fields: {
@@ -6149,7 +6164,7 @@ else if (connectionType == "Zoho") {
                                   .then(async (result) => {
                                     clientId = result?.fields?.ID;
                                     transNOtes += `Added a new customer to TrueERP database with ID : ${clientId}.\n`;
-                                    templateObject.transNote.set(transNOtes);
+                                    templateObject.setLogFunction(transNOtes);
                                   })
                                   .catch((error) =>
                                     console.log("error", error)
@@ -6158,7 +6173,7 @@ else if (connectionType == "Zoho") {
                             })
                             .catch(() => {
                               transNOtes += `Error while getting client Id from the TrueERP database.\n`;
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                             });
 
                           //check if the product exists and add if not
@@ -6166,11 +6181,11 @@ else if (connectionType == "Zoho") {
                           const productIdList = [];
                           const productQtyList = [];
                           transNOtes += `There are ${productList.length} products in the Product_Details.\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
 
                           for (const product of productList) {
                             transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.product?.name}...\n`;
-                            templateObject.transNote.set(transNOtes);
+                            templateObject.setLogFunction(transNOtes);
                             await fetch(
                               `${erpObject.base_url}/TProduct?select=[ProductName]="${product?.product?.name}"`,
                               {
@@ -6189,13 +6204,13 @@ else if (connectionType == "Zoho") {
                                 if (result?.tproduct.length > 0) {
                                   const productId = result?.tproduct[0]?.Id;
                                   transNOtes += `Found the Product as ID : ${productId}\n`;
-                                  templateObject.transNote.set(transNOtes);
+                                  templateObject.setLogFunction(transNOtes);
                                   productIdList.push(productId);
                                   productQtyList.push(product?.quantity);
                                 }
                                 // } else {
                                 //   transNOtes += `Not Existing Product, creating...\n`;
-                                //   templateObject.transNote.set(transNOtes);
+                                //   templateObject.setLogFunction(transNOtes);
 
                                 //   let args = {
                                 //     productID: product?.product?.id,
@@ -6222,7 +6237,7 @@ else if (connectionType == "Zoho") {
                                 //     console.log(productListFromZOHO);
                                 //     transNOtes += `Product ${productListFromZOHO.data[0].id} Success!\n`;
 
-                                //     templateObject.transNote.set(transNOtes);
+                                //     templateObject.setLogFunction(transNOtes);
 
                                 //     const productFromZoho =
                                 //       productListFromZOHO.data[0];
@@ -6275,7 +6290,7 @@ else if (connectionType == "Zoho") {
                                 //         const tempProductId =
                                 //           result?.fields?.ID;
                                 //         transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
-                                //         templateObject.transNote.set(transNOtes);
+                                //         templateObject.setLogFunction(transNOtes);
                                 //         productIdList.push(tempProductId);
                                 //         productQtyList.push(product?.quantity);
                                 //       })
@@ -6286,14 +6301,14 @@ else if (connectionType == "Zoho") {
                                 //     console.log(productListFromZOHO);
                                 //     transNOtes += `product searching by id Failed!\n`;
                                 //     transNOtes += `Failed!!!\n`;
-                                //     templateObject.transNote.set(transNOtes);
+                                //     templateObject.setLogFunction(transNOtes);
                                 //   }
                                 // }
                                 // productQtyList.push(product?.quantity)
                               })
                               .catch(() => {
                                 transNOtes += `Error while getting Product Id from the TrueERP database.\n`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
                               });
                           }
 
@@ -6348,13 +6363,13 @@ else if (connectionType == "Zoho") {
                               upload_num += 1;
                               transNOtes += `Quotes transfer Success!\n`;
 
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                             })
                             .catch((error) => {
                               console.log(error);
                               transNOtes += `Quotes transfer Failed!\n`;
                               transNOtes += `Failed!!!\n`;
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                             });
                         }
 
@@ -6398,23 +6413,26 @@ else if (connectionType == "Zoho") {
                     .catch((err) => {
                       console.log(err);
                       transNOtes += `An error occurred while receiving a Quotes from Zoho\n`;
-                      templateObject.transNote.set(transNOtes);
+                      templateObject.setLogFunction(transNOtes);
                     });
                 } else {
                   transNOtes += `There is no newly added Quote in ZOHO.\n`;
-                  templateObject.transNote.set(transNOtes);
+                  templateObject.setLogFunction(transNOtes);
                 }
               }
 
               if (ZOHO_SalesState) {
+                transNOtes += `-----------------------------------------------------------\n`;
+                templateObject.setLogFunction(transNOtes);
                 transNOtes += "Processing Sales Orders.........\n";
-                templateObject.transNote.set(transNOtes);
+                templateObject.setLogFunction(transNOtes);
                 const args = {
                   auth: token,
                   data: {
                     module: "Sales_Orders",
                     lstTime: lstUpdateTime,
                   },
+                  datacenter: datacenter
                 };
                 const resultOrders = await new Promise((resolve, reject) => {
                   Meteor.call(
@@ -6437,7 +6455,7 @@ else if (connectionType == "Zoho") {
                   let combinedIds = ids.join(",");
 
                   await fetch(
-                    `https://www.zohoapis.com/crm/v2/Sales_Orders?${combinedIds}`,
+                    `https://www.zohoapis.${datacenter}/crm/v2/Sales_Orders?${combinedIds}`,
                     {
                       method: "GET",
                       headers: {
@@ -6450,7 +6468,7 @@ else if (connectionType == "Zoho") {
                     .then(async (result) => {
                       if (result.data.length === 0) {
                         transNOtes += `There is no newly added Sales Order in ZOHO.\n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
                       } else {
                         responseCount = result.data.length;
                         var resultData = result.data;
@@ -6468,7 +6486,7 @@ else if (connectionType == "Zoho") {
                           ` ${formatting} from Zoho.\n`;
 
                         transNOtes += `Adding ${formatting} to TrueERP \n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
 
                         let upload_num = 0;
 
@@ -6483,12 +6501,12 @@ else if (connectionType == "Zoho") {
                               ? `${i + 1}rd`
                               : `${i + 1}th`;
                           transNOtes += `Adding ${count} Sales Order to ERP database.\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
 
                           const clientName = resultData[i]?.Account_Name?.name;
                           let clientId;
                           transNOtes += `Checking Customer in the TrueERP database for ClientName : ${clientName}...\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                           await fetch(
                             `${erpObject.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
                             {
@@ -6507,10 +6525,10 @@ else if (connectionType == "Zoho") {
                               if (result?.tcustomer.length > 0) {
                                 clientId = result?.tcustomer[0]?.Id;
                                 transNOtes += `Found the Customer as ID : ${clientId}\n`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
                               } else {
                                 transNOtes += `Not Existing Customer, creating...\n`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
                                 const tempCustomerDetailtoERP = {
                                   type: "TCustomer",
                                   fields: {
@@ -6544,7 +6562,7 @@ else if (connectionType == "Zoho") {
                                   .then(async (result) => {
                                     clientId = result?.fields?.ID;
                                     transNOtes += `Added a new customer to TrueERP database with ID : ${clientId}.\n`;
-                                    templateObject.transNote.set(transNOtes);
+                                    templateObject.setLogFunction(transNOtes);
                                   })
                                   .catch((error) =>
                                     console.log("error", error)
@@ -6553,7 +6571,7 @@ else if (connectionType == "Zoho") {
                             })
                             .catch(() => {
                               transNOtes += `Error while getting client Id from the TrueERP database.\n`;
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                             });
 
                           //check if the product exists and add if not
@@ -6561,11 +6579,11 @@ else if (connectionType == "Zoho") {
                           const productIdList = [];
                           const productQtyList = [];
                           transNOtes += `There are ${productList.length} products in the Product_Details.\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
 
                           for (const product of productList) {
                             transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.product?.name}...\n`;
-                            templateObject.transNote.set(transNOtes);
+                            templateObject.setLogFunction(transNOtes);
                             await fetch(
                               `${erpObject.base_url}/TProduct?select=[ProductName]="${product?.product?.name}"`,
                               {
@@ -6584,13 +6602,13 @@ else if (connectionType == "Zoho") {
                                 if (result?.tproduct.length > 0) {
                                   const productId = result?.tproduct[0]?.Id;
                                   transNOtes += `Found the Product as ID : ${productId}\n`;
-                                  templateObject.transNote.set(transNOtes);
+                                  templateObject.setLogFunction(transNOtes);
                                   productIdList.push(productId);
                                   productQtyList.push(product?.quantity);
                                 }
                                 // } else {
                                 //     transNOtes += `Not Existing Product, creating...\n`;
-                                //     templateObject.transNote.set(transNOtes);
+                                //     templateObject.setLogFunction(transNOtes);
 
                                 //     let args = {
                                 //       productID: product?.product?.id,
@@ -6618,7 +6636,7 @@ else if (connectionType == "Zoho") {
                                 //       console.log(productListFromZOHO)
                                 //       transNOtes += `Product ${productListFromZOHO.data[0].id} Success!\n`;
 
-                                //       templateObject.transNote.set(transNOtes);
+                                //       templateObject.setLogFunction(transNOtes);
 
                                 //       const productFromZoho = productListFromZOHO.data[0];
 
@@ -6662,7 +6680,7 @@ else if (connectionType == "Zoho") {
                                 //                 .then(async result => {
                                 //                     const tempProductId = result?.fields?.ID
                                 //                     transNOtes += `Added a new product to TrueERP database with ID : ${tempProductId}.\n`;
-                                //                     templateObject.transNote.set(transNOtes);
+                                //                     templateObject.setLogFunction(transNOtes);
                                 //                     productIdList.push(tempProductId)
                                 //                     productQtyList.push(product?.quantity)
                                 //                 })
@@ -6671,7 +6689,7 @@ else if (connectionType == "Zoho") {
                                 //       console.log(productListFromZOHO)
                                 //       transNOtes += `product searching by id Failed!\n`;
                                 //       transNOtes += `Failed!!!\n`;
-                                //       templateObject.transNote.set(transNOtes);
+                                //       templateObject.setLogFunction(transNOtes);
                                 //     }
 
                                 // }
@@ -6679,7 +6697,7 @@ else if (connectionType == "Zoho") {
                               })
                               .catch(() => {
                                 transNOtes += `Error while getting Product Id from the TrueERP database.\n`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
                               });
                           }
 
@@ -6734,13 +6752,13 @@ else if (connectionType == "Zoho") {
                               upload_num += 1;
                               transNOtes += `SalesOrder transfer Success!\n`;
 
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                             })
                             .catch((error) => {
                               console.log(error);
                               transNOtes += `SalesOrder transfer Failed!\n`;
                               transNOtes += `Failed!!!\n`;
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                             });
                         }
 
@@ -6783,23 +6801,26 @@ else if (connectionType == "Zoho") {
                     })
                     .catch((err) => {
                       transNOtes += `An error occurred while receiving a Sales Orders from Zoho\n`;
-                      templateObject.transNote.set(transNOtes);
+                      templateObject.setLogFunction(transNOtes);
                     });
                 } else {
                   transNOtes += `There is no newly added Sales Order in ZOHO.\n`;
-                  templateObject.transNote.set(transNOtes);
+                  templateObject.setLogFunction(transNOtes);
                 }
               }
 
               if (ZOHO_LeadsState) {
+                transNOtes += `-----------------------------------------------------------\n`;
+                templateObject.setLogFunction(transNOtes);
                 transNOtes += "Processing Leads .........\n";
-                templateObject.transNote.set(transNOtes);
+                templateObject.setLogFunction(transNOtes);
                 const args = {
                   auth: token,
                   data: {
                     module: "Leads",
                     lstTime: lstUpdateTime,
                   },
+                  datacenter: datacenter
                 };
                 const resultLeads = await new Promise((resolve, reject) => {
                   Meteor.call(
@@ -6822,7 +6843,7 @@ else if (connectionType == "Zoho") {
                   let combinedIds = ids.join(",");
 
                   await fetch(
-                    `https://www.zohoapis.com/crm/v2/Leads?${combinedIds}`,
+                    `https://www.zohoapis.${datacenter}/crm/v2/Leads?${combinedIds}`,
                     {
                       method: "GET",
                       headers: {
@@ -6835,7 +6856,7 @@ else if (connectionType == "Zoho") {
                     .then(async (result) => {
                       if (result.data.length === 0) {
                         transNOtes += `There is no newly added Lead in ZOHO.\n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
                       } else {
                         responseCount = result.data.length;
                         var resultData = result.data;
@@ -6855,7 +6876,7 @@ else if (connectionType == "Zoho") {
                           ` ${formatting} from Zoho.\n`;
 
                         transNOtes += `Adding ${formatting} to TrueERP \n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
 
                         let upload_num = 0;
 
@@ -6870,7 +6891,7 @@ else if (connectionType == "Zoho") {
                               ? `${i + 1}rd`
                               : `${i + 1}th`;
                           transNOtes += `Adding ${count} Lead to ERP database.\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
 
                           let postData = {};
                           postData.type = "TProspect";
@@ -6883,7 +6904,7 @@ else if (connectionType == "Zoho") {
                             resultData[i]?.Last_Name || "";
 
                           transNOtes += `Lead ${resultData[i]?.Full_Name} converting ..........\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
                           postData.fields.LastName =
                             resultData[i]?.Last_Name || "";
 
@@ -6921,7 +6942,7 @@ else if (connectionType == "Zoho") {
                                   postData.fields.GlobalRef =
                                     result?.tprospect[0]?.GlobalRef;
                                   transNOtes += `Found the TProspect as ClientName : ${clientName}\n`;
-                                  templateObject.transNote.set(transNOtes);
+                                  templateObject.setLogFunction(transNOtes);
                                 } else {
                                   postData.fields.ClientName =
                                     resultData[i].Full_Name;
@@ -6932,7 +6953,7 @@ else if (connectionType == "Zoho") {
                                 postData.fields.ClientName =
                                   resultData[i].Full_Name;
                                 transNOtes += `Confirming TProspect existence of Lead in TrueERP Failed! \n`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
                               });
                           } else {
                             postData.fields.GlobalRef = resultData[i].GlobalRef;
@@ -6958,14 +6979,14 @@ else if (connectionType == "Zoho") {
                               upload_num += 1;
                               transNOtes += `Leads transfer Success!\n`;
 
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                             })
                             .catch((error) => {
                               console.log(error);
 
                               transNOtes += `Leads transfer Failed!\n`;
                               transNOtes += `Failed!!!\n`;
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                             });
                         }
 
@@ -7009,23 +7030,26 @@ else if (connectionType == "Zoho") {
                     .catch((error) => {
                       console.log(error);
                       transNOtes += `An error occurred while receiving a Leads from Zoho\n`;
-                      templateObject.transNote.set(transNOtes);
+                      templateObject.setLogFunction(transNOtes);
                     });
                 } else {
                   transNOtes += `There is no newly added Lead in ZOHO.\n`;
-                  templateObject.transNote.set(transNOtes);
+                  templateObject.setLogFunction(transNOtes);
                 }
               }
 
               if (ZOHO_CustomerState) {
+                transNOtes += `-----------------------------------------------------------\n`;
+                templateObject.setLogFunction(transNOtes);
                 transNOtes += "Processing Contacts .........\n";
-                templateObject.transNote.set(transNOtes);
+                templateObject.setLogFunction(transNOtes);
                 const args = {
                   auth: token,
                   data: {
                     module: "Contacts",
                     lstTime: lstUpdateTime,
                   },
+                  datacenter: datacenter
                 };
                 const resultContacts = await new Promise((resolve, reject) => {
                   Meteor.call(
@@ -7048,7 +7072,7 @@ else if (connectionType == "Zoho") {
                   let combinedIds = ids.join(",");
 
                   await fetch(
-                    `https://www.zohoapis.com/crm/v2/Contacts?${combinedIds}`,
+                    `https://www.zohoapis.${datacenter}/crm/v2/Contacts?${combinedIds}`,
                     {
                       method: "GET",
                       headers: {
@@ -7061,7 +7085,7 @@ else if (connectionType == "Zoho") {
                     .then(async (result) => {
                       if (result.data.length === 0) {
                         transNOtes += `There is no newly added Contact in ZOHO.\n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
                       } else {
                         responseCount = result.data.length;
                         var resultData = result.data;
@@ -7081,7 +7105,7 @@ else if (connectionType == "Zoho") {
                           ` ${formatting} from Zoho.\n`;
 
                         transNOtes += `Adding ${formatting} to TrueERP \n`;
-                        templateObject.transNote.set(transNOtes);
+                        templateObject.setLogFunction(transNOtes);
                         let upload_num = 0;
 
                         for (let i = 0; i < responseCount; i++) {
@@ -7095,7 +7119,7 @@ else if (connectionType == "Zoho") {
                               ? `${i + 1}rd`
                               : `${i + 1}th`;
                           transNOtes += `Adding ${count} Contact to ERP database.\n`;
-                          templateObject.transNote.set(transNOtes);
+                          templateObject.setLogFunction(transNOtes);
 
                           let postData = {};
                           postData.type = "TCustomer";
@@ -7141,7 +7165,7 @@ else if (connectionType == "Zoho") {
                                   postData.fields.GlobalRef =
                                     result?.tcustomer[0]?.GlobalRef;
                                   transNOtes += `Found the Customer as ClientName : ${clientName}\n`;
-                                  templateObject.transNote.set(transNOtes);
+                                  templateObject.setLogFunction(transNOtes);
                                 } else {
                                   postData.fields.ClientName =
                                     resultData[i].Full_Name;
@@ -7152,7 +7176,7 @@ else if (connectionType == "Zoho") {
                                 postData.fields.ClientName =
                                   resultData[i].Full_Name;
                                 transNOtes += `Confirming Customer existence in TrueERP Failed! \n`;
-                                templateObject.transNote.set(transNOtes);
+                                templateObject.setLogFunction(transNOtes);
                               });
                           } else {
                             postData.fields.GlobalRef = resultData[i].GlobalRef;
@@ -7178,13 +7202,13 @@ else if (connectionType == "Zoho") {
                               upload_num += 1;
                               transNOtes += `Customers transfer Success!\n`;
 
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                             })
                             .catch((error) => {
                               console.log(error);
                               transNOtes += `Customers transfer Failed!\n`;
                               transNOtes += `Failed!!!\n`;
-                              templateObject.transNote.set(transNOtes);
+                              templateObject.setLogFunction(transNOtes);
                             });
                         }
 
@@ -7228,7 +7252,7 @@ else if (connectionType == "Zoho") {
                     .catch((err) => console.log);
                 } else {
                   transNOtes += `There is no newly added Contact in ZOHO.\n`;
-                  templateObject.transNote.set(transNOtes);
+                  templateObject.setLogFunction(transNOtes);
                 }
               }
 
@@ -7342,7 +7366,7 @@ else if (connectionType == "Zoho") {
                       .catch((error) => console.log(error));
                   }
                 });
-  
+
             }).catch(error => {console.log(error)})
         }
       );
@@ -7350,14 +7374,11 @@ else if (connectionType == "Zoho") {
 else {
 swal(`Error Occurred While Attempting to Connect to the ${result[0].name} Server`, `Head to Connection Details and Check if ${result[0].name} Server Configuration is Correct`, "error")
 }
-})
-.catch(error => {
-templateObject.transNote.set(error)
+}).catch(error => {
+  templateObject.setLogFunction(error);
 });
-})
-.catch(error => {
-templateObject.transNote.set(error)
-
+}).catch(error => {
+  templateObject.setLogFunction(error);
 });
 }
 

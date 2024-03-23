@@ -1,6 +1,6 @@
 import { Meteor } from 'meteor/meteor';
 import pool from '../../imports/api/dbConection.js';
-
+const axios = require('axios');
 
 Meteor.methods({
     'getMagento': function () {
@@ -101,4 +101,105 @@ Meteor.methods({
             })
         })
     },
+
+    'getMagentoAdminToken': async function (reqData) {
+        console.log(reqData)
+        try {
+            const response = await axios.post(`${reqData.url}/rest/V1/integration/admin/token`,
+                {
+                    username: reqData.username, 
+                    password: reqData.password,
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Credentials': 'true'
+                    },
+                }
+            );
+            
+            return response.data;
+    
+        } catch (error) {
+            throw new Meteor.Error("api-error", error.response.data);
+        }
+    },
+
+    'addOrUpdateMagentoCustomer': async function (url, accessToken, customerData) {
+        try {
+          const response = await axios.post(
+            `${url}/rest/V1/customers`,
+            customerData,
+            {
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+
+          return response.data;
+        } catch (error) {
+            console.log(error)
+          throw new Meteor.Error("api-error", error.response.data.message);
+        }
+    },
+
+    'addOrUpdateMagentoProduct': async function(url, accessToken, productData) {
+        try {
+            const response = await axios.post(
+              `${url}/rest/V1/products`,
+              productData,
+              {
+                headers: {
+                  'Authorization': `Bearer ${accessToken}`,
+                  'Content-Type': 'application/json'
+                }
+              }
+            );
+            
+            return response.data;
+        } catch (error) {
+              console.log(error)
+            throw new Meteor.Error("api-error", error.response.data.message);
+        }
+    },
+
+    'findMagentoCustomerByEmail': async function(url, email, accessToken) {
+        try {
+          const response = await axios.get(
+            `${url}/rest/V1/customers/search?searchCriteria[filter_groups][0][filters][0][field]=email&searchCriteria[filter_groups][0][filters][0][value]=${email}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+    
+          return response?.data?.items[0];
+        } catch (error) {
+          throw new Meteor.Error("api-error", error.response.data.message);
+        }
+      },
+
+    'updateMagentoCustomer': async function(url, customerId, customerData, accessToken) {
+        try {
+          const response = await axios.put(
+            `${url}/rest/V1/customers/${customerId}`,
+            customerData,
+            {
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+    
+          return response.data;
+        } catch (error) {
+          throw new Meteor.Error("api-error", error.response.data.message);
+        }
+      }
+    
 });

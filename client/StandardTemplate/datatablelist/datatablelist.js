@@ -297,7 +297,7 @@ Template.datatablelist.onRendered(async function () {
                     })
                         .then(response => response.json())
                         .then(async (result1) => {
-                          await fetch(result1[0].base_url + `/erpapi/TProduct?select=[ProductName]="${result[0].product_name}"&ListType=Detail`, {
+                          await fetch(result1[0].base_url + `/TProduct?select=[ProductName]="${result[0].product_name}"&ListType=Detail`, {
                             //await fetch(result1[0].base_url + `/erpapi/TProduct?ListType=Detail`, {
                                 method: 'GET',
                                 headers: {
@@ -309,7 +309,7 @@ Template.datatablelist.onRendered(async function () {
                             })
                                 .then(response => response.json())
                                 .then(async (result2) => {
-                                    productData = result2.tproduct[0];
+                                    productData = result2.tproduct[0]||'';
                                     console.log(productData);
                                     result.map(async (r, index) => {
                                         var date = r.date.split('T');
@@ -358,7 +358,7 @@ Template.datatablelist.onRendered(async function () {
             })
                 .then(response => response.json())
                 .then(async (result) => {
-                    await fetch(result[0].base_url + '/erpapi/TProduct?ListType=Detail&LimitCount=50', {
+                    await fetch(result[0].base_url + '/TProduct?ListType=Detail&LimitCount=50', {
                         method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
@@ -422,7 +422,7 @@ Template.datatablelist.onRendered(async function () {
                     result.map((r, index) => {
                         result[index] = {
                             "TransactionId": r.transaction_id,
-                            "Time": r.date,
+                            "Date": r.date,
                             "Detail": r.detail_string,
                             "Count": r.count
                         }

@@ -278,7 +278,7 @@
                       <script>
                         $(".toggle-password").click(function () {
                           $(this).toggleClass("fa-eye fa-eye-slash");
-                          var passwordSecret = $("#cloudEmpUserPassword");
+                          var passwordSecret = $("#logonPassword");
 
                           if (passwordSecret.attr("type") == "password") {
                             passwordSecret.attr("type", "text");
