@@ -1,0 +1,489 @@
+<template name="trueerpcard">
+  <div class="row">
+      <div class="form-group col-md-4">
+          <label class="text-nowrap">User Name</label>
+          <input type="text" class="form-control" id="trueerp_user_name"
+              name="edtFirstName" value="{{record.user_name}}">
+      </div>
+      <div class="form-group col-md-4">
+          <label class="text-nowrap">Password</label>
+          <input type="text" class="form-control" id="trueerp_password"
+              name="edtFirstName" value="{{record.password}}">
+      </div>
+      <div class="form-group col-md-4 erp_enabled">
+          <label class="text-nowrap" style="padding: 12px"></label>
+          {{> toggle_button
+          className="chkGlobalSettings"
+          id="trueerp_enabled"
+          width="131px"
+          for="trueerp_enabled"
+          displayName="Enabled"
+          isChecked=record.enabled
+          }}
+      </div>
+  </div>
+  <div class="row">
+      <div class="form-group col-md-4">
+          <label class="text-nowrap">Database</label>
+          <input type="text" class="form-control" id="trueerp_database"
+              name="database" value="{{record.database}}">
+      </div>
+      <div class="form-group col-md-4">
+          <label class="text-nowrap">Client ID</label>
+          <input type="text" class="form-control edtClientID" id="trueerp_id"
+              name="client_id" value="{{record.id}}" disabled>
+      </div>
+      <div class="form-group col-md-4">
+          <label class="text-nowrap">Base URL</label>
+          <input type="text" class="form-control" id="trueerp_base_url"
+              name="base_url" value="{{record.base_url}}">
+      </div>
+  </div>
+  {{ #if equals connection "Magento" }}
+  <div class="row transferOption">
+      <div class="col-12 col-lg-4" id="whatTransfer">
+          <h5 class="mb-4">Type of Transfer</h5>
+          {{> toggle_button
+          className="chkGlobalSettings mt-3"
+          id="magento_customers2magento"
+          width="80px"
+          for="magento_customers2magento"
+          displayName="Magento Customers"
+          labelclass=''
+          isChecked=true
+          }}
+          {{> toggle_button
+          className="chkGlobalSettings mt-3"
+          id="magento_invoices2magento"
+          width="80px"
+          for="magento_invoices2magento"
+          displayName="Magento Invoices"
+          labelclass=''
+          isChecked=false
+          }}
+      </div>
+      <div class="col-12 col-lg-4"
+          style="padding: 0; border-right: solid gray 1px;">
+          <div class="row" style="padding-left: 20px;">
+              <div class="form-group"
+                  style="margin-left: 4px;padding-left:4px; width: 80%;">
+                  <label class="text-nowrap">
+                      <h5 style="margin-bottom: 8px;">Identifier</h5>
+                  </label>
+                  <select class="form-control" id="magento_cIdentify"
+                      name="cIdentify" style="cursor: pointer;">
+                      {{#if equals record.customer_identified_by 0}}
+                      <option value="1" selected>Invoice</option>
+                      <option value="0">Sales Order</option>
+                      {{else}}
+                      <option value="0">Invoice</option>
+                      <option value="1" selected>Sales Order</option>
+                      {{/if}}
+                  </select>
+              </div>
+              <div class="form-group"
+                  style="margin-left: 4px;padding-left:4px; width: 80%">
+              </div>
+          </div>
+      </div>
+      <div class="col-12 col-lg-4" style="padding: 0;">
+          <div class="form-group"
+              style="margin-left: 4px;padding-left:4px; width: 100%">
+              <h5 style="margin-bottom: 8px; margin-left: 10px; text-align: left;">
+                  Product Filter:</h5>
+              <button class="btn btn-primary btnFilter" id="btnFilterOption"
+                  type="button"><i class="fa fa-filter"
+                      style="margin-right: 5px;"></i>Filter
+                  Options</button>
+          </div>
+      </div>
+  </div>
+  {{ /if }}
+  {{ #if equals connection "WooCommerce" }}
+      <div class="row transferOption">
+          <div class="col-12 col-lg-4" id="whatTransfer">
+              <h5 class="mb-4">Type of Transfer</h5>
+              {{#each transfertype in transfertypes1}}
+              {{> toggle_button
+                  className="chkGlobalSettings mt-3"
+                  id=transfertype.id
+                  for=transfertype.id
+                  width="80px"
+                  displayName=transfertype.transfer_type
+                  labelclass=''
+                  isChecked=transfertype.status
+                  custId="account_transfertype_"
+              }}
+          {{/each}}
+          </div>
+          <div class="col-12 col-lg-4"
+              style="padding: 0; border-right: solid gray 1px;">
+              <div class="row" style="padding-left: 20px;">
+                  <div class="form-group"
+                      style="margin-left: 4px;padding-left:4px; width: 80%;">
+                      <label class="text-nowrap">
+                          <h5 style="margin-bottom: 8px;">Identifier</h5>
+                      </label>
+                      <select class="form-control" id="magento_cIdentify"
+                          name="cIdentify" style="cursor: pointer;">
+                          {{#if equals record.invoice_template 0}}
+                          <option value="0" selected>Invoice</option>
+                          <option value="1">Sales Order</option>
+                          {{else}}
+                          <option value="0">Invoice</option>
+                          <option value="1" selected>Sales Order</option>
+                          {{/if}}
+                      </select>
+                  </div>
+                  <div class="form-group"
+                      style="margin-left: 4px;padding-left:4px; width: 80%">
+                      <select class="form-control" id="magento_pName" name="pName"
+                          style="cursor: pointer;">
+                          {{#if equals record.customer_type 0}}
+                          <option value="0" selected>Email</option>
+                          <option value="1">CustomerID</option>
+                          {{else}}
+                          <option value="0">Email</option>
+                          <option value="1" selected>CustomerID</option>
+                          {{/if}}
+                      </select>
+                  </div>
+              </div>
+          </div>
+          <div class="col-12 col-lg-4" style="padding: 0;">
+              <div class="form-group"
+                  style="margin-left: 4px;padding-left:4px; width: 100%">
+                  <h5
+                      style="margin-bottom: 8px; margin-left: 10px; text-align: left;">
+                      Product
+                      Filter:</h5>
+                  <!-- <div style="align-items: center;"> -->
+                  <button class="btn btn-primary btnFilter" id="btnFilterOption"
+                      type="button"><i class="fa fa-filter"
+                          style="margin-right: 5px;"></i>Filter
+                      Options</button>
+                  <!-- </div> -->
+              </div>
+          </div>
+          <!-- <div class="col-2 d-xl-flex align-items-xl-start" style="padding: 0;">
+              <div class="form-group flex-grow-1"
+                  style="margin: 4px;padding-left:4px;">
+                  <label class="text-nowrap">Sync Page Size</label>
+                  <input type="text" class="form-control"
+                      id="magento_sync_page_size" name="edtMiddleName"
+                      value="{{record.synch_page_size}}">
+              </div>
+          </div> -->
+      </div>
+  {{ /if }}
+  {{ #if equals connection "Zoho" }}
+  <div class="row transferOption">
+      <div class="col-12 col-lg-4" id="whatTransfer">
+          <h5 class="mb-4">Type of Transfer</h5>
+          {{> toggle_button
+          className="chkGlobalSettings mt-3"
+          id="zoho_quotes2trueerp"
+          width="80px"
+          for="zoho_quotes2trueerp"
+          displayName="ZOHO Quotes"
+          labelclass=' '
+          isChecked=true
+          }}
+          {{> toggle_button
+          className="chkGlobalSettings mt-3"
+          id="zoho_sales_orders2trueerp"
+          width="80px"
+          for="zoho_sales_orders2trueerp"
+          displayName="ZOHO Sales Orders"
+          labelclass=' '
+          isChecked=false
+          }}
+          {{> toggle_button
+          className="chkGlobalSettings mt-3"
+          id="zoho_leads_prospects2trueerp"
+          width="80px"
+          for="zoho_leads_prospects2trueerp"
+          displayName="ZOHO Leads to Prospects"
+          labelclass=' '
+          isChecked=false
+          }}
+          {{> toggle_button
+          className="chkGlobalSettings mt-3"
+          id="zoho_contacts_customers2trueerp"
+          width="80px"
+          for="zoho_contacts_customers2trueerp"
+          displayName="ZOHO Contacts to Customers"
+          labelclass=' '
+          isChecked=false
+          }}
+      </div>
+      <div class="col-12 col-lg-4"
+          style="padding: 0; border-right: solid gray 1px;">
+          <div class="row" style="padding-left: 20px;">
+              <div class="form-group"
+                  style="margin-left: 4px;padding-left:4px; width: 80%;">
+                  <label class="text-nowrap">
+                      <h5 style="margin-bottom: 8px;">Identifier</h5>
+                  </label>
+                  <select class="form-control" id="magento_pName" name="pName"
+                      style="cursor: pointer;">
+                      {{#if equals record.product_name 0}}
+                      <option value="1" selected>Email</option>
+                      <option value="0">CustomerID</option>
+                      {{else}}
+                      <option value="0">Email</option>
+                      <option value="1" selected>CustomerID</option>
+                      {{/if}}
+                  </select>
+              </div>
+          </div>
+      </div>
+      <div class="col-12 col-lg-4" style="padding: 0;">
+          <div class="form-group"
+              style="margin-left: 4px;padding-left:4px; width: 100%">
+              <h5
+                  style="margin-bottom: 8px; margin-left: 10px; text-align: left;">
+                  Product
+                  Filter:</h5>
+              <!-- <div style="align-items: center;"> -->
+              <button class="btn btn-primary btnFilter" id="btnFilterOption"
+                  type="button"><i class="fa fa-filter"
+                      style="margin-right: 5px;"></i>Filter
+                  Options</button>
+              <!-- </div> -->
+          </div>
+      </div>
+  </div>
+  {{ /if }}
+  {{ #if equals connection "AustraliaPOST" }}
+  <div class="row transferOption">
+      <div class="col-12 col-lg-4" id="whatTransfer">
+          <h5 class="mb-4">Type of Transfer</h5>
+          {{> toggle_button
+          className="chkGlobalSettings mt-3"
+          id="austpost_invoices2austpost"
+          width="80px"
+          for="austpost_invoices2austpost"
+          displayName="AustPOST Invoices"
+          labelclass=''
+          isChecked=true
+          }}
+          {{> toggle_button
+          className="chkGlobalSettings mt-3"
+          id="magento_customers2magento"
+          width="80px"
+          for="magento_customers2magento"
+          displayName="AustPOST Customers"
+          labelclass=''
+          isChecked=false
+          }}
+      </div>
+      <div class="col-12 col-lg-4"
+          style="padding: 0; border-right: solid gray 1px;">
+          <div class="row" style="padding-left: 20px;">
+              <div class="form-group"
+                  style="margin-left: 4px;padding-left:4px; width: 80%;">
+                  <label class="text-nowrap">
+                      <h5 style="margin-bottom: 8px;">Identifier</h5>
+                  </label>
+                  <select class="form-control" id="magento_cIdentify"
+                      name="cIdentify" style="cursor: pointer;">
+                      {{#if equals record.customer_identified_by 0}}
+                      <option value="1" selected>Invoice</option>
+                      <option value="0">Sales Order</option>
+                      {{else}}
+                      <option value="0">Invoice</option>
+                      <option value="1" selected>Sales Order</option>
+                      {{/if}}
+                  </select>
+              </div>
+              <div class="form-group"
+                  style="margin-left: 4px;padding-left:4px; width: 80%">
+                  <!-- <select class="form-control" id="magento_pName" name="pName"
+                      style="cursor: pointer;">
+                      {{#if equals record.product_name 0}}
+                      <option value="1" selected>Email</option>
+                      <option value="0">CustomerID</option>
+                      {{else}}
+                      <option value="0">Email</option>
+                      <option value="1" selected>CustomerID</option>
+                      {{/if}}
+                  </select> -->
+              </div>
+          </div>
+      </div>
+      <div class="col-12 col-lg-4" style="padding: 0;">
+          <div class="form-group"
+              style="margin-left: 4px;padding-left:4px; width: 80%">
+              <h5 style="margin-bottom: 8px; margin-left: 10px; text-align: left;">
+                  Product Filter:</h5>
+              <!-- <div style="align-items: center;"> -->
+              <button class="btn btn-primary btnFilter" id="btnFilterOption"
+                  type="button"><i class="fa fa-filter"
+                      style="margin-right: 5px;"></i>Filter
+                  Options</button>
+              <!-- </div> -->
+          </div>
+      </div>
+      <!-- <div class="col-2 d-xl-flex align-items-xl-start" style="padding: 0;">
+          <div class="form-group flex-grow-1"
+              style="margin: 4px;padding-left:4px;">
+              <label class="text-nowrap">Sync Page Size</label>
+              <input type="text" class="form-control"
+                  id="magento_sync_page_size" name="edtMiddleName"
+                  value="{{record.synch_page_size}}">
+          </div>
+      </div> -->
+  </div>
+  <div class="row transferOption">
+      <div class="col-12 col-lg-6" id="whatTransfer">
+          <h5 style="margin-bottom: 8px;">Customer Card Extras</h5>
+          <div class="form-group" style="margin: 4px;">
+          {{> toggle_button
+          className="chkGlobalSettings mt-3"
+          id="austpost_customertype"
+          width="80px"
+          for="austpost_customertype"
+          displayName="Customer Type"
+          labelclass=''
+          isChecked=true
+          }}
+          </div>
+          <div class="form-group" style="margin: 4px;">
+          {{> toggle_button
+          className="chkGlobalSettings mt-3"
+          id="austpost_DefaultInvoiceTemplate"
+          width="80px"
+          for="austpost_DefaultInvoiceTemplate"
+          displayName="Default Invoice Template"
+          labelclass=''
+          isChecked=false
+          }}
+          </div>
+          <div class="form-group" style="margin: 4px;">
+          {{> toggle_button
+          className="chkGlobalSettings mt-3"
+          id="austpost_relatedcustomers"
+          width="80px"
+          for="austpost_relatedcustomers"
+          displayName="Use Related Customers"
+          labelclass=''
+          isChecked=false
+          }}
+          </div>
+      </div>
+      <div class="col-12 col-lg-6" style="padding: 0;">
+          <div class="row" style="padding-left: 20px;">
+              <div class="form-group"
+                  style="margin-left: 4px;padding-left:4px; width: 80%;">
+                  <label class="text-nowrap">
+                      <h5 style="margin-bottom: 8px;">Options</h5>
+                  </label>
+                  <select class="form-control" id="magento_cIdentify"
+                      name="cIdentify" style="cursor: pointer;">
+                      {{#if equals record.customer_identified_by 0}}
+                      <option value="0" selected>Camplist</option>
+                      <option value="1">Default</option>
+                      <option value="2">Outdoor Pro deal</option>
+                      <option value="3">Trade</option>
+                      <option value="4">W/S Trade</option>
+                      <option value="5">Wholesale</option>
+                      {{else if equals record.customer_identified_by 1}}
+                      <option value="0">Camplist</option>
+                      <option value="1" selected>Default</option>
+                      <option value="2">Outdoor Pro deal</option>
+                      <option value="3">Trade</option>
+                      <option value="4">W/S Trade</option>
+                      <option value="5">Wholesale</option>
+                      {{else if equals record.customer_identified_by 2}}
+                      <option value="0">Camplist</option>
+                      <option value="1">Default</option>
+                      <option value="2" selected>Outdoor Pro deal</option>
+                      <option value="3">Trade</option>
+                      <option value="4">W/S Trade</option>
+                      <option value="5">Wholesale</option>
+                      {{else if equals record.customer_identified_by 3}}
+                      <option value="0">Camplist</option>
+                      <option value="1">Default</option>
+                      <option value="2">Outdoor Pro deal</option>
+                      <option value="3" selected>Trade</option>
+                      <option value="4">W/S Trade</option>
+                      <option value="5">Wholesale</option>
+                      {{else if equals record.customer_identified_by 4}}
+                      <option value="0">Camplist</option>
+                      <option value="1">Default</option>
+                      <option value="2">Outdoor Pro deal</option>
+                      <option value="3">Trade</option>
+                      <option value="4" selected>W/S Trade</option>
+                      <option value="5">Wholesale</option>
+                      {{else}}
+                      <option value="0">Camplist</option>
+                      <option value="1">Default</option>
+                      <option value="2">Outdoor Pro deal</option>
+                      <option value="3">Trade</option>
+                      <option value="4">W/S Trade</option>
+                      <option value="5" selected>Wholesale</option>
+                      {{/if}}
+                  </select>
+              </div>
+              <div class="form-group"
+                  style="margin-left: 4px;padding-left:4px; width: 80%">
+                  <select class="form-control" id="magento_pName" name="pName"
+                      style="cursor: pointer;">
+                      {{#if equals record.product_name 0}}
+                      <option value="0" selected>Invoice A (One Planet)</option>
+                      <option value="1">Invoice B (Camplist)</option>
+                      <option value="2">Invoice C (OP credit note)</option>
+                      <option value="3">Invoice C (OP credit note)</option>
+                      {{else if equals record.product_name 1}}
+                      <option value="0">Invoice A (One Planet)</option>
+                      <option value="1" selected>Invoice B (Camplist)</option>
+                      <option value="2">Invoice C (OP credit note)</option>
+                      <option value="3">Invoice C (OP credit note)</option>
+                      {{else if equals record.product_name 2}}
+                      <option value="0">Invoice A (One Planet)</option>
+                      <option value="1">Invoice B (Camplist)</option>
+                      <option value="2" selected>Invoice C (OP credit note)
+                      </option>
+                      <option value="3">Invoice C (OP credit note)</option>
+                      {{else}}
+                      <option value="0">Invoice A (One Planet)</option>
+                      <option value="1">Invoice B (Camplist)</option>
+                      <option value="2">Invoice C (OP credit note)</option>
+                      <option value="3" selected>Invoice C (OP credit note)
+                      </option>
+                      {{/if}}
+                  </select>
+              </div>
+          </div>
+      </div>
+  </div>
+  {{ /if }}
+  <div class="d-xl-flex justify-content-between align-items-xl-center"
+      style="margin: 16px 0px 0px 0px;">
+      <div>
+          <button class="btn btn-success btnRunERP btn-auto-RunERP"
+          id="btnRunERP" type="button"><i class="fa fa-sync"
+              style="margin-right: 5px;"></i>Run Now</button>
+          <button class="btn btn-success btnTestERPConnection btn-auto-testERP"
+              id="btnTestERPConnection" type="button"><i class="fa fa-play"
+                  style="margin-right: 5px;"></i>Test TrueERP</button>
+
+      </div>
+      <div>
+          <button class="btn btn-success btnSave btn-auto-save" id="saveTrueERP"
+              type="button"><i class="fa fa-save"
+                  style="margin-right: 5px;"></i>Save</button>
+          <button class="btn btn-success btnUpdate btn-auto-update"
+              style="display: none;" id="updateTrueERP" type="button"><i
+                  class="fa fa-save"
+                  style="margin-right: 5px;"></i>Update</button>
+          <button class="btn btn-danger btnDelete" type="button"
+              data-toggle="modal"><i class="fas fa-trash-alt"
+                  style="margin-right: 5px;"></i> Delete</button>
+          <button class="btn btn-secondary btnBack" type="button"><i
+                  class="fa fa-close" style="margin-right: 5px;"
+                  id="true-erp-cancel-btn"></i>Cancel</button>
+      </div>
+  </div>
+</template>

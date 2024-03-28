@@ -178,7 +178,7 @@ Meteor.startup(() => {
       });
     });
   });
-
+/*
   JsonRoutes.add('post', '/api/updatetransfertypes', function (req, res) {
     jsonParser(req, res, () => {
       const data = req.body;
@@ -198,6 +198,99 @@ Meteor.startup(() => {
       return JsonRoutes.sendResult(res, {
         data: 'success'
       });
+    });
+  });
+*/
+
+JsonRoutes.add('post', '/api/updatetransfertypes', function (req, res) {
+  jsonParser(req, res, () => {
+    const data = req.body;
+    for(let i = 0; i< data.length; i++){
+
+      let transfer_type = data[i];
+      let id = transfer_type.id;
+      let status = 0;
+      let connectionID = transfer_type.connection_id;
+      let tabID = transfer_type.tab_id;
+      let transferType = transfer_type.transfer_type;
+      if(transfer_type.checked == true){
+        status = 1
+      };
+
+      //Check IF NEW
+      const querySelect = "SELECT * FROM transfer_types WHERE id = '" + data[i].id + "'"
+      pool.query(querySelect, (error, resultSelect, fields) => {
+        if (error) {
+          handleError(error, res);
+        }else {
+           if (resultSelect.length != 0) {//Update Data
+             const queryUpdate = "UPDATE transfer_types SET status = '" + status + "'WHERE id = '" + id+ "'"
+             pool.query(queryUpdate, (error, results, fields) => {
+               if (error) {
+                 handleError(error, res);
+               }
+             });
+           }else{
+             //Create NEW
+             const queryInsert = `INSERT IGNORE INTO transfer_types (transfer_type, status, connection_id, tab_id) VALUES ('${transferType}', '${status}', '${connectionID}', '${tabID}')`;
+             pool.query(queryInsert, (error, results, fields) => {
+               if (error) {
+                 handleError(error, res);
+               }
+             });
+           };
+        }
+      })
+
+    }
+    return JsonRoutes.sendResult(res, {
+      data: 'success'
+    });
+  });
+});
+
+JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
+    jsonParser(req, res, () => {
+      const data = req.body;
+      let query = "SELECT * FROM transfer_types WHERE id = '" + data.id + "'"
+      pool.query(query, (error, results, fields) => {
+        if (error) {
+          handleError(error, res);
+        }else {
+          if (results.length != 0) {
+            const data = req.body;
+            for(let i = 0; i< data.length; i++){
+
+              query = "SELECT * FROM transfer_types WHERE id = '" + data[i].id + "'"
+
+              let transfer_type = data[i]
+              let id = transfer_type.id
+              let status = 0
+              if(transfer_type.checked == true)
+                status = 1;
+                query = "UPDATE transfer_types SET status = '" + status + "'WHERE id = '" + id+ "'"
+                pool.query(query, (error, results, fields) => {
+                  if (error) {
+                    handleError(error, res);
+                  }
+                });
+            }
+          }
+          else {
+            let _enabled = data.enabled ? 1 : 0;
+            const insertQuery = "INSERT INTO clienttrueerp (`id`, `user_name`, `password`, `database`, `base_url`, `enabled`, `customer_type`, `invoice_template`) VALUES ('" +
+                                data.id + "','" + data.user_name + "', '" + data.password + "', '" + data.database + "', '" + data.base_url + "', '" + _enabled + "', '" + data.customer_type + "', '" + data.invoice_template + "');";
+              pool.query(insertQuery, (err, re, fe) => {
+              if (err) console.log(err)
+              else {
+                return JsonRoutes.sendResult(res, {
+                  data: 'success'
+                });
+              }
+            })
+          }
+        }
+      })
     });
   });
 
@@ -684,12 +777,56 @@ Meteor.startup(() => {
       pool.query(query, (error, results, fields) => {
         if (error) {
           handleError(error, res);
-        }
-        else {
+        }else {
           if (results.length != 0) {
             let _enabled = data.enabled ? 1 : 0;
             let _print_name_to_short_description = data.print_name_to_short_description ? 1 : 0;
-            const updateQuery = "UPDATE `clientmagento` SET company_name='" + data.company_name + "', consumer_key='" + data.consumer_key + "', consumer_secret='" + data.consumer_secret + "', admin_user_name='" + data.admin_user_name + "', admin_user_password='" + data.admin_user_password + "', base_api_url='" + data.base_api_url + "', access_token='" + data.access_token + "', access_token_secret='" + data.access_token_secret + "', synch_page_size='" + data.synch_page_size + "', sales_type='" + data.sales_type + "', customer_identified_by='" + data.customer_identified_by + "', product_name='" + data.product_name + "', print_name_to_short_description='" + _print_name_to_short_description + "', enabled='" + _enabled + "'WHERE id=" + data.id
+            let _transfer_type_customers = data.transfer_type_customers ? 1 : 0;
+            let _transfer_type_products = data.transfer_type_products ? 1 : 0;
+            let _transfer_type_options = data.transfer_type_options ? 1 : 0;
+            let _transfer_type_qty = data.transfer_type_qty ? 1 : 0;
+            let _transfer_type_pictures = data.transfer_type_pictures ? 1 : 0;
+            const updateQuery =
+              "UPDATE `clientmagento` SET company_name='" +
+              data.company_name +
+              "', consumer_key='" +
+              data.consumer_key +
+              "', consumer_secret='" +
+              data.consumer_secret +
+              "', admin_user_name='" +
+              data.admin_user_name +
+              "', admin_user_password='" +
+              data.admin_user_password +
+              "', base_api_url='" +
+              data.base_api_url +
+              "', access_token='" +
+              data.access_token +
+              "', access_token_secret='" +
+              data.access_token_secret +
+              "', synch_page_size='" +
+              data.synch_page_size +
+              "', sales_type='" +
+              data.sales_type +
+              "', customer_identified_by='" +
+              data.customer_identified_by +
+              "', product_name='" +
+              data.product_name +
+              "', print_name_to_short_description='" +
+              _print_name_to_short_description +
+              "', enabled='" +
+              _enabled +
+              "', transfer_type_customers='" +
+              _transfer_type_customers +
+              "', transfer_type_products='" +
+              _transfer_type_products +
+              "', transfer_type_options='" +
+              _transfer_type_options +
+              "', transfer_type_qty='" +
+              _transfer_type_qty +
+              "', transfer_type_pictures='" +
+              _transfer_type_pictures +
+              "'WHERE id=" +
+              data.id;
             pool.query(updateQuery, (err, re, fe) => {
               if (err) console.log(err)
               else {
@@ -702,7 +839,48 @@ Meteor.startup(() => {
           else {
             let _enabled = data.enabled ? 1 : 0;
             let _print_name_to_short_description = data.print_name_to_short_description ? 1 : 0;
-            const insertQuery = "INSERT INTO `clientmagento` SET id='" + data.id + "',company_name='" + data.company_name + "', consumer_key='" + data.consumer_key + "', consumer_secret='" + data.consumer_secret + "', admin_user_name='" + data.admin_user_name + "', admin_user_password='" + data.admin_user_password + "', base_api_url='" + data.base_api_url + "', access_token='" + data.access_token + "', access_token_secret='" + data.access_token_secret + "', synch_page_size='" + data.synch_page_size + "', sales_type='" + data.sales_type + "', customer_identified_by='" + data.customer_identified_by + "', product_name='" + data.product_name + "', print_name_to_short_description='" + _print_name_to_short_description + "', enabled='" + _enabled + "'"
+            const insertQuery =
+              "INSERT INTO `clientmagento` SET id='" +
+              data.id +
+              "',company_name='" +
+              data.company_name +
+              "', consumer_key='" +
+              data.consumer_key +
+              "', consumer_secret='" +
+              data.consumer_secret +
+              "', admin_user_name='" +
+              data.admin_user_name +
+              "', admin_user_password='" +
+              data.admin_user_password +
+              "', base_api_url='" +
+              data.base_api_url +
+              "', access_token='" +
+              data.access_token +
+              "', access_token_secret='" +
+              data.access_token_secret +
+              "', synch_page_size='" +
+              data.synch_page_size +
+              "', sales_type='" +
+              data.sales_type +
+              "', customer_identified_by='" +
+              data.customer_identified_by +
+              "', product_name='" +
+              data.product_name +
+              "', print_name_to_short_description='" +
+              _print_name_to_short_description +
+              "', enabled='" +
+              _enabled +
+              "', transfer_type_customers='" +
+              _transfer_type_customers +
+              "', transfer_type_products='" +
+              _transfer_type_products +
+              "', transfer_type_options='" +
+              _transfer_type_options +
+              "', transfer_type_qty='" +
+              _transfer_type_qty +
+              "', transfer_type_pictures='" +
+              _transfer_type_pictures +
+              "'";
             pool.query(insertQuery, (err, re, fe) => {
               if (err) console.log(err)
               else {
@@ -727,27 +905,27 @@ Meteor.startup(() => {
         } else {
           if (results.length != 0) {
             let _enabled = data.enabled ? 1 : 0;
+            let _transfer_type_salesorder = data.transfer_type_salesorder ? 1 : 0;
+            let _transfer_type_customers = data.transfer_type_customers ? 1 : 0;
+            let _transfer_type_products = data.transfer_type_products ? 1 : 0;
+            let _transfer_type_quotes = data.transfer_type_quotes ? 1 : 0;
+
             const updateQuery =
-              "UPDATE `clientZoho` SET client_id='" +
-              data.client_id +
-              "', client_secret='" +
-              data.client_secret +
-              "', redirect_uri='" +
-              data.redirect_uri +
-              "', print_name_to_short_description='" +
-              data.print_name_to_short_description +
-              "', customer_identified_by='" +
-              data.customer_identified_by +
-              "', access_token='" +
-              data.access_token +
-              "', enabled='" +
-              _enabled +
-              "', username='" +
-              data.username +
-              "', password='" +
-              data.password +
-              "'WHERE id=" +
-              data.id;
+              "UPDATE `clientZoho` SET client_id='" + data.client_id +
+              "', client_secret='" + data.client_secret +
+              "', redirect_uri='" + data.redirect_uri +
+              "', print_name_to_short_description='" + data.print_name_to_short_description +
+              "', customer_identified_by='" + data.customer_identified_by +
+              "', access_token='" + data.access_token +
+              "', refresh_token='" + data.refresh_token +
+              "', enabled='" + _enabled +
+              "', transfer_type_salesorder='" + _transfer_type_salesorder +
+              "', transfer_type_customers='" + _transfer_type_customers +
+              "', transfer_type_products='" + _transfer_type_products +
+              "', transfer_type_quotes='" + _transfer_type_quotes +
+              "', username='" + data.username +
+              "', password='" + data.password +
+              "'WHERE id=" + data.id;
             pool.query(updateQuery, (err, re, fe) => {
               if (err) {
                 console.log(err);
@@ -762,26 +940,21 @@ Meteor.startup(() => {
           } else {
             let _enabled = data.enabled ? 1 : 0;
             const insertQuery =
-              "INSERT INTO `clientZoho` SET id='" +
-              data.id +
-              "',client_id='" +
-              data.client_id +
-              "', client_secret='" +
-              data.client_secret +
-              "', redirect_uri='" +
-              data.redirect_uri +
-              "', print_name_to_short_description='" +
-              data.print_name_to_short_description +
-              "', customer_identified_by='" +
-              data.customer_identified_by +
-              "', access_token='" +
-              data.access_token +
-              "', enabled='" +
-              _enabled +
-              "', username='" +
-              data.username +
-              "', password='" +
-              data.password +
+              "INSERT INTO `clientZoho` SET id='" + data.id +
+              "',client_id='" + data.client_id +
+              "', client_secret='" + data.client_secret +
+              "', redirect_uri='" + data.redirect_uri +
+              "', print_name_to_short_description='" + data.print_name_to_short_description +
+              "', customer_identified_by='" + data.customer_identified_by +
+              "', access_token='" + data.access_token +
+              "', refresh_token='" + data.refresh_token +
+              "', enabled='" + _enabled +
+              "', transfer_type_customers='" + _transfer_type_salesorder +
+              "', transfer_type_customers='" + _transfer_type_customers +
+              "', transfer_type_products='" + _transfer_type_products +
+              "', transfer_type_quotes='" + _transfer_type_quotes +
+              "', username='" + data.username +
+              "', password='" + data.password +
               "'";
             pool.query(insertQuery, (err, re, fe) => {
               if (err) {
@@ -799,6 +972,25 @@ Meteor.startup(() => {
       });
     });
   });
+
+  JsonRoutes.add('post', '/api/updateZohoToken', function (req, res) {
+    jsonParser(req, res, () => {
+            const data = req.body;
+            const updateQuery =
+              "UPDATE `clientZoho` SET access_token='" + data.access_token + "' WHERE refresh_token='"+ data.refresh_token+"'";
+            pool.query(updateQuery, (err, re, fe) => {
+              if (err) {
+                console.log(err);
+                return JsonRoutes.error(err);
+              }
+              else {
+                return JsonRoutes.sendResult(res, {
+                  data: "success",
+                });
+              }
+            });
+      });
+    });
 
   JsonRoutes.add('post', '/api/updateWooCommerce', function (req, res) {
     jsonParser(req, res, () => {
@@ -1742,30 +1934,87 @@ Meteor.startup(() => {
     });
   });
 
-  JsonRoutes.add("POST", "/api/updateTrueERP2", async function (req, res) {
-    const reqData = req.body;
-    await axios({
-      method: "POST",
-      url: `${reqData.url}`,
-      headers: {
-        Username: reqData.Username,
-        Password: reqData.Password,
-        Database: reqData.Database,
-        'Content-Type': 'application/json'
-      },
-      data: JSON.stringify(reqData.data),
-    })
-      .then((result) => {
-        JsonRoutes.sendResult(res, {
-          data: result.data,
-        });
-      })
-      .catch((error) => {
-        return JsonRoutes.sendResult(res, {
-          code: "500",
-          data: error,
+  // JsonRoutes.add("POST", "/api/updateTrueERP2", async function (req, res) {
+  //   jsonParser(req, res, async () => {
+  //   const reqData = req.body;
+  //   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+  //   await HTTP.call('POST', `${reqData.url}`, {
+  //       headers: {
+  //           'Username': reqData.Username,
+  //           'Password': reqData.Password,
+  //           'Database':reqData.Database
+  //       },
+  //       data: reqData.data,
+  //   }, async (error, response) => {
+  //     if(response){
+  //       JsonRoutes.sendResult(res, {
+  //         data: response,
+  //       });
+  //     }else{
+  //       return JsonRoutes.sendResult(res, {
+  //         code: "500",
+  //         data: error,
+  //       });
+  //     }
+  //   });
+  //   /*
+  //   await axios({
+  //     method: "POST",
+  //     url: `${reqData.url}`,
+  //     headers: {
+  //       Username: reqData.Username,
+  //       Password: reqData.Password,
+  //       Database: reqData.Database,
+  //       'Content-Type': 'application/json'
+  //     },
+  //     data: JSON.stringify(reqData.data),
+  //   }).then((result) => {
+  //       JsonRoutes.sendResult(res, {
+  //         data: result.data,
+  //       });
+  //     }).catch((error) => {
+  //       return JsonRoutes.sendResult(res, {
+  //         code: "500",
+  //         data: error,
+  //       });
+  //     });
+  //     */
+  // });
+  // })
+
+  JsonRoutes.add('POST', '/api/updateTrueERP2', async function (req, res) {
+    try {
+      // Assuming jsonParser is defined and correctly used
+      const reqData = req.body;
+  
+      // Avoid setting NODE_TLS_REJECT_UNAUTHORIZED to "0" for security reasons
+  
+      const response = await new Promise((resolve, reject) => {
+        HTTP.call('POST', reqData.url, {
+          headers: {
+            'Username': reqData.Username,
+            'Password': reqData.Password,
+            'Database': reqData.Database
+          },
+          data: reqData.data,
+        }, (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result);
+          }
         });
       });
+  
+      JsonRoutes.sendResult(res, {
+        data: response.data,
+      });
+    } catch (error) {
+      JsonRoutes.sendResult(res, {
+        code: "500",
+        data: error,
+      });
+    }
   });
 })
 

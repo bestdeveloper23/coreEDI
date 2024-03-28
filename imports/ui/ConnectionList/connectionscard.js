@@ -11,8 +11,9 @@ import { first, template } from 'lodash';
 import './connectionscard.html';
 const axios = require('axios');
 import moment from "moment";
+import {UtilityService} from "../../utility-service";
+let utilityService = new UtilityService();
 let cancelBtnFlag = false;
-
 Template.connectionscard.onCreated(function () {
 const templateObject = Template.instance();
 templateObject.record = ReactiveVar();
@@ -673,11 +674,18 @@ magentoData.admin_user_password = jQuery('#magento_admin_user_password').val();
 magentoData.base_api_url = jQuery('#magento_base_api_url').val();
 magentoData.access_token = jQuery('#magento_access_token').val();
 magentoData.access_token_secret = jQuery('#magento_access_token_secret').val();
+
+magentoData.transfer_type_customers = jQuery("#erp_customers2magento").is(":Checked");
+magentoData.transfer_type_products = jQuery("#erp_products2magento").is(":Checked");
+magentoData.transfer_type_options = jQuery("#erp_product_options2magento").is(":Checked");
+magentoData.transfer_type_qty = jQuery("#erp_products_qty2magento").is(":Checked");
+magentoData.transfer_type_pictures = jQuery("#erp_products_pictures2magento").is(":Checked");
+
 magentoData.synch_page_size = 100;
 magentoData.sales_type = 0;
-magentoData.customer_identified_by = 0;
-magentoData.product_name = 0;
-magentoData.print_name_to_short_description = 1;
+magentoData.customer_identified_by = jQuery("#magento_cIdentify").val();
+magentoData.product_name = jQuery("#magento_pName").val();
+magentoData.print_name_to_short_description = jQuery("#magento_pName").val();
 
 
 fetch('/api/updateMagento', {
@@ -867,9 +875,7 @@ headers: {
 "Content-Type": "application/json",
 },
 body: JSON.stringify(trueERPData),
-})
-.then((response) => response.json())
-.then(async (result) => {
+}).then((response) => response.json()).then(async (result) => {
 if (result == 'success'){
   if (FlowRouter.current().queryParams.id == 0 && FlowRouter.current().queryParams.customerId && FlowRouter.current().queryParams.connsoftware) {
   swal("TrueERP Data Successfully Updated", '', "success");
@@ -908,9 +914,7 @@ headers: {
 "Content-Type": "application/json",
 },
 body: JSON.stringify(transfer_type),
-})
-.then((response) => response.json())
-.then(async (result) => {
+}).then((response) => response.json()).then(async (result) => {
 }).catch(error => console.log(error));
 
 if (FlowRouter.current().queryParams.id == 0 && FlowRouter.current().queryParams.customerId && FlowRouter.current().queryParams.connsoftware) {
@@ -920,7 +924,7 @@ connectionData.account_id = 7;
 connectionData.db_name = jQuery('#trueerp_database').val();
 connectionData.connection_id = FlowRouter.current().queryParams.connsoftwareid;
 connectionData.enabled = jQuery('#trueerp_enabled').is(':Checked');
-connectionData.last_ran_date = moment(new Date('1990-01-01T00:00:01')).format("YYYY-MM-DD HH:mm:ss")
+connectionData.last_ran_date = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
 
 fetch('/api/addConnections', {
 method: 'POST',
@@ -953,6 +957,11 @@ console.log(result);
   zohoData.customer_identified_by = jQuery("#zoho_cIdentify").val();
   zohoData.print_name_to_short_description = jQuery("#zoho_pName").val();
   zohoData.access_token = jQuery("#zoho_access_token").val();
+  zohoData.refresh_token = jQuery("#zoho_refresh_token").val();
+  zohoData.transfer_type_salesorder = jQuery("#erp_sales_orders2zoho").is(":Checked");
+  zohoData.transfer_type_customers = jQuery("#erp_customers2zoho").is(":Checked");
+  zohoData.transfer_type_products = jQuery("#erp_products2zoho").is(":Checked");
+  zohoData.transfer_type_quotes = jQuery("#erp_quotoes2zoho").is(":Checked");
   zohoData.username = jQuery("#zoho_username").val();
   zohoData.password = jQuery("#zoho_password").val();
 
@@ -992,37 +1001,59 @@ console.log(result);
 },
 
 "click #testZoho": async function () {
-  // TrueERP2Zoho(
-  //   jQuery("#erp_sales_orders2zoho").is(":checked"),
-  //   jQuery("#erp_customers2zoho").is(":checked"),
-  //   jQuery("#erp_products2zoho").is(":checked"),
-  //   jQuery("#erp_quotoes2zoho").is(":checked")
-  // );
-  const token = jQuery("#zoho_access_token").val();
-  // if(!token)
-  // {
-  //   swal("", 'Please try to get Token by clicking "Get Token"');
-  // } else {
-    const response = await axios.get(`https://www.zohoapis.${datacenter}/crm/v2/users?type=CurrentUser`, {
-      headers: {
-        Authorization: `Zoho-oauthtoken ${token}`,
-        "Content-Type": "application/json",
-      },
+
+  const templateObject = Template.instance();
+  function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms || DEF_DELAY));
+  };
+
+  var testNOtes = 'Connecting..'
+  await sleep(300)
+  templateObject.setLogFunction(testNOtes)
+  testNOtes = 'Connecting.......'
+  await sleep(300)
+  templateObject.setLogFunction(testNOtes)
+  testNOtes = 'Connecting..........'
+  await sleep(300)
+  templateObject.setLogFunction(testNOtes)
+  testNOtes = 'Connecting.............'
+  await sleep(300)
+  templateObject.setLogFunction(testNOtes)
+  testNOtes = 'Connecting................'
+  await sleep(300)
+  templateObject.setLogFunction(testNOtes)
+  testNOtes = 'Connecting...................'
+  await sleep(300)
+  templateObject.setLogFunction(testNOtes)
+  testNOtes = 'Connecting........................'
+  await sleep(300)
+  templateObject.setLogFunction(testNOtes)
+  testNOtes = 'Connecting.........................\n'
+  await sleep(300)
+  templateObject.setLogFunction(testNOtes)
+
+
+  let zohoData = {};
+  zohoData.grant_type = "authorization_code";
+  zohoData.clientid = jQuery('#zoho_client_id').val()||'';
+  zohoData.clientsecret = jQuery('#zoho_client_secret').val()||'';
+  zohoData.refresh_token = jQuery('#zoho_refresh_token').val()||"";
+
+  const tokenPromise = await new Promise((resolve, reject) => {
+    Meteor.call("getZohoTokenByRefreshToken", zohoData, datacenter, (error, result) => {
+      if (error) {
+        console.log(error);
+        //reject(error);
+      } else {
+
+        jQuery('#zoho_access_token').val(result);
+        testNOtes = 'Successfully Connected to Zoho\n';
+        templateObject.setLogFunction(testNOtes);
+        resolve(result);
+      }
     });
-
-    if(response.status === 200) {
-      swal({
-        text: "Successfully Connected to Zoho..",
-        type: "success",
-        confirmButtonText: "Ok",
-      });
-    } else {
-      swal(`Error Occurred While Attempting to Connect to the Zoho Server`, `Check if Zoho access_token is Correct`, "error");
-    }
-
-  //}
-
-  return;
+  });
+  console.log(tokenPromise);
 },
 
 "click #runNowZoho": async function () {
@@ -1036,16 +1067,32 @@ console.log(result);
 },
 
 "click #btnRunERP": async function () {
-  Zoho2TrueERP(
-    jQuery("#zoho_quotes2trueerp").is(":checked"),
-    jQuery("#zoho_sales_orders2trueerp").is(":checked"),
-    jQuery("#zoho_leads_prospects2trueerp").is(":checked"),
-    jQuery("#zoho_contacts_customers2trueerp").is(":checked")
-  );
-  Magento2TrueERP(
-    jQuery("#magento_invoices2magento").is(":checked"),
-    jQuery("#magento_customers2magento").is(":checked"),
-  )
+  var templateObject = Template.instance();
+  let listData = FlowRouter.current().queryParams.id || '';
+  let connectionType = templateObject.connection.get() || '';
+  //RunNow('', listData);
+if(listData != ''){
+   utilityService.runNowFunction('',listData, Template.instance());
+ }else{
+   swal({
+     title: 'Oooops...',
+     text: "This connection has not been saved yet, please save it first and then try again",
+     type: 'error',
+     showCancelButton: false,
+     confirmButtonText: 'Ok'
+   }).then((result) => {
+     if (result.value) {
+     } else if (result.dismiss === 'cancel') {
+       return;
+     }
+   });
+ }
+  // Zoho2TrueERP(
+  //   jQuery("#zoho_quotes2trueerp").is(":checked"),
+  //   jQuery("#zoho_sales_orders2trueerp").is(":checked"),
+  //   jQuery("#zoho_leads_prospects2trueerp").is(":checked"),
+  //   jQuery("#zoho_contacts_customers2trueerp").is(":checked")
+  // );
 },
 
 'click .btnBack': function (event) {
@@ -1056,7 +1103,23 @@ history.back(1);
 var templateObject = Template.instance();
 let listData = FlowRouter.current().queryParams.id || '';
 let connectionType = templateObject.connection.get() || '';
-RunNow('', listData);
+//RunNow('', listData);
+if(listData != ''){
+ utilityService.runNowFunction('',listData, Template.instance());
+}else{
+  swal({
+    title: 'Oooops...',
+    text: "This connection has not been saved yet, please save it first and then try again",
+    type: 'error',
+    showCancelButton: false,
+    confirmButtonText: 'Ok'
+  }).then((result) => {
+    if (result.value) {
+    } else if (result.dismiss === 'cancel') {
+      return;
+    }
+  });
+}
 },
 'click .setFrequency': function () {
 var templateObject = Template.instance();
@@ -2944,9 +3007,7 @@ headers: {
 'Content-Type': 'application/json'
 },
 body: JSON.stringify(postData)
-})
-.then(response => response.json())
-.then(async (connectionResult) => {
+}).then(response => response.json()).then(async (connectionResult) => {
 lstUpdateTime = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").subtract(1, 'hours').format("YYYY-MM-DD HH:mm:ss");
 var lstUpdateTimeUTC = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").format("YYYY-MM-DDTHH:mm:ss")
 // lstUpdateTime = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").subtract(1, 'hours').format("YYYY-MM-DD HH:mm:ss");
@@ -3201,9 +3262,6 @@ fetch("/api/MagentoByID", {
                             } catch (error) {
                               transNOtes += `[Error] ${error}\n`;
                               templateObject.setLogFunction(transNOtes);
-                              if(error="A customer with the same email address already exists in an associated website"){
-                                console.log("I will fix soon")
-                              }
                             }
                           }
                         } catch (error) {
@@ -4659,7 +4717,7 @@ async function TrueERP2Zoho(
       var responseCount = 0;
       let customerCount = 0;
       let token = null;
-      var datacenter = 'com';
+
       function sleep(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms || DEF_DELAY));
       }
@@ -4696,30 +4754,32 @@ async function TrueERP2Zoho(
             const CLIENT_ID = zohoData.clientid;
             const REDIRECT_URI = zohoData.redirect_uri;
             const RESPONSE_TYPE = 'token';
-            const SCOPE = 'ZohoCRM.modules.ALL,ZohoCRM.settings.ALL,ZohoCRM.users.ALL';
+            const SCOPE = 'ZohoCRM.modules.ALL,ZohoCRM.settings.ALL,ZohoCRM.users.ALL,ZohoSearch.securesearch.READ';
 
             const authorizationUrl = `https://accounts.zoho.com/oauth/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}&response_type=token`;
 
             const username = jQuery('#zoho_username').val();
             const zohopass = jQuery('#zoho_password').val();
 
-            const tokenPromise = await new Promise((resolve, reject) => {
-              Meteor.call("getZohoAccessToken", authorizationUrl, username, zohopass, (error, result) => {
-                if (error) {
-                  reject(error);
-                } else {
-                  resolve(result);
-                }
-              });
-            })
+            const clientAccessToken = jQuery('#zoho_access_token').val();
 
-            if (tokenPromise) {
-              token = tokenPromise.token;
-              datacenter = tokenPromise.datacenter;
+            // const tokenPromise = await new Promise((resolve, reject) => {
+            //   Meteor.call("getZohoAccessToken", authorizationUrl, username, zohopass, (error, result) => {
+            //     if (error) {
+            //       reject(error);
+            //     } else {
+            //       resolve(result);
+            //     }
+            //   });
+            // })
+
+            //if (tokenPromise) {
+              token = clientAccessToken;
+              datacenter = datacenter;
               testNOtes = "Got token for Zoho.......\n"
               templateObject.setLogFunction(testNOtes);
-            }
-            console.log(token, tokenPromise)
+            //}
+            //console.log(token, tokenPromise)
 
           testNOtes += "Connecting to TrueERP database.............\n";
           templateObject.setLogFunction(testNOtes);
@@ -4736,7 +4796,7 @@ async function TrueERP2Zoho(
               erpObject.base_url +
                 // "/TSalesOrder?PropertyList=Lines,ClientName,OrderNumber,CustomerID,CreationDate,ClientName,DueDate,InvoicePrintDesc,ID&select=[MsTimeStamp]>"${lstUpdateTime}"`,
                 // `/TSalesOrder?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
-                `/TSalesOrder?Listtype=detail&limitCount=3`,
+                `/TSalesOrder?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
               {
                 method: "GET",
                 headers: {
@@ -4868,7 +4928,7 @@ async function TrueERP2Zoho(
 
                     if (resultPromiseProductDetect.data) {
                       if (resultPromiseProductDetect.data.length > 0) {
-                        testNOtes += `Product Name "${productreqData.productName}" already exits in ZOHO\n`;
+                        // testNOtes += `Product Name "${productreqData.productName}" already exits in ZOHO\n`;
                         productList.push({
                           product: {
                             name: resultData[i]?.fields?.Lines[j]?.fields
@@ -4877,6 +4937,7 @@ async function TrueERP2Zoho(
                           },
                           quantity:
                             resultData[i]?.fields?.Lines[j].fields?.OrderQty,
+                          price:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
                           product_description:
                             resultData[i]?.fields?.Lines[j].fields
                               ?.ProductDescription,
@@ -4923,6 +4984,7 @@ async function TrueERP2Zoho(
                             },
                             quantity:
                               resultData[i]?.fields?.Lines[j].fields?.OrderQty,
+                           price:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
                             product_description:
                               resultData[i]?.fields?.Lines[j].fields
                                 ?.ProductDescription,
@@ -4974,6 +5036,7 @@ async function TrueERP2Zoho(
                           },
                           quantity:
                             resultData[i]?.fields?.Lines[j].fields?.OrderQty,
+                          price:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
                           product_description:
                             resultData[i].fields.Lines[j].fields
                               .ProductDescription || "",
@@ -5213,7 +5276,7 @@ async function TrueERP2Zoho(
             await fetch(
               erpObject.base_url +
                 // `/TCustomer?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
-                `/TCustomer?PropertyList=ClientName,Email,FirstName,LastName,Phone,Mobile,SkypeName,Title,Faxnumber,Country,State,Street,Postcode,Billcountry,BillState,BillPostcode,BillStreet&limitCount=3`,
+                `/TCustomer?PropertyList=ClientName,Email,FirstName,LastName,Phone,Mobile,SkypeName,Title,Faxnumber,Country,State,Street,Postcode,Billcountry,BillState,BillPostcode,BillStreet&select=[MsTimeStamp]>"${lstUpdateTime}"`,
               {
                 method: "GET",
                 headers: {
@@ -5477,8 +5540,8 @@ async function TrueERP2Zoho(
             testNOtes += "Getting TrueERP Products ..................\n";
             templateObject.setLogFunction(testNOtes);
             await fetch(
-              erpObject.base_url + `/TProduct?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"&[PublishOnWeb]=true`,
-                // `/TProduct?PropertyList=ProductName,PRODUCTCODE,ProductDescription,Active,SalesDescription,TotalQtyonOrder,TotalQtyInStock,WHOLESALEPRICE&limitCount=3`,
+              erpObject.base_url + `/TProduct?PropertyList=ProductName,PRODUCTCODE,ProductDescription,Active,SalesDescription,TotalQtyonOrder,TotalQtyInStock,WHOLESALEPRICE&select=[MsTimeStamp]>"${lstUpdateTime}"`,
+              //`/TProduct?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"&[PublishOnWeb]=true`
               {
                 method: "GET",
                 headers: {
@@ -5498,6 +5561,7 @@ async function TrueERP2Zoho(
                 responseCount = result.tproduct.length;
                 var resultData = result.tproduct;
                 products = resultData;
+
                 // download_transaction_count += responseCount;
                 // transaction_details.push({
                 //   detail_string:
@@ -5538,8 +5602,10 @@ async function TrueERP2Zoho(
 
                   Meteor.call("checkFieldExistence", reqData, (error, result) => {
                     if (error) {
+                      console.log(error);
                       reject(error);
                     } else {
+                      console.log(result);
                       resolve(result);
                     }
                   });
@@ -5587,7 +5653,7 @@ async function TrueERP2Zoho(
 
                   let tempNote = testNOtes;
 
-
+                  console.log(resultData);
                   postData[i] = {
                     Product_Name: resultData[i]?.ProductName,
                     Product_Code: resultData[i]?.PRODUCTCODE,
@@ -5606,7 +5672,7 @@ async function TrueERP2Zoho(
                   data: postData,
                   datacenter: datacenter
                 };
-
+                console.log(args);
                 const batchSize = 100;
                 const numBatches = Math.ceil(postData.length / batchSize);
                 let upload_num = 0;
@@ -5615,24 +5681,26 @@ async function TrueERP2Zoho(
                   const startIdx = i * batchSize;
                   const endIdx = Math.min(startIdx + batchSize, postData.length);
                   const batchData = postData.slice(startIdx, endIdx);
+                  console.log(batchData);
                   args.data = batchData;
 
                   const resultProductsPromise = await new Promise((resolve, reject) => {
-
+                    console.log(args);
                     Meteor.call("updateZohoProducts", args, (error, result) => {
                       if (error) {
                         reject(error);
                       } else {
+                        console.log(result);
                         resolve(result);
                       }
                     });
 
                   });
-
+                  console.log(resultProductsPromise.data);
                   if (resultProductsPromise.data) {
                     upload_transaction_count += resultProductsPromise.data.length;
                     upload_num += resultProductsPromise.data.length;
-                    testNOtes += `Products transfer Success!\n`;
+                    testNOtes += `${upload_num} Products Transfer Successfully!\n`;
                     templateObject.setLogFunction(testNOtes);
                   } else {
                     console.log(resultProductsPromise);
@@ -5699,7 +5767,7 @@ async function TrueERP2Zoho(
             await fetch(
               erpObject.base_url +
                 // `/TQuote?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"`,
-                `/TQuote?Listtype=detail&limitCount=3`,
+                `/TQuote?Listtype=detail&LimitCount=25`,
               {
                 method: "GET",
                 headers: {
@@ -5836,7 +5904,7 @@ async function TrueERP2Zoho(
 
                     if (resultPromiseProductDetect.data) {
                       if (resultPromiseProductDetect.data.length > 0) {
-                        testNOtes += `Product Name "${productreqData.productName}" already exits in ZOHO\n`;
+                        // testNOtes += `Product Name "${productreqData.productName}" already exits in ZOHO\n`;
                         productList.push({
                           product: {
                             name: resultData[i]?.fields?.Lines[j]?.fields
@@ -5845,6 +5913,7 @@ async function TrueERP2Zoho(
                           },
                           quantity:
                             resultData[i]?.fields?.Lines[j].fields?.OrderQty,
+                          price:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
                           product_description:
                             resultData[i]?.fields?.Lines[j].fields
                               ?.ProductDescription,
@@ -5891,6 +5960,7 @@ async function TrueERP2Zoho(
                             },
                             quantity:
                               resultData[i]?.fields?.Lines[j].fields?.OrderQty,
+                          price:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
                             product_description:
                               resultData[i]?.fields?.Lines[j].fields
                                 ?.ProductDescription,
@@ -5940,8 +6010,8 @@ async function TrueERP2Zoho(
                               ?.ProductName,
                             id: resultPromiseProduct.data[0].details.id
                           },
-                          quantity:
-                            resultData[i]?.fields?.Lines[j].fields?.OrderQty,
+                          quantity:resultData[i]?.fields?.Lines[j].fields?.OrderQty,
+                          price:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
                           product_description:
                             resultData[i]?.fields?.Lines[j].fields
                               ?.ProductDescription,
@@ -6153,12 +6223,9 @@ async function TrueERP2Zoho(
                     "Content-Type": "application/json",
                   },
                   body: JSON.stringify(argsDate),
-                })
-                  .then((response) => response.json())
-                  .then(async (result) => {
+                }).then((response) => response.json()).then(async (result) => {
                     console.log(result);
-                  })
-                  .catch((err) => console.log(err));
+                  }).catch((err) => console.log(err));
 
               }
 
@@ -6363,7 +6430,6 @@ async function Zoho2TrueERP(
       templateObject.setLogFunction(testNOtes);
 
       var token = null;
-      var datacenter = 'com';
 
       let zohoData = {};
       zohoData.clientid = jQuery('#zoho_client_id').val();
@@ -6372,13 +6438,17 @@ async function Zoho2TrueERP(
       const CLIENT_ID = zohoData.clientid;
       const REDIRECT_URI = zohoData.redirect_uri;
       const RESPONSE_TYPE = 'token';
-      const SCOPE = 'ZohoCRM.modules.ALL,ZohoCRM.settings.ALL,ZohoCRM.users.ALL';
+      const SCOPE = 'ZohoCRM.modules.ALL,ZohoCRM.settings.ALL,ZohoCRM.users.ALL,ZohoSearch.securesearch.READ';
 
       const authorizationUrl = `https://accounts.zoho.com/oauth/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}&response_type=token`;
 
       const username = jQuery('#zoho_username').val();
       const zohopass = jQuery('#zoho_password').val();
 
+      const clientAccessToken = jQuery('#zoho_access_token').val();
+      console.log(username);
+      console.log(clientAccessToken);
+      /*
       const tokenPromise = await new Promise((resolve, reject) => {
         Meteor.call("getZohoAccessToken", authorizationUrl, username, zohopass, (error, result) => {
           if (error) {
@@ -6388,17 +6458,16 @@ async function Zoho2TrueERP(
           }
         });
       })
+      */
 
-      if (tokenPromise) {
-        token = tokenPromise;
-        datacenter = tokenPromise.datacenter;
+      //if (tokenPromise) {
+        token = clientAccessToken;
+        datacenter = datacenter;
         testNOtes += "Got token";
         templateObject.setLogFunction(testNOtes);
-      }
+      //}
 
-      HTTP.call(
-        "post",
-        "/api/getAccSoftt",
+      HTTP.call("post","/api/getAccSoftt",
         {
           data: {
             id: postData.id,

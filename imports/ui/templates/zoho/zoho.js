@@ -11,7 +11,7 @@ import './zoho.html';
 const axios = require('axios');
 import moment from 'moment';
 let cancelBtnFlag = false;
-
+let datacenter = 'com.au';
 Template.zohocard.onCreated(function () {
   const templateObject = Template.instance();
 });
@@ -25,18 +25,55 @@ Template.zohocard.rendered = () => {
 };
 
 Template.zohocard.events({
-  'click #getZohoCode': function () {
+  'click #getZohoCode': async function () {
     let zohoData = {};
-    zohoData.clientid = jQuery('#zoho_client_id').val();
-    zohoData.clientsecret = jQuery('#zoho_client_secret').val();
-    zohoData.redirect_uri = jQuery('#zoho_redirect_uri').val();
-    const CLIENT_ID = zohoData.clientid;
-    const REDIRECT_URI = zohoData.redirect_uri;
-    const RESPONSE_TYPE = 'token';
-    const SCOPE = 'ZohoCRM.modules.ALL,ZohoCRM.settings.ALL,ZohoCRM.users.ALL';
+    zohoData.grant_type = "authorization_code";
+    zohoData.clientid = jQuery('#zoho_client_id').val()||'';
+    zohoData.clientsecret = jQuery('#zoho_client_secret').val()||'';
+    zohoData.redirect_uri = jQuery('#zoho_redirect_uri').val()||"";
+    zohoData.code = jQuery('#zoho_access_token').val()||"";
 
-    const authorizationUrl = `https://accounts.zoho.com/oauth/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}&response_type=token`;
-    window.location.href = authorizationUrl;
+  const CLIENT_ID = zohoData.clientid;
+  const REDIRECT_URI = zohoData.redirect_uri;
+  const RESPONSE_TYPE = 'token';
+  const SCOPE = 'ZohoCRM.modules.ALL,ZohoCRM.settings.ALL,ZohoCRM.users.ALL';
+  const authorizationUrlGetCode = `https://accounts.zoho.com.au/oauth/v2/auth?scope=${SCOPE}&client_id=${CLIENT_ID}&state=zzz&response_type=code&redirect_uri=${REDIRECT_URI}&access_type=offline`;
+
+  window.location.href = authorizationUrlGetCode;
+
+  },
+  'click #getZohoToken': async function () {
+    let zohoData = {};
+    zohoData.grant_type = "authorization_code";
+    zohoData.clientid = jQuery('#zoho_client_id').val()||'';
+    zohoData.clientsecret = jQuery('#zoho_client_secret').val()||'';
+    zohoData.redirect_uri = jQuery('#zoho_redirect_uri').val()||"";
+    zohoData.code = jQuery('#zoho_access_token').val()||"";
+  const CLIENT_ID = zohoData.clientid;
+  const REDIRECT_URI = zohoData.redirect_uri;
+  const RESPONSE_TYPE = 'token';
+  const SCOPE = 'ZohoCRM.modules.ALL,ZohoCRM.settings.ALL,ZohoCRM.users.ALL';
+
+  const resultZohoToken = await new Promise((resolve, reject) => {
+    Meteor.call("getZohoOauthToken", zohoData, datacenter, (error, result) => {
+      if (error) {
+        swal(`Invalid Code`, `Head to Zoho and check if you have copied the correct details.`, "error");
+        reject(error);
+      } else {
+        if(result.data && result.data.error){
+          swal(`Invalid Code`, `Head to Zoho and check if you have copied the correct details.`, "error");
+          reject(error);
+        }else{
+          jQuery('#zoho_access_token').val(result.data.access_token);
+          jQuery('#zoho_refresh_token').val(result.data.refresh_token);
+          jQuery('#getZohoToken').css('display','none');
+          resolve(result.data);
+        }
+
+
+      }
+    });
+    });
   },
 });
 

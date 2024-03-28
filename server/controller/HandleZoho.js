@@ -47,7 +47,6 @@ Meteor.methods({
     },
 
     'addZoho': function ({ dbName, accName, connName, lastRanDate, runCycle, nextRunDate, enabled }) {
-        console.log('add Zoho')
         return new Promise((resolve, reject) => {
             const addQuery = "INSERT INTO `coreedit`.`clientZoho` (`db_name`, `acc_name`, `conn_name`, `last_ran_date`, `last_ran_date`, `next_run_date`, `enabled`) VALUES ('" + dbName + "' , '" + accName + "', '" + connName + "', '" + lastRanDate + "', '" + runCycle + "', '" + nextRunDate + "', '" + enabled + "');";
             pool.query(addQuery, (err, re, fe) => {
@@ -105,14 +104,14 @@ Meteor.methods({
             })
         })
     },
-    
+
     'getZohoAccessToken': async function (url, username, password) {
-      
+
       try {
 
         // Create a new WebDriver instance
         const options = new chrome.Options();
-        options.addArguments('--headless');
+        // options.addArguments('--headless');
     
         // Create a new WebDriver instance with headless mode enabled
         const driver = await new Builder()
@@ -121,13 +120,13 @@ Meteor.methods({
           .build();
         // Navigate to the website
         await driver.get(url);
-    
+
         try {
             const usernameInput = await driver.findElement(By.id('login_id'));
             await usernameInput.sendKeys(username);
             await new Promise((resolve) => setTimeout(resolve, 5000));
           } catch (error) {}
-      
+
         try {
         const nextButton = await driver.findElement(By.id('nextbtn'));
         await nextButton.click();
@@ -143,8 +142,6 @@ Meteor.methods({
           datacenter = parsedUrl.hostname.split('.')[2] + "." + datacenter
         }
 
-        console.log("Datacenter:", datacenter);
-
         try {
         const passwordInput = await driver.findElement(By.id('password'));
         await passwordInput.sendKeys(password);
@@ -158,29 +155,29 @@ Meteor.methods({
           await continueButton.click();
           await new Promise((resolve) => setTimeout(resolve, 15000));
         } catch (error) {}
-  
+
         try {
           const continueButton = await driver.findElement(By.className('continue_button'));
           await continueButton.click();
           await new Promise((resolve) => setTimeout(resolve, 15000));
         } catch (error) {}
-  
+
         try {
         const laterButton = await driver.findElement(By.className('remind_me_later'));
         await laterButton.click();
         await new Promise((resolve) => setTimeout(resolve, 5000));
         } catch (error) {}
-    
+
         try {
         const acceptButton = await driver.findElement(By.className('btn'));
         await acceptButton.click();
         await new Promise((resolve) => setTimeout(resolve, 10000));
         } catch (error) {}
-      
-    
+
+
         // Get the current URL, which should contain the RedirectURL
         const currentURL = await driver.getCurrentUrl();
-    
+
         // Extract the token ID from the URL string
         const regex = /access_token=([^&]+)/;
         const match = currentURL.match(regex);
@@ -193,11 +190,10 @@ Meteor.methods({
           token: tokenID,
           datacenter: datacenter
         }
-    
+
         return response;
       } catch (error) {
         // Handle any errors that occur during the automation process
-        console.error(error);
         throw new Error('An error occurred');
       }
     },
@@ -207,7 +203,7 @@ Meteor.methods({
         let allProducts = [];
         let nextPage = 1;
         const perPage = 200; // Number of products to fetch per page
-  
+
         // Continue fetching pages until there are no more products
         while (true) {
           // Make a GET request to fetch products for the current page
@@ -216,10 +212,10 @@ Meteor.methods({
               Authorization: `Zoho-oauthtoken ${accessToken}`, // Replace accessToken with your actual access token
             },
           });
-  
+
           // Extract products from the response and append to the list
           allProducts = allProducts.concat(response.data.data);
-  
+
           // Check if there are more pages
           if (response.data.info.more_records) {
             nextPage++; // Move to the next page
@@ -227,32 +223,32 @@ Meteor.methods({
             break; // No more pages, exit the loop
           }
         }
-  
+
         // Return all fetched products
         return allProducts;
-        
+
       } catch (error) {
-        console.error('Error fetching products:', error.response.data);
         throw new Meteor.Error('api-error', 'Error fetching products');
       }
     },
-
     'getDatafromZohoByDate': async function (reqData) {
       try {
-        const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v6/${reqData.data.module}/search?criteria=(Modified_Time:greater_than:${reqData.data.lstTime})`, {
+        console.log(reqData.data.lstTime);
+        let uncodedURLForSearch = encodeURIComponent(`(Modified_Time:greater_than:${reqData.data.lstTime})`);
+        console.log(uncodedURLForSearch);
+        const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v5/${reqData.data.module}/search?criteria=${uncodedURLForSearch}`, {
           headers: {
             Authorization: `Zoho-oauthtoken ${reqData.auth}`,
             "Content-Type": "application/json",
           },
         });
-        
         return response.data;
 
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        // console.log(error);
+        // throw new Meteor.Error("api-error", error.response.data);
       }
     },
-
     'getZohoCurrentUser': async function (reqData) {
       try {
         const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/users?type=CurrentUser`, {
@@ -291,7 +287,8 @@ Meteor.methods({
 
     'getzohoDatasforLatest': async function(reqData) {
       try {
-        const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/${reqData.data.module}/search?criteria=Modified_Time.after:${reqData.data.lastRanDate}`, {
+        let uncodedURLForSearch = encodeURIComponent(`(Modified_Time.after:${reqData.data.lastRanDate})`);
+        const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/${reqData.data.module}/search?criteria=${uncodedURLForSearch}`, {
           headers: {
             Authorization: `Zoho-oauthtoken ${reqData.auth}`,
             "Content-Type": "application/json",
@@ -304,12 +301,71 @@ Meteor.methods({
         throw new Meteor.Error("api-error", error.response.data);
       }
     },
-
     'getZohoCustomers': async function (reqData) {
       try {
         const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Contacts`, {
           headers: {
             Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        return response.data;
+
+      } catch (error) {
+        throw new Meteor.Error("api-error", error.response.data);
+      }
+    },
+    'getZohoContactByIDs': async function (token,datacenter,combinedIds) {
+      try {
+        const response = await axios.get(`https://www.zohoapis.${datacenter}/crm/v2/Contacts?${combinedIds}`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        return response.data;
+
+      } catch (error) {
+        throw new Meteor.Error("api-error", error.response.data);
+      }
+    },
+    'getZohoLeadsByIDs': async function (token,datacenter,combinedIds) {
+      try {
+        const response = await axios.get(`https://www.zohoapis.${datacenter}/crm/v2/Leads?${combinedIds}`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        return response.data;
+
+      } catch (error) {
+        throw new Meteor.Error("api-error", error.response.data);
+      }
+    },
+    'getZohoSales_OrdersByIDs': async function (token,datacenter,combinedIds) {
+      try {
+        const response = await axios.get(`https://www.zohoapis.${datacenter}/crm/v2/Sales_Orders?${combinedIds}`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        return response.data;
+
+      } catch (error) {
+        throw new Meteor.Error("api-error", error.response.data);
+      }
+    },
+    'getZohoQuotesByIDs': async function (token,datacenter,combinedIds) {
+      try {
+        const response = await axios.get(`https://www.zohoapis.${datacenter}/crm/v2/Quotes?${combinedIds}`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${token}`,
             "Content-Type": "application/json",
           },
         });
@@ -354,11 +410,8 @@ Meteor.methods({
             },
           }
         );
-
-        console.log(response);
         return response.data;
       } catch (error) {
-        console.log(error)
         throw new Meteor.Error("api-error", error.response.data);
       }
     },
@@ -377,12 +430,9 @@ Meteor.methods({
             },
           }
         );
-          console.log(response);
         return response.data;
 
       } catch (error) {
-        
-        console.log(error)
         throw new Meteor.Error("api-error", error.response.data);
       }
     },
@@ -401,12 +451,9 @@ Meteor.methods({
             },
           }
         );
-          console.log(response)
         return response.data;
 
       } catch (error) {
-        
-        console.log(error)
         throw new Meteor.Error("api-error", error.response.data);
       }
     },
@@ -422,11 +469,9 @@ Meteor.methods({
               "Content-Type": "application/json",
             },
           }
-        ); 
-        console.log(response)
+        );
         return response.data;
       } catch (error) {
-        console.log(error)
         throw new Meteor.Error("api-error", error.response.data);
       }
     },
@@ -442,11 +487,9 @@ Meteor.methods({
               "Content-Type": "application/json",
             },
           }
-        ); 
-        console.log(response)
+        );
         return response.data;
       } catch (error) {
-        console.log(error)
         throw new Meteor.Error("api-error", error.response.data);
       }
     },
@@ -464,11 +507,8 @@ Meteor.methods({
             },
           }
         );
-        console.log(response)
         return response.data;
       } catch (error) {
-        
-        console.log(error)
         throw new Meteor.Error("api-error", error.response.data);
       }
     },
@@ -534,30 +574,75 @@ Meteor.methods({
               "Content-Type": "application/json",
             },
         });
-        console.log(response)
         return response.data;
       } catch (error) {
-        
-        console.log(error)
         throw new Meteor.Error("api-error", error.response.data);
       }
     },
 
     'checkFieldExistence': async function (reqData) {
-      console.log(reqData.auth)
-      try {
-        const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/settings/fields?module=${reqData.module}`, {
-          headers: {
-            Authorization: `Zoho-oauthtoken ${reqData.auth}`,
-            "Content-Type": "application/json",
-          },
+      //console.log(reqData);
+      // try {
+      //   const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/settings/fields?module=${reqData.module}`, {
+      //     headers: {
+      //       Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+      //       "Content-Type": "application/json",
+      //     },
+      //   });
+      //   console.log(response);
+      //   const fieldNames = response.data.fields.map(field => field.api_name);
+      //   const fieldnameExists = fieldNames.includes(reqData.fieldName);
+      //   return fieldnameExists;
+      // } catch (error) {
+      //   console.log(error);
+      //   throw new Meteor.Error("api-error", error.response.data);
+      // }
+
+      let promisePOST = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/settings/fields?module=${reqData.module}`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+              const fieldNames = result.data.fields.map(field => field.api_name);
+                const fieldnameExists = fieldNames.includes(reqData.fieldName);
+                // return fieldnameExists;
+                resolve(fieldnameExists);
+              // Do something with the token
+          } else {
+              if(error.response.data.code == "INVALID_TOKEN"){
+                /*
+                let refreshTokenPOST = new Promise(function (resolve, reject) {
+                HTTP.post(`https://accounts.zoho.${reqDataCenter}/oauth/v2/token?refresh_token=1000.3745937a41acef2c8cf02f7d4d532cab.3d340d8481932ad9ec74536d1f7d9c9d&client_id=1000.JJX6ZNMPON9DJ8BFTB98W2K31M2B9Y&client_secret=a09ba576eec8ae815c0d431bf5f25c41bece222d22&grant_type=refresh_token`, {
+                    params: {
+                        'grant_type': 'authorization_code',
+                        'client_id': jsonData.clientid,
+                        'client_secret': jsonData.clientsecret,
+                        'redirect_uri': jsonData.redirect_uri,
+                        'code': jsonData.code
+                    }
+                }, function(error, result) {
+                    if (!error) {
+                        console.log('Zoho token:', result);
+                        console.log('Zoho token:', result.data.access_token);
+                        resolve(result)
+                        // Do something with the token
+                    } else {
+                        console.error('Error:', error);
+                        reject(error);
+                    }
+                });
+                  });
+                  */
+              }
+            //  reject(error);
+          }
+      });
         });
-        const fieldNames = response.data.fields.map(field => field.api_name);
-        const fieldnameExists = fieldNames.includes(reqData.fieldName);
-        return fieldnameExists;
-      } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
-      }
+      return promisePOST;
+
     },
 
     'addcustomFields': async function (reqData) {
@@ -571,6 +656,43 @@ Meteor.methods({
         return response.data;
       } catch (error) {
         throw new Meteor.Error("api-error", error.response.data);
-      }  
+      }
     },
+    'getZohoOauthToken': async function(jsonData, reqDataCenter) {
+      let promisePOST = new Promise(function (resolve, reject) {
+      HTTP.post(`https://accounts.zoho.${reqDataCenter}/oauth/v2/token`, {
+          params: {
+              'grant_type': 'authorization_code',
+              'client_id': jsonData.clientid,
+              'client_secret': jsonData.clientsecret,
+              'redirect_uri': jsonData.redirect_uri,
+              'code': jsonData.code
+          }
+      }, function(error, result) {
+          if (!error) {
+              resolve(result)
+              // Do something with the token
+          } else {
+              reject(error);
+          }
+      });
+        });
+      return promisePOST;
+    },
+    'getZohoTokenByRefreshToken': async function(jsonData, reqDataCenter) {
+      let refreshTokenPOST = new Promise(function (resolve, reject) {
+        let requestURL = `https://accounts.zoho.${reqDataCenter}/oauth/v2/token?refresh_token=${jsonData.refresh_token}&client_id=${jsonData.clientid}&client_secret=${jsonData.clientsecret}&grant_type=refresh_token`;
+        HTTP.post(requestURL, {
+
+        }, function(error, result) {
+            if (!error) {
+                resolve(result.data.access_token);
+                // Do something with the token
+            } else {
+                reject(error);
+            }
+        });
+      });
+      return refreshTokenPOST;
+    }
 });
