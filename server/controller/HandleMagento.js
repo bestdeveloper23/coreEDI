@@ -215,4 +215,22 @@ Meteor.methods({
           throw new Meteor.Error("api-error", error.response.data.message);
         }
       },
+
+      'getMagentoOrderByID': function (url, accessToken, id) {
+        console.log(id)
+        try {
+          const response = HTTP.get(`${url}/rest/V1/orders/${id}`, {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            },
+          });
+    
+          console.log(response)
+          return response.data;
+        } catch (error) {
+          console.log(error)
+          throw new Meteor.Error("api-error", error.response.data.message);
+        }
+      },
 });

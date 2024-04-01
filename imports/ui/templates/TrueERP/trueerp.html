@@ -43,8 +43,31 @@
   <div class="row transferOption">
       <div class="col-12 col-lg-4" id="whatTransfer">
           <h5 class="mb-4">Type of Transfer</h5>
+          {{#if transfertypes1}}
+          {{#each transfertype in transfertypes1}}
+            {{> toggle_button
+                className="chkGlobalSettings chkTransferType mt-3"
+                id=transfertype.id
+                for=transfertype.id
+                width="80px"
+                displayName=transfertype.transfer_type
+                labelclass=''
+                isChecked=transfertype.status
+                custId="magentoaccount_transfertype_"
+            }}
+         {{/each}}
+          {{else}}
           {{> toggle_button
-          className="chkGlobalSettings mt-3"
+          className="chkGlobalSettings chkTransferType mt-3"
+          id="magento_invoices2magento"
+          width="80px"
+          for="magento_invoices2magento"
+          displayName="Magento Invoices"
+          labelclass=''
+          isChecked=true
+          }}
+          {{> toggle_button
+          className="chkGlobalSettings chkTransferType mt-3"
           id="magento_customers2magento"
           width="80px"
           for="magento_customers2magento"
@@ -52,15 +75,7 @@
           labelclass=''
           isChecked=true
           }}
-          {{> toggle_button
-          className="chkGlobalSettings mt-3"
-          id="magento_invoices2magento"
-          width="80px"
-          for="magento_invoices2magento"
-          displayName="Magento Invoices"
-          labelclass=''
-          isChecked=false
-          }}
+          {{/if}}
       </div>
       <div class="col-12 col-lg-4"
           style="padding: 0; border-right: solid gray 1px;">
@@ -86,7 +101,7 @@
               </div>
           </div>
       </div>
-      <div class="col-12 col-lg-4" style="padding: 0;">
+      <div class="col-12 col-lg-4" style="padding: 0; display: none!important;">
           <div class="form-group"
               style="margin-left: 4px;padding-left:4px; width: 100%">
               <h5 style="margin-bottom: 8px; margin-left: 10px; text-align: left;">
@@ -103,18 +118,40 @@
       <div class="row transferOption">
           <div class="col-12 col-lg-4" id="whatTransfer">
               <h5 class="mb-4">Type of Transfer</h5>
-              {{#each transfertype in transfertypes1}}
-              {{> toggle_button
-                  className="chkGlobalSettings mt-3"
-                  id=transfertype.id
-                  for=transfertype.id
-                  width="80px"
-                  displayName=transfertype.transfer_type
-                  labelclass=''
-                  isChecked=transfertype.status
-                  custId="account_transfertype_"
+              {{#if transfertypes1}}
+                {{#each transfertype in transfertypes1}}
+                  {{> toggle_button
+                      className="chkGlobalSettings chkTransferType mt-3"
+                      id=transfertype.id
+                      for=transfertype.id
+                      width="80px"
+                      displayName=transfertype.transfer_type
+                      labelclass=''
+                      isChecked=transfertype.status
+                      custId="account_transfertype_"
+                  }}
+               {{/each}}
+             {{else}}
+
+             {{> toggle_button
+               className="chkGlobalSettings chkTransferType mt-3"
+               id="magento_invoices2magento"
+               width="80px"
+               for="magento_invoices2magento"
+               displayName="Magento Invoices"
+               labelclass=''
+               isChecked=true
               }}
-          {{/each}}
+              {{> toggle_button
+                className="chkGlobalSettings chkTransferType mt-3"
+                id="magento_customers2magento"
+                width="80px"
+                for="magento_customers2magento"
+                displayName="Magento Customers"
+                labelclass=''
+                isChecked=true
+               }}
+             {{/if}}
           </div>
           <div class="col-12 col-lg-4"
               style="padding: 0; border-right: solid gray 1px;">
@@ -150,7 +187,7 @@
                   </div>
               </div>
           </div>
-          <div class="col-12 col-lg-4" style="padding: 0;">
+          <div class="col-12 col-lg-4" style="padding: 0;display: none!important;">
               <div class="form-group"
                   style="margin-left: 4px;padding-left:4px; width: 100%">
                   <h5
@@ -180,42 +217,59 @@
   <div class="row transferOption">
       <div class="col-12 col-lg-4" id="whatTransfer">
           <h5 class="mb-4">Type of Transfer</h5>
-          {{> toggle_button
-          className="chkGlobalSettings mt-3"
-          id="zoho_quotes2trueerp"
-          width="80px"
-          for="zoho_quotes2trueerp"
-          displayName="ZOHO Quotes"
-          labelclass=' '
-          isChecked=true
-          }}
-          {{> toggle_button
-          className="chkGlobalSettings mt-3"
-          id="zoho_sales_orders2trueerp"
-          width="80px"
-          for="zoho_sales_orders2trueerp"
-          displayName="ZOHO Sales Orders"
-          labelclass=' '
-          isChecked=false
-          }}
-          {{> toggle_button
-          className="chkGlobalSettings mt-3"
-          id="zoho_leads_prospects2trueerp"
-          width="80px"
-          for="zoho_leads_prospects2trueerp"
-          displayName="ZOHO Leads to Prospects"
-          labelclass=' '
-          isChecked=false
-          }}
-          {{> toggle_button
-          className="chkGlobalSettings mt-3"
-          id="zoho_contacts_customers2trueerp"
-          width="80px"
-          for="zoho_contacts_customers2trueerp"
-          displayName="ZOHO Contacts to Customers"
-          labelclass=' '
-          isChecked=false
-          }}
+          {{#if transfertypes1}}
+            {{#each transfertype in transfertypes1}}
+              {{> toggle_button
+                  className="chkGlobalSettings chkTransferType mt-3"
+                  id=transfertype.id
+                  for=transfertype.id
+                  width="80px"
+                  displayName=transfertype.transfer_type
+                  labelclass=''
+                  isChecked=transfertype.status
+                  custId="zohoaccount_transfertype_"
+              }}
+           {{/each}}
+
+         {{else}}
+
+            {{> toggle_button
+            className="chkGlobalSettings chkTransferType mt-3"
+            id="zoho_quotes2trueerp"
+            width="80px"
+            for="zoho_quotes2trueerp"
+            displayName="ZOHO Quotes"
+            labelclass=' '
+            isChecked=true
+            }}
+            {{> toggle_button
+            className="chkGlobalSettings chkTransferType mt-3"
+            id="zoho_sales_orders2trueerp"
+            width="80px"
+            for="zoho_sales_orders2trueerp"
+            displayName="ZOHO Sales Orders"
+            labelclass=' '
+            isChecked=false
+            }}
+            {{> toggle_button
+            className="chkGlobalSettings chkTransferType mt-3"
+            id="zoho_leads_prospects2trueerp"
+            width="80px"
+            for="zoho_leads_prospects2trueerp"
+            displayName="ZOHO Leads to Prospects"
+            labelclass=' '
+            isChecked=false
+            }}
+            {{> toggle_button
+            className="chkGlobalSettings chkTransferType mt-3"
+            id="zoho_contacts_customers2trueerp"
+            width="80px"
+            for="zoho_contacts_customers2trueerp"
+            displayName="ZOHO Account to Customers"
+            labelclass=' '
+            isChecked=false
+            }}
+          {{/if}}
       </div>
       <div class="col-12 col-lg-4"
           style="padding: 0; border-right: solid gray 1px;">
@@ -238,7 +292,7 @@
               </div>
           </div>
       </div>
-      <div class="col-12 col-lg-4" style="padding: 0;">
+      <div class="col-12 col-lg-4" style="padding: 0;display: none!important;">
           <div class="form-group"
               style="margin-left: 4px;padding-left:4px; width: 100%">
               <h5
@@ -259,24 +313,39 @@
   <div class="row transferOption">
       <div class="col-12 col-lg-4" id="whatTransfer">
           <h5 class="mb-4">Type of Transfer</h5>
-          {{> toggle_button
-          className="chkGlobalSettings mt-3"
-          id="austpost_invoices2austpost"
-          width="80px"
-          for="austpost_invoices2austpost"
-          displayName="AustPOST Invoices"
-          labelclass=''
-          isChecked=true
-          }}
-          {{> toggle_button
-          className="chkGlobalSettings mt-3"
-          id="magento_customers2magento"
-          width="80px"
-          for="magento_customers2magento"
-          displayName="AustPOST Customers"
-          labelclass=''
-          isChecked=false
-          }}
+          {{#if transfertypes1}}
+            {{#each transfertype in transfertypes1}}
+              {{> toggle_button
+                  className="chkGlobalSettings chkTransferType mt-3"
+                  id=transfertype.id
+                  for=transfertype.id
+                  width="80px"
+                  displayName=transfertype.transfer_type
+                  labelclass=''
+                  isChecked=transfertype.status
+                  custId="austpostaccount_transfertype_"
+              }}
+           {{/each}}
+          {{else}}
+            {{> toggle_button
+            className="chkGlobalSettings chkTransferType mt-3"
+            id="austpost_invoices2austpost"
+            width="80px"
+            for="austpost_invoices2austpost"
+            displayName="AustPOST Invoices"
+            labelclass=''
+            isChecked=true
+            }}
+            {{> toggle_button
+            className="chkGlobalSettings chkTransferType mt-3"
+            id="magento_customers2magento"
+            width="80px"
+            for="magento_customers2magento"
+            displayName="AustPOST Customers"
+            labelclass=''
+            isChecked=true
+            }}
+          {{/if}}
       </div>
       <div class="col-12 col-lg-4"
           style="padding: 0; border-right: solid gray 1px;">
@@ -312,7 +381,7 @@
               </div>
           </div>
       </div>
-      <div class="col-12 col-lg-4" style="padding: 0;">
+      <div class="col-12 col-lg-4" style="padding: 0; display: none!important;">
           <div class="form-group"
               style="margin-left: 4px;padding-left:4px; width: 80%">
               <h5 style="margin-bottom: 8px; margin-left: 10px; text-align: left;">

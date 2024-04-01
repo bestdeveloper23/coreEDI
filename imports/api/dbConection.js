@@ -42,8 +42,8 @@ function handleDisconnect() {
     console.log('db error', err);
     if (err.code === 'PROTOCOL_CONNECTION_LOST') { // Connection to the MySQL server is usually
       handleDisconnect();                         // lost due to either server restart, or a
-    } else {                                      // connnection idle timeout (the wait_timeout
-      throw err;                                  // server variable configures this)
+    } else {
+      console.log(err);                                     // connnection idle timeout (the wait_timeout                                  // server variable configures this)
     }
   });
 }
@@ -167,7 +167,7 @@ Meteor.startup(() => {
   JsonRoutes.add('post', '/api/identifiertypesByID', function (req, res) {
     jsonParser(req, res, () => {
       const data = req.body;
-      const query = 'SELECT * FROM identifier WHERE connection_id=' + data.id
+      const query = 'SELECT * FROM identifier WHERE connection_id=' + data.id||0
       pool.query(query, function (error, results) {
         if (error) {
           handleError(error, res);
@@ -178,6 +178,7 @@ Meteor.startup(() => {
       });
     });
   });
+/*
 /*
   JsonRoutes.add('post', '/api/updatetransfertypes', function (req, res) {
     jsonParser(req, res, () => {
@@ -206,7 +207,6 @@ JsonRoutes.add('post', '/api/updatetransfertypes', function (req, res) {
   jsonParser(req, res, () => {
     const data = req.body;
     for(let i = 0; i< data.length; i++){
-
       let transfer_type = data[i];
       let id = transfer_type.id;
       let status = 0;
@@ -216,31 +216,29 @@ JsonRoutes.add('post', '/api/updatetransfertypes', function (req, res) {
       if(transfer_type.checked == true){
         status = 1
       };
-
-      //Check IF NEW
-      const querySelect = "SELECT * FROM transfer_types WHERE id = '" + data[i].id + "'"
+      const querySelect = "SELECT * FROM transfer_types WHERE id = '"+ id+ "'";
       pool.query(querySelect, (error, resultSelect, fields) => {
         if (error) {
           handleError(error, res);
         }else {
-           if (resultSelect.length != 0) {//Update Data
-             const queryUpdate = "UPDATE transfer_types SET status = '" + status + "'WHERE id = '" + id+ "'"
-             pool.query(queryUpdate, (error, results, fields) => {
-               if (error) {
-                 handleError(error, res);
-               }
-             });
-           }else{
-             //Create NEW
-             const queryInsert = `INSERT IGNORE INTO transfer_types (transfer_type, status, connection_id, tab_id) VALUES ('${transferType}', '${status}', '${connectionID}', '${tabID}')`;
-             pool.query(queryInsert, (error, results, fields) => {
-               if (error) {
-                 handleError(error, res);
-               }
-             });
-           };
+          if (resultSelect.length != 0) {//Update Data
+            const query = "UPDATE transfer_types SET status = '" + status + "' WHERE id = '" + id+ "'"
+            pool.query(query, (error, results, fields) => {
+              if (error) {
+                handleError(error, res);
+              }
+            });
+          }else{
+            //Insert NEW
+           const queryInsert = `INSERT IGNORE INTO transfer_types (transfer_type, status, connection_id, tab_id) VALUES ('${transferType}', '${status}', '${connectionID}', '${tabID}')`;
+           pool.query(queryInsert, (error, results, fields) => {
+             if (error) {
+               handleError(error, res);
+             }
+           });
+          }
         }
-      })
+      });
 
     }
     return JsonRoutes.sendResult(res, {
@@ -248,51 +246,6 @@ JsonRoutes.add('post', '/api/updatetransfertypes', function (req, res) {
     });
   });
 });
-
-JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
-    jsonParser(req, res, () => {
-      const data = req.body;
-      let query = "SELECT * FROM transfer_types WHERE id = '" + data.id + "'"
-      pool.query(query, (error, results, fields) => {
-        if (error) {
-          handleError(error, res);
-        }else {
-          if (results.length != 0) {
-            const data = req.body;
-            for(let i = 0; i< data.length; i++){
-
-              query = "SELECT * FROM transfer_types WHERE id = '" + data[i].id + "'"
-
-              let transfer_type = data[i]
-              let id = transfer_type.id
-              let status = 0
-              if(transfer_type.checked == true)
-                status = 1;
-                query = "UPDATE transfer_types SET status = '" + status + "'WHERE id = '" + id+ "'"
-                pool.query(query, (error, results, fields) => {
-                  if (error) {
-                    handleError(error, res);
-                  }
-                });
-            }
-          }
-          else {
-            let _enabled = data.enabled ? 1 : 0;
-            const insertQuery = "INSERT INTO clienttrueerp (`id`, `user_name`, `password`, `database`, `base_url`, `enabled`, `customer_type`, `invoice_template`) VALUES ('" +
-                                data.id + "','" + data.user_name + "', '" + data.password + "', '" + data.database + "', '" + data.base_url + "', '" + _enabled + "', '" + data.customer_type + "', '" + data.invoice_template + "');";
-              pool.query(insertQuery, (err, re, fe) => {
-              if (err) console.log(err)
-              else {
-                return JsonRoutes.sendResult(res, {
-                  data: 'success'
-                });
-              }
-            })
-          }
-        }
-      })
-    });
-  });
 
   JsonRoutes.add('post', '/api/employees', function (req, res) {
     jsonParser(req, res, () => {
@@ -459,7 +412,7 @@ JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
     jsonParser(req, res, () => {
       const data = req.body;
       const insertQuery = "INSERT INTO `transactions` SET accounting_soft='" + data.accounting_soft + "', connection_soft='" + data.connection_soft + "', date='" + data.date + "', order_num='" +
-      data.order_num + "', products='" + data.products + "', products_num='" + data.product_num + "', uploaded_num='" + data.uploaded_num +"', downloaded_num='" + data.downloaded_num + "', connection_id='" + data.connection_id + "'";
+      data.order_num + "', products='" + data.products + "', products_num='" + data.products_num + "', uploaded_num='" + data.uploaded_num +"', downloaded_num='" + data.downloaded_num + "', connection_id='" + data.connection_id + "'";
       pool.query(insertQuery, function (error, results) {
         if (error) {
           handleError(error, res);
@@ -476,7 +429,7 @@ JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
       const id = req.body.id;
       const data = req.body.transaction_data;
       const insertQuery = "UPDATE transactions SET order_num='" +
-      data.order_num + "', products='" + data.products + "', products_num='" + data.product_num + "', uploaded_num='" + data.uploaded_num +
+      data.order_num + "', products='" + data.products + "', products_num='" + data.products_num + "', uploaded_num='" + data.uploaded_num +
       "', downloaded_num='" + data.downloaded_num + "' WHERE id = " + id + ";";
       pool.query(insertQuery, function (error, results) {
         if (error) {
@@ -898,7 +851,7 @@ JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
   JsonRoutes.add('post', '/api/updateZoho', function (req, res) {
     jsonParser(req, res, () => {
       const data = req.body;
-      const query = "SELECT * FROM clientZoho WHERE id = '" + data.id + "'"
+      const query = "SELECT * FROM clientzoho WHERE id = '" + data.id + "'"
       pool.query(query, (error, results, fields) => {
         if (error) {
           handleError(error, res);
@@ -911,7 +864,7 @@ JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
             let _transfer_type_quotes = data.transfer_type_quotes ? 1 : 0;
 
             const updateQuery =
-              "UPDATE `clientZoho` SET client_id='" + data.client_id +
+              "UPDATE `clientzoho` SET client_id='" + data.client_id +
               "', client_secret='" + data.client_secret +
               "', redirect_uri='" + data.redirect_uri +
               "', print_name_to_short_description='" + data.print_name_to_short_description +
@@ -939,8 +892,12 @@ JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
             });
           } else {
             let _enabled = data.enabled ? 1 : 0;
+            let _transfer_type_salesorder = data.transfer_type_salesorder ? 1 : 0;
+            let _transfer_type_customers = data.transfer_type_customers ? 1 : 0;
+            let _transfer_type_products = data.transfer_type_products ? 1 : 0;
+            let _transfer_type_quotes = data.transfer_type_quotes ? 1 : 0;
             const insertQuery =
-              "INSERT INTO `clientZoho` SET id='" + data.id +
+              "INSERT INTO `clientzoho` SET id='" + data.id +
               "',client_id='" + data.client_id +
               "', client_secret='" + data.client_secret +
               "', redirect_uri='" + data.redirect_uri +
@@ -949,7 +906,7 @@ JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
               "', access_token='" + data.access_token +
               "', refresh_token='" + data.refresh_token +
               "', enabled='" + _enabled +
-              "', transfer_type_customers='" + _transfer_type_salesorder +
+              "', transfer_type_salesorder='" + _transfer_type_salesorder +
               "', transfer_type_customers='" + _transfer_type_customers +
               "', transfer_type_products='" + _transfer_type_products +
               "', transfer_type_quotes='" + _transfer_type_quotes +
@@ -977,7 +934,7 @@ JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
     jsonParser(req, res, () => {
             const data = req.body;
             const updateQuery =
-              "UPDATE `clientZoho` SET access_token='" + data.access_token + "' WHERE refresh_token='"+ data.refresh_token+"'";
+              "UPDATE `clientzoho` SET access_token='" + data.access_token + "' WHERE refresh_token='"+ data.refresh_token+"'";
             pool.query(updateQuery, (err, re, fe) => {
               if (err) {
                 console.log(err);
@@ -1001,9 +958,10 @@ JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
           handleError(error, res);
         }
         else {
+          console.log(results);
           if (results.length != 0) {
             let _enabled = data.enabled ? 1 : 0;
-            const updateQuery = `UPDATE \`coreedit\`.\`clientwoocommerce\` SET \`key\` = '${data.email}', \`secret\` = '${data.password}', \`base_url\` = '${data.url}', \`enabled\` = '${_enabled}'`;
+            const updateQuery = `UPDATE clientwoocommerce SET emailkey = '${data.email}', secret = '${data.password}', base_url = '${data.url}', enabled = '${_enabled}' WHERE id = '${data.id}'`;
 
             pool.query(updateQuery, (err, re, fe) => {
               if (err) console.log(err)
@@ -1016,7 +974,7 @@ JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
           }
           else {
             let _enabled = data.enabled ? 1 : 0;
-            const insertQuery = `INSERT INTO \`clientwoocommerce\` SET \`id\` = '${data.id}',SET \`key\` = '${data.email}', \`secret\` = '${data.password}', \`base_url\` = '${data.url}', \`enabled\` = '${_enabled}'`;
+            const insertQuery = `INSERT INTO clientwoocommerce SET id = '${data.id}', emailkey = '${data.email}', secret = '${data.password}', base_url = '${data.url}', enabled = '${_enabled}' `;
 
             pool.query(insertQuery, (err, re, fe) => {
               if (err) console.log(err)
@@ -1874,7 +1832,8 @@ JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
   JsonRoutes.add('post', '/api/updateLastRanDate', function (req, res) {
     jsonParser(req, res, () => {
       const data = req.body;
-      const updateQuery = "UPDATE connections SET last_ran_date='" + data.last_ran_date + "' WHERE id=" + data.id
+      const updateQuery = "UPDATE connections SET last_ran_date='" + data.last_ran_date + "' WHERE id=" + data.id;
+      console.log(updateQuery);
       pool.query(updateQuery, (err, re, fe) => {
         if (err) console.log(err)
         return JsonRoutes.sendResult(res, {
@@ -1902,7 +1861,7 @@ JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
               if (err) console.log(err)
               else {
                 return JsonRoutes.sendResult(res, {
-                  data: 'success'
+                  data: "success"
                 });
               }
             })
@@ -1924,7 +1883,7 @@ JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
                 });
               } else {
                 return JsonRoutes.sendResult(res, {
-                  data: "success",
+                  data: "success"
                 });
               }
             });
@@ -1934,88 +1893,53 @@ JsonRoutes.add('post', '/api/updateTrueERP', function (req, res) {
     });
   });
 
-  // JsonRoutes.add("POST", "/api/updateTrueERP2", async function (req, res) {
-  //   jsonParser(req, res, async () => {
-  //   const reqData = req.body;
-  //   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-  //   await HTTP.call('POST', `${reqData.url}`, {
-  //       headers: {
-  //           'Username': reqData.Username,
-  //           'Password': reqData.Password,
-  //           'Database':reqData.Database
-  //       },
-  //       data: reqData.data,
-  //   }, async (error, response) => {
-  //     if(response){
-  //       JsonRoutes.sendResult(res, {
-  //         data: response,
-  //       });
-  //     }else{
-  //       return JsonRoutes.sendResult(res, {
-  //         code: "500",
-  //         data: error,
-  //       });
-  //     }
-  //   });
-  //   /*
-  //   await axios({
-  //     method: "POST",
-  //     url: `${reqData.url}`,
-  //     headers: {
-  //       Username: reqData.Username,
-  //       Password: reqData.Password,
-  //       Database: reqData.Database,
-  //       'Content-Type': 'application/json'
-  //     },
-  //     data: JSON.stringify(reqData.data),
-  //   }).then((result) => {
-  //       JsonRoutes.sendResult(res, {
-  //         data: result.data,
-  //       });
-  //     }).catch((error) => {
-  //       return JsonRoutes.sendResult(res, {
-  //         code: "500",
-  //         data: error,
-  //       });
-  //     });
-  //     */
-  // });
-  // })
-
-  JsonRoutes.add('POST', '/api/updateTrueERP2', async function (req, res) {
-    try {
-      // Assuming jsonParser is defined and correctly used
-      const reqData = req.body;
-  
-      // Avoid setting NODE_TLS_REJECT_UNAUTHORIZED to "0" for security reasons
-  
-      const response = await new Promise((resolve, reject) => {
-        HTTP.call('POST', reqData.url, {
-          headers: {
+  JsonRoutes.add("POST", "/api/updateTrueERP2", async function (req, res) {
+    jsonParser(req, res, async () => {
+    const reqData = req.body;
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+    await HTTP.call('POST', `${reqData.url}`, {
+        headers: {
             'Username': reqData.Username,
             'Password': reqData.Password,
-            'Database': reqData.Database
-          },
-          data: reqData.data,
-        }, (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(result);
-          }
+            'Database':reqData.Database
+        },
+        data: reqData.data,
+    }, async (error, response) => {
+      if(response){
+        JsonRoutes.sendResult(res, {
+          data: response,
+        });
+      }else{
+        return JsonRoutes.sendResult(res, {
+          code: "500",
+          data: error,
+        });
+      }
+    });
+    /*
+    await axios({
+      method: "POST",
+      url: `${reqData.url}`,
+      headers: {
+        Username: reqData.Username,
+        Password: reqData.Password,
+        Database: reqData.Database,
+        'Content-Type': 'application/json'
+      },
+      data: JSON.stringify(reqData.data),
+    }).then((result) => {
+        JsonRoutes.sendResult(res, {
+          data: result.data,
+        });
+      }).catch((error) => {
+        return JsonRoutes.sendResult(res, {
+          code: "500",
+          data: error,
         });
       });
-  
-      JsonRoutes.sendResult(res, {
-        data: response.data,
-      });
-    } catch (error) {
-      JsonRoutes.sendResult(res, {
-        code: "500",
-        data: error,
-      });
-    }
+      */
   });
+  })
 })
 
 export default pool;

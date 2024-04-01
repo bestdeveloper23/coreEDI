@@ -853,7 +853,6 @@ Meteor.methods({
       });
     } catch (err) {
       console.log(err);
-      throw new Meteor.Error(err);
     }
   },
   /**

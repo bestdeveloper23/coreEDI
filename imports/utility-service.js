@@ -8,7 +8,7 @@ import { error } from 'jquery';
 import { indexOf } from 'lodash';
 
 export class UtilityService {
-  runNowFunction = function (customDate, selConnectionId = '', TemplateInstant) {
+  runNowFunction = async function (customDate, selConnectionId = '', TemplateInstant) {
     TemplateInstant.setLogFunction('');
     var templateObject = TemplateInstant;
     templateObject.setLogFunction('');
@@ -30,6 +30,59 @@ export class UtilityService {
     let download_transaction_count = 0
     let order_transaction_count = 0
 
+    let postgetTransData = {
+          id: selConnectionId
+      };
+
+      let ERP_QuotesState = true;
+      let ERP_SalesState = true;
+      let ERP_ProductsState = true;
+      let ERP_CustomerState = true;
+
+      let ZOHO_QuotesState = true;
+      let ZOHO_SalesState = true;
+      let ZOHO_LeadsState = true;
+      let ZOHO_CustomerState = true;
+
+      await fetch('/api/transfertypesByID', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(postgetTransData)
+        }).then(response => response.json()).then(async (resultsTransType) => {
+
+          $.each(resultsTransType, async function (i, e) {
+                if(e.transfer_type == "ZOHO Quotes" && e.status == 0){
+                  ZOHO_QuotesState = false;
+                };
+                if(e.transfer_type == "ZOHO Sales Orders" && e.status == 0){
+                  ZOHO_SalesState = false;
+                };
+
+                if(e.transfer_type == "ZOHO Leads to Prospects" && e.status == 0){
+                  ZOHO_LeadsState = false;
+                };
+                if(e.transfer_type == "ZOHO Account to Customers" && e.status == 0){
+                  ZOHO_CustomerState = false;
+                };
+                if(e.transfer_type == "TrueERP Sales Orders" && e.status == 0){
+                  ERP_SalesState = false;
+                };
+                if(e.transfer_type == "TrueERP Customers" && e.status == 0){
+                  ERP_CustomerState = false;
+                };
+                if(e.transfer_type == "TrueERP Products" && e.status == 0){
+                  ERP_ProductsState = false;
+                };
+                if(e.transfer_type == "TrueERP Quotes" && e.status == 0){
+                  ERP_QuotesState = false;
+                };
+          });
+
+        }).catch(error => console.log(error));
+
+
     const postData = {
     id: selConnectionId
     };
@@ -40,17 +93,17 @@ export class UtilityService {
     },
     body: JSON.stringify(postData)
     }).then(response => response.json()).then(async (connectionResult) => {
-    lstUpdateTime = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").format("YYYY-MM-DD HH:mm:ss");
+    lstUpdateTime = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").format("YYYY-MM-DD hh:mm:ss");
     //lstUpdateTime = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").subtract(1, 'hours').format("YYYY-MM-DD HH:mm:ss");
     // lstUpdateTime = connectionResult[0].last_ran_date !=''? moment(connectionResult[0].last_ran_date).format("YYYY-MM-DD HH:mm:ss"): connectionResult[0].last_ran_date;
-    var lstUpdateTimeUTC = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").format("YYYY-MM-DDTHH:mm:ss");
+    var lstUpdateTimeUTC = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").format("YYYY-MM-DDThh:mm:ss");
 
-    var lstUpdateTimeZoho = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").format("YYYY-MM-DDTHH:mm:ssZ");
+    var lstUpdateTimeZoho = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").format("YYYY-MM-DDThh:mm:ssZ");
 
     if (customDate != '') {
     lstUpdateTime = customDate;
     lstUpdateTimeUTC = customDate;
-    lstUpdateTimeZoho= moment(customDate).tz("Australia/Brisbane").format("YYYY-MM-DDTHH:mm:ssZ");
+    lstUpdateTimeZoho= moment(customDate).tz("Australia/Brisbane").format("YYYY-MM-DDThh:mm:ssZ");
     }
     tempConnection = connectionResult[0];
     const postData = {
@@ -86,7 +139,6 @@ export class UtilityService {
         .then((response) => response.json())
         .then(async (result) => {
           tempConnectionSoftware = result[0];
-      
           let postData = {
             id: tempConnection.account_id,
           };
@@ -180,12 +232,13 @@ export class UtilityService {
                   templateObject.setLogFunction(transNOtes);
                   async function runPerFiveMinutes() {
       
-                    const CustomerState = jQuery('#erp_customers2magento').is(':checked');
-                    const ProductsState = jQuery('#erp_products2magento').is(':checked');
+                    const CustomerState = tempConnectionSoftware.transfer_type_customers;
+                    const ProductsState = tempConnectionSoftware.transfer_type_products;;
+                    // const ProductsState = jQuery('#erp_products2magento').is(':checked');
       
                     if ( CustomerState ) {
                     //getting newly added customer from ERP database
-                      transNOtes += `---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n`;
+                      transNOtes += `----------------------------------------------------------\n`;
                       templateObject.setLogFunction(transNOtes);
                       await fetch(
                         `${tempAccount.base_url}/TCustomer?listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"&limitCount=3`,
@@ -223,7 +276,7 @@ export class UtilityService {
                                 firstname: newCustomerFromERP?.fields?.FirstName,
                                 lastname: newCustomerFromERP?.fields?.LastName,
                                 prefix: "TrueERP",
-                                dob: "1990-01-01",
+                                dob: moment().format("YYYY-MM-DD"),
       
                               };
       
@@ -290,10 +343,10 @@ export class UtilityService {
                                     if (customerResult) {
                                       upload_transaction_count ++;
                                       upload_num ++;
-                                      transNOtes += `Successfully added ${newCustomersFromERPCount} Customer to Magento with ID: ${newCustomerFromERP.fields?.ID}.\n`;
+                                      transNOtes += `Successfully added ${newCustomersFromERPCount} Customer to Magento with ID: ${newCustomerFromERP.fields?.ID}.\n\n`;
                                       templateObject.setLogFunction(transNOtes);
                                     } else {
-                                      transNOtes += `[Error] Failed to add customer.\n`;
+                                      transNOtes += `[Error] Failed to add customer.\n\n`;
                                       templateObject.setLogFunction(transNOtes);
                                     }
                                   } catch (error) {
@@ -323,7 +376,7 @@ export class UtilityService {
                     if ( ProductsState ) {
       
                     //getting newly added products from ERP database
-                      transNOtes += `---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n`;
+                      transNOtes += `----------------------------------------------------------\n`;
                       templateObject.setLogFunction(transNOtes);
                       await fetch(
                         `${tempAccount.base_url}/TProduct?listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"&[PublishOnWeb]=true&limitCount=3`,
@@ -383,10 +436,10 @@ export class UtilityService {
                                 if (productResult) {
                                   upload_transaction_count ++;
                                   upload_num ++;
-                                  transNOtes += `Successfully added ${newProductsFromERPCount} Product to Magento with ID: ${newProductFromERP?.fields?.ID}.\n`;
+                                  transNOtes += `Successfully added ${newProductsFromERPCount} Product to Magento with ID: ${newProductFromERP?.fields?.ID}.\n\n`;
                                   templateObject.setLogFunction(transNOtes);
                                 } else {
-                                  transNOtes += `[Error] Failed to add product.\n`;
+                                  transNOtes += `[Error] Failed to add product.\n\n`;
                                   templateObject.setLogFunction(transNOtes);
                                 }
                               } catch (error) {
@@ -408,14 +461,15 @@ export class UtilityService {
                           templateObject.setLogFunction(transNOtes);
                         });
                       //Getting newly added orders from woocommerce
-                      transNOtes += `---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n`;
+                      transNOtes += `----------------------------------------------------------\n`;
                       templateObject.setLogFunction(transNOtes);
                     }
       
-                    const Magento_CustomerState = true;
+                    const Magento_CustomerState = false;
+                    const Magento_InvoiceState = true;
                     if ( Magento_CustomerState ) {
                       //Getting newly added Customers from Magento
-                      transNOtes += `---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n`;
+                      transNOtes += `----------------------------------------------------------\n`;
                       templateObject.setLogFunction(transNOtes);
 
                       try {
@@ -512,11 +566,11 @@ export class UtilityService {
                               }).then((response) => response.json()).then(async (result) => {
                                   download_transaction_count += 1;
                                   download_num += 1;
-                                  transNOtes += `Customer ${i+1} with ID:${resultData[i].id} transfer Success!\n`;
+                                  transNOtes += `Customer ${i+1} with ID:${resultData[i].id} transfer Success!\n\n`;
                                   templateObject.setLogFunction(transNOtes);
                                 }).catch((error) => {
                                   console.log(error);
-                                  transNOtes += `Customers transfer Failed!\n`;
+                                  transNOtes += `Customers transfer Failed!\n\n`;
                                   transNOtes += `Failed!!!\n`;
                                   templateObject.setLogFunction(transNOtes);
                                 });
@@ -538,9 +592,342 @@ export class UtilityService {
                         console.error('Failed to get customers:', error);
                       }
                     }
+
+                    if ( Magento_InvoiceState ) {
+                    //Getting newly added Invoices from Magento
+                      transNOtes += `-----------------------------------------------------------\n`;
+                      templateObject.setLogFunction(transNOtes);
+                      
+                      try {
+                        const invoices = await new Promise((resolve, reject) => {
+                          Meteor.call("getMagentoUpdatedInvoices", url, token, lstUpdateTime, (error, result) => {
+                            if (error) {
+                              reject(error);
+                            } else {
+                              resolve(result);
+                            }
+                          });
+                        });
+                      
+                        // Process the invoices as needed
+
+                        if (invoices) {
+                          if (invoices.items.length === 0) {
+                            transNOtes += `There is no newly added Invoice in Magento.\n`;
+                            templateObject.setLogFunction(transNOtes);
+                          } else {
+                            responseCount = invoices.items.length;
+                            var resultData = invoices.items;
+                            let formatting =
+                              responseCount > 1 ? "Invoices" : "Invoice";
+                            transNOtes +=
+                              `Received ` +
+                              responseCount +
+                              ` ${formatting} from Magento.\n`;
+  
+                            transNOtes += `Adding ${formatting} to TrueERP \n`;
+                            templateObject.setLogFunction(transNOtes);
+                            let download_num = 0;
+  
+                            for (let i = 0; i < responseCount; i++) {
+                              let tempCount = i % 10;
+                              let count = tempCount === 0 ? `${i + 1}st` : tempCount === 1 ? `${i + 1}nd` : tempCount === 2 ? `${i + 1}rd` : `${i + 1}th`;
+                              transNOtes += `Adding ${count} Invoice to ERP database.\n`;
+                              templateObject.setLogFunction(transNOtes);
+                              let orderID = resultData[i].order_id;
+                              let OrderData;
+                              console.log(resultData[i]?.order_id)
+                              try {
+                                const orderDetail = await new Promise((resolve, reject) => {
+                                  Meteor.call("getMagentoOrderByID", url, token, orderID, (error, result) => {
+                                    if (error) {
+                                      reject(error);
+                                    } else {
+                                      resolve(result);
+                                    }
+                                  });
+                                })
+
+console.log(orderDetail, resultData[i].order_id)
+                                if (orderDetail) {
+                                  OrderData = orderDetail;
+                                  console.log(orderDetail)
+                                  let postData = {};
+                                  postData.type = "TCustomer";
+                                  postData.fields = {};
+                                  postData.fields.Email = OrderData.customer_email || "";
+      
+                                  postData.fields.FirstName =
+                                    OrderData.customer_firstname || "";
+      
+                                  postData.fields.LastName =
+                                    OrderData.customer_lastname || "";
+      
+                                  const clientName = OrderData.customer_lastname + " " + OrderData.customer_firstname;
+                                  let clientId;
+
+                                  await fetch(
+                                    `${tempAccount.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
+                                    {
+                                      method: "GET",
+                                      headers: {
+                                        Username: tempAccount.user_name,
+                                        Password: tempAccount.password,
+                                        Database: tempAccount.database,
+                                        "Content-Type": "application/json",
+                                      },
+                                      redirect: "follow",
+                                    }
+                                  )
+                                    .then((response) => response.json())
+                                    .then(async (result) => {
+                                      if (result?.tcustomer.length > 0) {
+                                        clientId = result?.tcustomer[0]?.Id;
+                                        transNOtes += `Found the Customer as ID : ${clientId}\n`;
+                                        templateObject.setLogFunction(transNOtes);
+                                      } else {
+                                        transNOtes += `Not Existing Customer, creating...\n`;
+                                        templateObject.setLogFunction(transNOtes);
+                                        const tempCustomerDetailtoERP = {
+                                          type: "TCustomer",
+                                          fields: {
+                                            ClientName: clientName || "",
+                                            Country:OrderData.billing_address.country_id || "",
+                                            State: OrderData.billing_address.region || "",
+                                            Street: OrderData.billing_address.street[0] || "",
+                                            Postcode: OrderData.billing_address.postcode || "",
+                                          },
+                                        };
+                                        console.log(
+                                          tempCustomerDetailtoERP,
+                                          "tempCustomer"
+                                        );
+                                        await fetch(`${tempAccount.base_url}/TCustomer`, {
+                                          method: "POST",
+                                          headers: {
+                                            Username: tempAccount.user_name,
+                                            Password: tempAccount.password,
+                                            Database: tempAccount.database,
+                                            "Content-Type": "application/json",
+                                          },
+                                          redirect: "follow",
+                                          body: JSON.stringify(tempCustomerDetailtoERP),
+                                        })
+                                          .then((response) => {
+                                            console.log(response);
+                                            response.json();
+                                          })
+                                          .then(async (result) => {
+                                            clientId = result?.fields?.ID;
+                                            transNOtes += `Added a new customer to TrueERP database with ID : ${clientId}.\n`;
+                                            templateObject.setLogFunction(transNOtes);
+                                          })
+                                          .catch((error) =>
+                                            console.log("error", error)
+                                          );
+                                      }
+                                    })
+                                    .catch(() => {
+                                      transNOtes += `Error while getting client Id from the TrueERP database.\n`;
+                                      templateObject.setLogFunction(transNOtes);
+                                    });
+      
+                                  //check if the product exists and add if not
+                                  const productList = OrderData?.items;
+                                  const productIdList = [];
+                                  const productQtyList = [];
+                                  transNOtes += `There are ${productList.length} products in the items.\n`;
+                                  templateObject.setLogFunction(transNOtes);
+      
+                                  for (const product of productList) {
+                                    transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.name}...\n`;
+                                    templateObject.setLogFunction(transNOtes);
+                                    await fetch(
+                                      `${tempAccount.base_url}/TProduct?select=[ProductName]="${product?.name}"`,
+                                      {
+                                        method: "GET",
+                                        headers: {
+                                          Username: tempAccount.user_name,
+                                          Password: tempAccount.password,
+                                          Database: tempAccount.database,
+                                          "Content-Type": "application/json",
+                                        },
+                                        redirect: "follow",
+                                      }
+                                    )
+                                      .then((response) => response.json())
+                                      .then(async (result) => {
+                                        if (result?.tproduct.length > 0) {
+                                          const productId = result?.tproduct[0]?.Id;
+                                          transNOtes += `Found the Product as ID : ${productId}\n`;
+                                          templateObject.setLogFunction(transNOtes);
+                                          productIdList.push(productId);
+                                          productQtyList.push(product?.qty_invoiced);
+                                        }
+                                        
+                                      })
+                                      .catch(() => {
+                                        transNOtes += `Error while getting Product Id from the TrueERP database.\n`;
+                                        templateObject.setLogFunction(transNOtes);
+                                      });
+                                  }
+      
+                                  // create a new Qutoes in ERP.
+      
+                                  const InvoiceItems = [];
+      
+                                  productIdList.forEach((item, index) => {
+                                    InvoiceItems.push({
+                                      type: "TInvoiceLine",
+                                      fields: {
+                                        ProductID: item,
+                                        OrderQty: productQtyList[index],
+                                      },
+                                    });
+                                  });
+                                  if (InvoiceItems.length === 0) {
+                                    continue;
+                                  }
+                                  const InvoiceData = {
+                                    type: "TInvoiceEx",
+                                    fields: {
+                                      CustomerID: clientId,
+                                      Lines: InvoiceItems,
+                                      IsBackOrder: true,
+                                      Comments: "Invoice Produced in Magento",
+                                    },
+                                  };
+      
+                                  if(resultData[i]?.GlobalRef) {
+                                    InvoiceData.fields.GlobalRef = resultData[i]?.GlobalRef
+                                  }
+      
+                                  await fetch("/api/updateTrueERP2", {
+                                    method: "POST",
+                                    headers: {
+                                      "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                      data: QuoteData,
+                                      Username: tempAccount.user_name,
+                                      Password: tempAccount.password,
+                                      Database: tempAccount.database,
+                                      url: tempAccount.base_url + "/TInvoiceEx",
+                                    }),
+                                  })
+                                    .then((response) => response.json())
+                                    .then(async (result) => {
+                                      console.log(result);
+                                      upload_transaction_count += 1;
+                                      upload_num += 1;
+                                      transNOtes += `Invoice ${i+1} with ID:${resultData[i].entity_id} transfer Success!\n\n`;
+                                      templateObject.setLogFunction(transNOtes);
+                                    })
+                                    .catch((error) => {
+                                      console.log(error);
+                                      transNOtes += `Invoice transfer Failed!\n\n`;
+                                      templateObject.setLogFunction(transNOtes);
+                                    });
+                                
+                                }
+                              } catch (error) {
+                                console.error('Failed to get Order:', error);
+                              }
+  
+                              
+
+                              
+
+
+
+
+
+
+
+
+                              // if (!resultData[i].GlobalRef) {
+                              //   await fetch(`${erpObject.base_url}/TCustomer?select=[ClientName]="${clientName}"&[Active]=true`,
+                              //     {
+                              //       method: "GET",
+                              //       headers: {
+                              //         Username: erpObject.user_name,
+                              //         Password: erpObject.password,
+                              //         Database: erpObject.database,
+                              //         "Content-Type": "application/json",
+                              //       },
+                              //       redirect: "follow",
+                              //     }
+                              //   ).then((response) => response.json()).then(async (result) => {
+                              //       if (result.tcustomer.length > 0) {
+                              //         postData.fields.GlobalRef = result?.tcustomer[0]?.GlobalRef;
+                              //         transNOtes += `Found the Customer as ClientName : ${clientName}\n`;
+                              //         templateObject.setLogFunction(transNOtes);
+                              //       } else {
+                              //         postData.fields.ClientName = resultData[i].clientName;
+                              //       }
+                              //     }).catch((err) => {
+                              //       console.log(err);
+                              //       postData.fields.ClientName = resultData[i].clientName;
+                              //     });
+                              // } else {
+                              //   postData.fields.GlobalRef = resultData[i].GlobalRef;
+                              // }
+  
+                              // await fetch("/api/updateTrueERP2", {
+                              //   method: "POST",
+                              //   headers: {
+                              //     "Content-Type": "application/json",
+                              //   },
+                              //   body: JSON.stringify({
+                              //     data: postData,
+                              //     Username: erpObject.user_name,
+                              //     Password: erpObject.password,
+                              //     Database: erpObject.database,
+                              //     url: erpObject.base_url + "/TCustomer",
+                              //   }),
+                              // }).then((response) => response.json()).then(async (result) => {
+                              //   if(result.statusCode == 200){
+                              //     download_transaction_count += 1;
+                              //     download_num += 1;
+                              //     transNOtes += `Customers transfer Success!\n`;
+                              //     templateObject.setLogFunction(transNOtes);
+                                  
+                              //   }else{
+  
+                              //     if (result && result.headers && result.headers.errormessage) {
+                              //       transNOtes += `Customers transfer Failed!\n`;
+                              //       transNOtes += `${result.headers.errormessage}\n`;
+                              //       templateObject.setLogFunction(transNOtes);
+                              //     }
+  
+                              //   }
+                              //   }).catch((error) => {
+                              //     console.log(error);
+                              //     transNOtes += `Invoices transfer Failed!\n`;
+                              //     transNOtes += `Failed!!!\n`;
+                              //     templateObject.setLogFunction(transNOtes);
+                              //   });
+                            }
+  
+                            transaction_details.push({
+                              detail_string:
+                                "Downloaded Invoices from Magento to TrueERP",
+                              count: download_num,
+                            });
+                          }
+                        } else {
+                          transNOtes += `[Error] Failed to add Invoices.\n`;
+                          templateObject.setLogFunction(transNOtes);
+                        }
+
+                      } catch (error) {
+                        console.error('Failed to get invoices:', error);
+                      }
+
+                    }
                    
                     //update the last sync time
-                    transNOtes += `---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n`;
+                    transNOtes += `----------------------------------------------------------\n`;
                     templateObject.setLogFunction(transNOtes);
       
                     let nowInSydney = moment()
@@ -685,6 +1072,7 @@ export class UtilityService {
         })
         .catch((error) => console.log(error));
       }
+
     else if (connectionType == "WooCommerce") {
     let constCategoryFromWoo = "";
     let woCategoryID = '';
@@ -735,7 +1123,7 @@ export class UtilityService {
 
                           // Getting Wocommerce token
                           let url = tempConnectionSoftware.base_url;
-                          let username = tempConnectionSoftware.key;
+                          let username = tempConnectionSoftware.emailkey;
                           let password = tempConnectionSoftware.secret;
 
                           const axios = require('axios');
@@ -809,12 +1197,12 @@ export class UtilityService {
                                     }
                                 }
 
-                                transNOtes += `Last Sync Time as ${moment(lstUpdateTime).format("DD/MM/YYYY HH:mm:ss")}.\n`;
+                                transNOtes += `Last Sync Time as ${moment(lstUpdateTime).format("DD/MM/YYYY hh:mm:ss")}.\n`;
                                 templateObject.setLogFunction(transNOtes);
                                 async function runPerFiveMinutes() {
                                     if(customer_status){
                                     //getting newly added customer from ERP database
-                                    transNOtes += `-----------------------------------------------------------\n`;
+                                    transNOtes += `----------------------------------------------------------\n`;
                                     templateObject.setLogFunction(transNOtes);
                                     await fetch(`${tempAccount.base_url}/TCustomer?select=[MsTimeStamp]>"${lstUpdateTime}"`,
                                         {
@@ -1319,7 +1707,7 @@ export class UtilityService {
                                     transNOtes += `-----------------------------------------------------------\n`;
                                     templateObject.setLogFunction(transNOtes);
 
-                                    let nowInSydney = moment().tz("Australia/Brisbane").format("YYYY-MM-DD HH:mm:ss");
+                                    let nowInSydney = moment().tz("Australia/Brisbane").format("YYYY-MM-DD hh:mm:ss");
                                     let args = {
                                         id: selConnectionId,
                                         last_ran_date: nowInSydney
@@ -1333,7 +1721,7 @@ export class UtilityService {
                                     })
                                     .then(response => response.json())
                                     .then(async (result) => {
-                                        transNOtes += `Updated Last Sync Time as ${moment(nowInSydney).format("DD/MM/YYYY HH:mm:ss")}.\n`;
+                                        transNOtes += `Updated Last Sync Time as ${moment(nowInSydney).format("DD/MM/YYYY hh:mm:ss")}.\n`;
                                         templateObject.setLogFunction(transNOtes);
                                     })
                                     .catch((err) => console.log(err));
@@ -1396,7 +1784,7 @@ export class UtilityService {
                           myHeaders.append("Username", `${tempAccount.user_name}`);
                           myHeaders.append("Password", `${tempAccount.password}`);
 
-                          transNOtes += `Last Sync Time as ${moment(lstUpdateTime).format("DD/MM/YYYY HH:mm:ss")}.\n`;
+                          transNOtes += `Last Sync Time as ${moment(lstUpdateTime).format("DD/MM/YYYY hh:mm:ss")}.\n`;
                           templateObject.setLogFunction(transNOtes);
                           // Getting backorders invoice from ERP machine
                           transNOtes += `-----------------------------------------------------------\n`;
@@ -1466,66 +1854,6 @@ export class UtilityService {
                                                                       const width = result?.tunitofmeasure[0]?.fields?.Width;
                                                                       const height = result?.tunitofmeasure[0]?.fields?.Height;
                                                                       const multiplier = result?.tunitofmeasure[0]?.fields?.Multiplier ||1;
-
-                                                                      const testBedObjSample = {
-                                                                          "shipments": [
-                                                                              {
-                                                                                  "shipment_reference": "shipment reference 1",
-                                                                                  "from": {
-                                                                                      "country": "AU",
-                                                                                      "email": "larry.citizen@citizen.com",
-                                                                                      "lines": [
-                                                                                          "123 Main Street"
-                                                                                      ],
-                                                                                      "name": "Larry Smith",
-                                                                                      "phone": "0412345678",
-                                                                                      "postcode": "3000",
-                                                                                      "state": "VIC",
-                                                                                      "suburb": "Melbourne"
-                                                                                  },
-                                                                                  "to": {
-                                                                                      "email": "jane.buyer@citizen.com",
-                                                                                      "lines": [
-                                                                                          "5 Main Street"
-                                                                                      ],
-                                                                                      "name": "Jane Buyer",
-                                                                                      "phone": "1234567890",
-                                                                                      "postcode": "6012",
-                                                                                      "state": "WLG",
-                                                                                      "suburb": "Karori",
-                                                                                      "country": "NZ"
-                                                                                  },
-                                                                                  "items": [
-                                                                                      {
-                                                                                          "classification_type": "OTHER",
-                                                                                          "commercial_value": true,
-                                                                                          "description_of_other": "This is a classification description",
-                                                                                          "export_declaration_number": "1234567890",
-                                                                                          "import_reference_number": "111222333",
-                                                                                          "item_contents": [
-                                                                                              {
-                                                                                                  "country_of_origin": "AU",
-                                                                                                  "description": "description",
-                                                                                                  "sku": "ABC1243567",
-                                                                                                  "quantity": 1,
-                                                                                                  "tariff_code": "123456",
-                                                                                                  "value": 55.55,
-                                                                                                  "weight": 0.5,
-                                                                                                  "item_contents_reference": "IC123456"
-                                                                                              }
-                                                                                          ],
-                                                                                          "item_description": "This is a description of the item",
-                                                                                          "item_reference": "TD1234567",
-                                                                                          "length": 10,
-                                                                                          "height": 10,
-                                                                                          "weight": 2,
-                                                                                          "product_id": "PTI8",
-                                                                                          "width": 10
-                                                                                      }
-                                                                                  ]
-                                                                              }
-                                                                          ]
-                                                                      };
                                                                       const testBedObj = {
                                                                           "shipments": [
                                                                               {
@@ -1789,17 +2117,6 @@ export class UtilityService {
       .catch((err) => console.log(err))
     }
     else if (connectionType == "Zoho") {
-
-        let ERP_QuotesState = true;
-        let ERP_SalesState = true;
-        let ERP_ProductsState = true;
-        let ERP_CustomerState = true;
-
-        let ZOHO_QuotesState = true;
-        let ZOHO_SalesState = true;
-        let ZOHO_LeadsState = true;
-        let ZOHO_CustomerState = true;
-
           var responseCount = 0;
           let customerCount = 0;
 
@@ -1845,7 +2162,7 @@ export class UtilityService {
                   const authorizationUrl = `https://accounts.zoho.com/oauth/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}&response_type=token`;
 
                   let token = '';
-                  transNOtes += 'Getting token for Zoho\n';
+                  transNOtes += 'Getting token for Zoho.....\n';
                   templateObject.setLogFunction(transNOtes);
                   if (ZOHO_ACCESS_TOKEN) {
                     token = ZOHO_ACCESS_TOKEN;
@@ -1853,21 +2170,20 @@ export class UtilityService {
                     transNOtes += 'Got token for Zoho.\n';
                     templateObject.setLogFunction(transNOtes);
                   }
-
+                  console.log(token);
                   const resultUser = await new Promise((resolve, reject) => {
                       Meteor.call("getZohoCurrentUser", {auth: token, datacenter: datacenter},(error, result) => {
                           if (error) {
+                            console.log(error);
                             resolve('');
                           } else {
+                            console.log(result);
                             resolve(result);
                           }
                         }
                       )
-                    }
-                  );
-                  // console.log(resultUser.details);
-                  // console.log(resultUser.reson.code);
-                  // return false;
+                    });
+                  console.log(resultUser);
                   if (resultUser != '') {
 
                   }else{
@@ -1908,7 +2224,7 @@ export class UtilityService {
                   }
 
                   console.log(token);
-                  transNOtes += `Last Sync Time as ${moment(lstUpdateTime).format("DD/MM/YYYY HH:mm:ss")}.\n`;
+                  transNOtes += `Last Sync Time as ${moment(lstUpdateTime).format("DD/MM/YYYY hh:mm:ss")}.\n`;
                   templateObject.setLogFunction(transNOtes);
 
                   if (ERP_SalesState) {
@@ -2011,7 +2327,7 @@ export class UtilityService {
                           for (let i = 0; i < responseCount; i++) {
                             let tempCount = i%10;
                             let count = tempCount === 0 ? `${i+1}st` : tempCount === 1 ? `${i+1}nd` : tempCount === 2 ? `${i+1}rd` : `${i+1}th`;
-                            transNOtes += `Adding ${count} Sales Order to ERP database.\n`;
+                            transNOtes += `Adding ${count} Sales Order to Zoho CRM.\n`;
                             templateObject.setLogFunction(transNOtes);
                             const productList = [];
                             if (!resultData[i].fields.Lines) {
@@ -2030,24 +2346,28 @@ export class UtilityService {
                               const resultPromiseProductDetect = await new Promise((resolve, reject) => {
                                   Meteor.call("getZohoProduct", productreqData,(error, result) => {
                                       if (error) {
+                                        console.log(error);
                                         reject(error);
                                       } else {
+                                        console.log(result);
                                         resolve(result);
                                       }
                                     }
                                   );
                                 }
                               );
-
-                              if (resultPromiseProductDetect.data) {
-                                if (resultPromiseProductDetect.data.length > 0) {
+                              console.log(resultPromiseProductDetect);
+                              if (resultPromiseProductDetect?.data) {
+                                if (resultPromiseProductDetect?.data?.length > 0) {
                                   productList.push({
                                     product: {
                                       name: resultData[i]?.fields?.Lines[j]?.fields?.ProductName,
                                       id: resultPromiseProductDetect.data[0].id,
                                     },
                                     quantity:resultData[i]?.fields?.Lines[j].fields?.OrderQty,
-                                    price:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
+                                    unit_price:resultData[i]?.fields?.Lines[j].fields?.LinePrice,
+                                    list_price:resultData[i]?.fields?.Lines[j].fields?.LinePrice,
+                                    total:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
                                     product_description:resultData[i]?.fields?.Lines[j].fields?.ProductDescription,
                                   });
                                 } else {
@@ -2085,7 +2405,9 @@ export class UtilityService {
                                           id: resultPromiseProduct.data[0].details.id,
                                         },
                                         quantity:resultData[i]?.fields?.Lines[j].fields?.OrderQty,
-                                        price:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
+                                        total:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
+                                        unit_price:resultData[i]?.fields?.Lines[j].fields?.LinePrice,
+                                        list_price:resultData[i]?.fields?.Lines[j].fields?.LinePrice,
                                         product_description:resultData[i]?.fields?.Lines[j].fields?.ProductDescription,
                                       });
                                     }else{
@@ -2132,7 +2454,9 @@ export class UtilityService {
                                         id: resultPromiseProduct.data[0].details.id,
                                       },
                                       quantity: resultData[i]?.fields?.Lines[j].fields?.OrderQty,
-                                      price:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
+                                      total:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
+                                      unit_price:resultData[i]?.fields?.Lines[j].fields?.LinePrice,
+                                      list_price:resultData[i]?.fields?.Lines[j].fields?.LinePrice,
                                       product_description: resultData[i].fields.Lines[j].fields.ProductDescription || "",
                                     });
                                   }else{
@@ -2160,8 +2484,10 @@ export class UtilityService {
                             const resultPromiseAccountDetect = await new Promise((resolve, reject) => {
                                 Meteor.call("getZohoAccount",accountreqData,(error, result) => {
                                     if (error) {
+                                      console.log(error);
                                       reject(error);
                                     } else {
+                                      console.log(result);
                                       resolve(result);
                                     }
                                   }
@@ -2169,8 +2495,8 @@ export class UtilityService {
                               }
                             );
 
-                            if (resultPromiseAccountDetect.data) {
-                              if (resultPromiseAccountDetect.data.length > 0) {
+                            if (resultPromiseAccountDetect?.data) {
+                              if (resultPromiseAccountDetect?.data?.length > 0) {
                                 transNOtes += `Account Name "${accountreqData.Account_Name}" already exists in ZOHO\n`;
                                 templateObject.setLogFunction(transNOtes);
                                 accountID = resultPromiseAccountDetect.data[0].id;
@@ -2188,8 +2514,10 @@ export class UtilityService {
                                 const resultPromiseAccount = await new Promise((resolve, reject) => {
                                     Meteor.call("addZohoAccounts",addAccount2Zotorequest,(error, result) => {
                                         if (error) {
+                                          console.log(error);
                                           reject(error);
                                         } else {
+                                          console.log(result);
                                           resolve(result);
                                         }
                                       }
@@ -2197,8 +2525,8 @@ export class UtilityService {
                                   }
                                 );
 
-                                if (resultPromiseAccount.data) {
-                                  if(resultPromiseAccount.data.code == "SUCCESS"){
+                                if (resultPromiseAccount?.data) {
+                                  if(resultPromiseAccount?.data?.code == "SUCCESS"){
                                     transNOtes += `Account ${addAccount2Zotorequest.data[0].Account_Name} has been added in ZOHO\n`;
                                     templateObject.setLogFunction(transNOtes);
                                     accountID = resultPromiseAccount.data[0].id;
@@ -2223,8 +2551,7 @@ export class UtilityService {
                                 datacenter: datacenter
                               };
 
-                              const resultPromiseAccount = await new Promise(
-                                (resolve, reject) => {
+                              const resultPromiseAccount = await new Promise((resolve, reject) => {
                                   Meteor.call("addZohoAccounts", addAccount2Zotorequest, (error, result) => {
                                       if (error) {
                                         reject(error);
@@ -2236,8 +2563,8 @@ export class UtilityService {
                                 }
                               );
 
-                              if (resultPromiseAccount.data) {
-                                if(resultPromiseAccount.data.code == "SUCCESS"){
+                              if (resultPromiseAccount?.data) {
+                                if(resultPromiseAccount?.data?.code == "SUCCESS"){
                                   transNOtes += `Account ${addAccount2Zotorequest.data[0].Account_Name} has been added in ZOHO\n`;
                                   templateObject.setLogFunction(transNOtes);
                                   accountID = resultPromiseAccount.data[0].id;
@@ -2259,6 +2586,10 @@ export class UtilityService {
                               GlobalRef: resultData[i]?.fields?.GlobalRef,
                               // Subject: resultData[i]?.fields?.ShipToDesc,
                               Subject: resultData[i]?.fields?.GlobalRef,
+                              Billing_Country: resultData[i]?.ShipCountry,
+                              Billing_State: resultData[i]?.ShipState,
+                              Billing_Street: resultData[i]?.ShipStreet1,
+                              Billing_Code: resultData[i]?.ShipPostcode,
                             });
 
                             let tempNote = transNOtes;
@@ -2287,8 +2618,10 @@ export class UtilityService {
                             const resultSalesOrder = await new Promise((resolve, reject) => {
                                 Meteor.call("updateZohoOrders",args,(error, result) => {
                                     if (error) {
+                                      console.log(error);
                                       reject(error);
                                     } else {
+                                      console.log(result);
                                       resolve(result);
                                     }
                                   }
@@ -2378,30 +2711,34 @@ export class UtilityService {
                           const resultPromise = await new Promise((resolve, reject) => {
                               Meteor.call("checkFieldExistence",reqData,(error, result) => {
                                   if (error) {
+                                    console.log(error);
                                     reject(error);
                                   } else {
+                                    console.log(result);
                                     resolve(result);
                                   }
                                 }
                               );
                             }
                           );
-
+                          console.log(resultPromise);
                           // Process the resultPromise
                           if (resultPromise) {
                             if (!resultPromise) {
                               const resultPromise = await new Promise((resolve, reject) => {
                                   Meteor.call("addcustomFields",reqData,(error, result) => {
                                       if (error) {
+                                        console.log(error);
                                         reject(error);
                                       } else {
+                                        console.log(result);
                                         resolve(result);
                                       }
                                     }
                                   );
                                 }
                               );
-
+                              console.log(resultPromise);
                               if (resultPromise.data) {
                                 transNOtes += `${reqData.module} field has been added in Contacts module!\n`;
                                 templateObject.setLogFunction(transNOtes);
@@ -2426,7 +2763,7 @@ export class UtilityService {
 
                             let tempCount = i%10;
                             let count = tempCount === 0 ? `${i+1}st` : tempCount === 1 ? `${i+1}nd` : tempCount === 2 ? `${i+1}rd` : `${i+1}th`;
-                            transNOtes += `Adding ${count} Customer to ERP database.\n`;
+                            transNOtes += `Adding ${count} Customer to Zoho CRM\n`;
                             templateObject.setLogFunction(transNOtes);
                             let tempData = {};
 
@@ -2435,12 +2772,9 @@ export class UtilityService {
                             tempData.Email = resultData[i].Email || "";
 
                             // Customer Name converting
-                            tempData.First_Name = resultData[i].FirstName || "";
-
-                            tempData.Last_Name = resultData[i].LastName || "";
-                            transNOtes =
-                              tempNote +
-                              `Customer ${resultData[i]?.LastName} formating.... \n`;
+                            tempData.First_Name = resultData[i].FirstName == '.'? resultData[i].ClientName : resultData[i].FirstName ||'',
+                            tempData.Last_Name = resultData[i].LastName == '.'? resultData[i].ClientName : resultData[i].LastName ||'',
+                            transNOtes = tempNote + `Customer ${resultData[i]?.LastName} formating.... \n`;
                             templateObject.setLogFunction(transNOtes);
 
                             //Phone converting
@@ -2475,7 +2809,7 @@ export class UtilityService {
                             // Postcode converting
                             tempData.Mailing_Zip = resultData[i].Postcode || "";
 
-                            if (!resultData[i].LastName) {
+                            if ((!resultData[i].LastName)) {
                               transNOtes += `Customer ID ${resultData[i].Id} not imported as no Last name\n`;
                               templateObject.setLogFunction(transNOtes);
                               continue;
@@ -2489,7 +2823,7 @@ export class UtilityService {
                             data: postData,
                             datacenter: datacenter
                           };
-
+                          console.log(args);
                           const batchSize = 100;
                           const numBatches = Math.ceil(postData.length / batchSize);
                           let upload_num = 0;
@@ -2506,17 +2840,18 @@ export class UtilityService {
                             const resultPromise = await new Promise((resolve, reject) => {
                                 Meteor.call("updateZohoCustomers",args,(error, result) => {
                                     if (error) {
+                                      console.log(error);
                                       reject(error);
                                     } else {
+                                      console.log(result);
                                       resolve(result);
                                     }
                                   }
                                 );
                               }
                             );
-
+                            console.log(resultPromise);
                             if (resultPromise.data) {
-                              console.log(resultPromise.data);
                               upload_transaction_count += resultPromise.data.length;
                               upload_num = resultPromise.data.length;
                               transNOtes += `Customers transfer Success!\n`;
@@ -2537,8 +2872,7 @@ export class UtilityService {
 
 
                         }
-                      })
-                      .catch((error) => {
+                      }).catch((error) => {
                         console.log(error);
                         transNOtes += `An error occurred while receiving a Customer from TrueERP database\n`;
                         templateObject.setLogFunction(transNOtes);
@@ -2548,7 +2882,8 @@ export class UtilityService {
                   if (ERP_ProductsState) {
                     transNOtes += `-----------------------------------------------------------\n`;
                     templateObject.setLogFunction(transNOtes);
-                    await fetch(erpObject.base_url + `/TProduct?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}" AND [PublishOnWeb]=true AND [Active]=true`,
+                    //await fetch(erpObject.base_url + `/TProduct?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}" AND [PublishOnWeb]=true AND [Active]=true`,
+                    await fetch(erpObject.base_url + `/TProduct?PropertyList=ProductName,PRODUCTCODE,ProductDescription,Active,SalesDescription,TotalQtyonOrder,TotalQtyInStock,SellQty1PriceInc,WHOLESALEPRICE&select=[MsTimeStamp]>"${lstUpdateTime}" AND [PublishOnWeb]=true AND [Active]=true`,
                       // `/TProduct?PropertyList=ProductName,PRODUCTCODE,ProductDescription,Active,SalesDescription,TotalQtyonOrder,TotalQtyInStock,WHOLESALEPRICE&limitCount=3`,
                       {
                         method: "GET",
@@ -2660,7 +2995,7 @@ export class UtilityService {
 
                             let tempCount = i%10;
                             let count = tempCount === 0 ? `${i+1}st` : tempCount === 1 ? `${i+1}nd` : tempCount === 2 ? `${i+1}rd` : `${i+1}th`;
-                            transNOtes += `Adding ${count} Product to ERP database.\n`;
+                            transNOtes += `Adding ${count} Product to Zoho CRM.\n`;
                             templateObject.setLogFunction(transNOtes);
                             // postData[i] = {};
 
@@ -2673,7 +3008,7 @@ export class UtilityService {
                               Product_Active: resultData[i]?.Active,
                               Qty_Ordered: resultData[i]?.TotalQtyonOrder,
                               Qty_in_Stock: resultData[i]?.TotalQtyInStock,
-                              Unit_Price: resultData[i]?.WHOLESALEPRICE,
+                              Unit_Price: resultData[i]?.SellQty1PriceInc,
                               GlobalRef: resultData[i]?.GlobalRef,
                             };
                           }
@@ -2683,7 +3018,7 @@ export class UtilityService {
                             data: postData,
                             datacenter: datacenter
                           };
-
+                          console.log(postData);
                           const batchSize = 100;
                           const numBatches = Math.ceil(postData.length / batchSize);
                           let upload_num = 0;
@@ -2697,25 +3032,22 @@ export class UtilityService {
                             const batchData = postData.slice(startIdx, endIdx);
                             args.data = batchData;
 
-                            const resultProductsPromise = await new Promise(
-                              (resolve, reject) => {
-                                Meteor.call(
-                                  "updateZohoProducts",
-                                  args,
-                                  (error, result) => {
+                            const resultProductsPromise = await new Promise((resolve, reject) => {
+                                Meteor.call("updateZohoProducts",args,(error, result) => {
                                     if (error) {
+                                      console.log(error);
                                       reject(error);
                                     } else {
+                                      console.log(result);
                                       resolve(result);
                                     }
                                   }
                                 );
                               }
                             );
-
+                            console.log(resultProductsPromise);
                             if (resultProductsPromise.data) {
-                              upload_transaction_count +=
-                                resultProductsPromise.data.length;
+                              upload_transaction_count += resultProductsPromise.data.length;
                               upload_num += resultProductsPromise.data.length;
                               transNOtes += `Products transfer Success!\n`;
                               templateObject.setLogFunction(transNOtes);
@@ -2732,8 +3064,7 @@ export class UtilityService {
                           });
 
                         }
-                      })
-                      .catch((error) => {
+                      }).catch((error) => {
                         console.log(error);
                         transNOtes += `An error occurred while receiving a Products from TrueERP database\n`;
                         templateObject.setLogFunction(transNOtes);
@@ -2858,7 +3189,7 @@ export class UtilityService {
 
                             let tempCount = i%10;
                             let count = tempCount === 0 ? `${i+1}st` : tempCount === 1 ? `${i+1}nd` : tempCount === 2 ? `${i+1}rd` : `${i+1}th`;
-                            transNOtes += `Adding ${count} Quote to ERP database.\n`;
+                            transNOtes += `Adding ${count} Quote to Zoho CRM.\n`;
                             templateObject.setLogFunction(transNOtes);
                             const productList = [];
                             if (!resultData[i].fields.Lines) {
@@ -2874,24 +3205,22 @@ export class UtilityService {
                               if (!productreqData.productName) {
                                 productreqData.productName = "Temp product";
                               }
-                              const resultPromiseProductDetect = await new Promise(
-                                (resolve, reject) => {
-                                  Meteor.call(
-                                    "getZohoProduct",
-                                    productreqData,
-                                    (error, result) => {
+                              const resultPromiseProductDetect = await new Promise((resolve, reject) => {
+                                  Meteor.call("getZohoProduct",productreqData,(error, result) => {
                                       if (error) {
+                                        console.log(error);
                                         reject(error);
                                       } else {
+                                        console.log(result);
                                         resolve(result);
                                       }
                                     }
                                   );
                                 }
                               );
-
-                              if (resultPromiseProductDetect.data) {
-                                if (resultPromiseProductDetect.data.length > 0) {
+                              console.log(resultPromiseProductDetect);
+                              if (resultPromiseProductDetect?.data) {
+                                if (resultPromiseProductDetect?.data?.length > 0) {
 
                                   productList.push({
                                     product: {
@@ -2899,6 +3228,9 @@ export class UtilityService {
                                       id: resultPromiseProductDetect.data[0].id,
                                     },
                                     quantity: resultData[i]?.fields?.Lines[j].fields?.OrderQty,
+                                    total:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
+                                    unit_price:resultData[i]?.fields?.Lines[j].fields?.LinePrice,
+                                    list_price:resultData[i]?.fields?.Lines[j].fields?.LinePrice,
                                     product_description:resultData[i]?.fields?.Lines[j].fields?.ProductDescription,
                                   });
                                 } else {
@@ -2936,7 +3268,9 @@ export class UtilityService {
                                           id: resultPromiseProduct.data[0].details.id,
                                         },
                                         quantity:resultData[i]?.fields?.Lines[j].fields?.OrderQty,
-                                        price:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
+                                        total:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
+                                        unit_price:resultData[i]?.fields?.Lines[j].fields?.LinePrice,
+                                        list_price:resultData[i]?.fields?.Lines[j].fields?.LinePrice,
                                         product_description:resultData[i]?.fields?.Lines[j].fields?.ProductDescription,
                                       });
                                     }else{
@@ -2987,7 +3321,9 @@ export class UtilityService {
                                         id: resultPromiseProduct.data[0].details.id,
                                       },
                                       quantity:resultData[i]?.fields?.Lines[j].fields?.OrderQty,
-                                      price:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
+                                      total:resultData[i]?.fields?.Lines[j].fields?.LinePriceInc,
+                                      unit_price:resultData[i]?.fields?.Lines[j].fields?.LinePrice,
+                                      list_price:resultData[i]?.fields?.Lines[j].fields?.LinePrice,
                                       product_description:resultData[i]?.fields?.Lines[j].fields?.ProductDescription,
                                     });
                                   }else{
@@ -3028,8 +3364,8 @@ export class UtilityService {
                               }
                             );
 
-                            if (resultPromiseAccountDetect.data) {
-                              if (resultPromiseAccountDetect.data.length > 0) {
+                            if (resultPromiseAccountDetect?.data) {
+                              if (resultPromiseAccountDetect?.data?.length > 0) {
                                 transNOtes += `Account Name "${accountreqData.Account_Name}" already exists in ZOHO\n`;
                                 templateObject.setLogFunction(transNOtes);
                                 accountID = resultPromiseAccountDetect.data[0].id;
@@ -3125,6 +3461,10 @@ export class UtilityService {
                               GlobalRef: resultData[i]?.fields?.GlobalRef,
                               // Subject: resultData[i]?.fields?.ShipToDesc,
                               Subject: resultData[i]?.fields?.GlobalRef,
+                              Billing_Country: resultData[i]?.ShipCountry,
+                              Billing_State: resultData[i]?.ShipState,
+                              Billing_Street: resultData[i]?.ShipStreet1,
+                              Billing_Code: resultData[i]?.ShipPostcode,
                             });
                           }
 
@@ -3197,7 +3537,7 @@ export class UtilityService {
                   // let connection_id = 13;
                   let account_id = tempConnection.account_id;
                   let connection_id = tempConnection.connection_id;
-                  let today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+                  let today = moment(new Date()).format("YYYY-MM-DD hh:mm:ss");
 
                   // let year = today.getFullYear();
                   // let month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
@@ -3322,13 +3662,12 @@ export class UtilityService {
                       datacenter: datacenter
                     };
                     const resultQuotes = await new Promise((resolve, reject) => {
-                      Meteor.call(
-                        "getDatafromZohoByDate",
-                        args,
-                        (error, result) => {
+                      Meteor.call("getDatafromZohoByDate",args,(error, result) => {
                           if (error) {
+                            console.log(error);
                             reject(error);
                           } else {
+                            console.log(result);
                             resolve(result);
                           }
                         }
@@ -3513,6 +3852,10 @@ export class UtilityService {
                                 Lines: QuoteLines,
                                 IsBackOrder: true,
                                 Comments: "Quote Produced in ZOHO",
+                                ShipCountry: resultData[i]?.Billing_Country,
+                                ShipState: resultData[i]?.Billing_State,
+                                ShipStreet1: resultData[i]?.Billing_Street,
+                                ShipPostcode: resultData[i]?.Billing_Code,
                               },
                             };
 
@@ -3767,6 +4110,10 @@ export class UtilityService {
                                 Lines: OrderLines,
                                 IsBackOrder: true,
                                 Comments: "Sales Order Produced in ZOHO",
+                                ShipCountry: resultData[i]?.Billing_Country,
+                                ShipState: resultData[i]?.Billing_State,
+                                ShipStreet1: resultData[i]?.Billing_Street,
+                                ShipPostcode: resultData[i]?.Billing_Code,
                               },
                             };
 
@@ -4198,12 +4545,11 @@ export class UtilityService {
                   // connection_id = 7;
                   account_id = tempConnection.account_id;
                   connection_id = tempConnection.connection_id;
-                  today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
+                  today = moment(new Date()).format("YYYY-MM-DD hh:mm:ss");
 
                   formattedDate = moment(today).format("YYYY-MM-DD");
 
-                  products_num =
-                    upload_transaction_count + download_transaction_count;
+                  products_num =upload_transaction_count + download_transaction_count;
 
                   transaction_data.accounting_soft = account_id;
                   transaction_data.connection_soft = connection_id;
@@ -4229,14 +4575,10 @@ export class UtilityService {
                     }),
                   }).then((response) => response.json()).then(async (result) => {
                       if (result != "No Result") {
-                        transaction_data.order_num =
-                          transaction_data.order_num + result.order_num;
-                        transaction_data.products_num =
-                          transaction_data.products_num + result.products_num;
-                        transaction_data.uploaded_num =
-                          transaction_data.uploaded_num + result.uploaded_num;
-                        transaction_data.downloaded_num =
-                          transaction_data.downloaded_num + result.downloaded_num;
+                        transaction_data.order_num = transaction_data.order_num + result.order_num;
+                        transaction_data.products_num = transaction_data.products_num + result.products_num;
+                        transaction_data.uploaded_num = transaction_data.uploaded_num + result.uploaded_num;
+                        transaction_data.downloaded_num = transaction_data.downloaded_num + result.downloaded_num;
                         let resultId = result.id;
                         fetch("/api/addtransaction", {
                           method: "POST",

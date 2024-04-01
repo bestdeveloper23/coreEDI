@@ -73,10 +73,10 @@ data.DBName || '-',
 data.AccName || '',
 data.ConnName || '',
 '<span style="display:none;">' + (data.LastRanDate != '' ? moment(lastRunDate).format("YYYY/MM/DD") : lastRunDate) + '</span>' + (lastRunDate != '' ? moment(lastRunDate).format("DD/MM/YYYY") : lastRunDate),
-'<span style="display:none;">' + (lastRunDate != '' ? moment(lastRunDate).format("HH:mm:ss") : lastRunDate) + '</span>' + (lastRunDate != '' ? moment(data.LastRanDate).format("HH:mm:ss") : data.LastRanDate),
+'<span style="display:none;">' + (lastRunDate != '' ? moment(lastRunDate).format("hh:mm:ss") : lastRunDate) + '</span>' + (lastRunDate != '' ? moment(data.LastRanDate).format("hh:mm:ss") : data.LastRanDate),
 data.RunCycle ? data.RunCycle + ' hour' : '',
 '<span style="display:none;">' + (nextRunDate != '' ? moment(nextRunDate).format("YYYY/MM/DD") : nextRunDate) + '</span>' + (nextRunDate != '' ? moment(nextRunDate).format("DD/MM/YYYY") : nextRunDate),
-'<span style="display:none;">' + (nextRunDate != '' ? moment(nextRunDate).format("HH:mm:ss") : nextRunDate) + '</span>' + (nextRunDate != '' ? moment(nextRunDate).format("HH:mm:ss") : nextRunDate),
+'<span style="display:none;">' + (nextRunDate != '' ? moment(nextRunDate).format("hh:mm:ss") : nextRunDate) + '</span>' + (nextRunDate != '' ? moment(nextRunDate).format("hh:mm:ss") : nextRunDate),
 runNowButton,
 setFrequencyButton,
 importAgainButton,
@@ -97,7 +97,7 @@ return dataList;
 }
 templateObject.getDataTableList2 = function (data) {
 let dataList = [
-'<span style="display:none;">' + (data.Date != '' ? moment(data.Date).format("HH:mm:ss") : data.Date) + '</span>' + (data.Date != '' ? moment(data.Date).format("HH:mm:ss") : data.Date),
+'<span style="display:none;">' + (data.Date != '' ? moment(data.Date).format("hh:mm:ss") : data.Date) + '</span>' + (data.Date != '' ? moment(data.Date).format("hh:mm:ss") : data.Date),
 data.Detail || '',
 data.Count || '0'
 ];
@@ -110,7 +110,7 @@ let headerStructure = [
 { index: 2, label: "Accounting", class: "colAccountingSoftware", active: true, display: true, width: "200" },
 { index: 3, label: "Connection", class: "colConnectionSoftware", active: true, display: true, width: "200" },
 { index: 4, label: "Last Run Date", class: "colLastScheduledJobRanOn", active: true, display: true, width: "100" },
-{ index: 5, label: "Last Run Time", class: "colLastScheduledJobRanOn", active: true, display: true, width: "100" },
+{ index: 5, label: "Last Run Time", class: "colLastScheduledJobRanOnTime", active: true, display: true, width: "100" },
 { index: 6, label: "Run Every", class: "colRunEvery", active: true, display: true, width: "110" },
 { index: 7, label: "Next Run Date", class: "colNextScheduledRunAt", active: true, display: true, width: "100" },
 { index: 8, label: "Next Run Time", class: "colNextScheduledRunAt", active: true, display: true, width: "100" },
@@ -291,13 +291,14 @@ swal("", result, "success");
 event.preventDefault();
 history.back(1);
 },
-
 'click .connectionTab': function () {
-Template.instance().currentTab.set("tab-3");
+Template.instance().currentTab.set("tab-2");
 },
-
 'click .customerTab': function () {
 Template.instance().currentTab.set("tab-1");
+},
+'click .transactionPanelTab': function () {
+Template.instance().currentTab.set("tab-3");
 },
 
 'click .setFrequency': function () {
@@ -532,9 +533,15 @@ $("#startDate").datepicker({ dateFormat: 'dd/mm/yy', }).datepicker("setDate", ne
 if (FlowRouter.current().queryParams.id) {
 if (FlowRouter.current().queryParams.TransTab == 'connection') {
 $('.customerTab').removeClass('active');
+$('.transactionPanelTab').removeClass('active');
 $('.connectionTab').trigger('click');
+}else if (FlowRouter.current().queryParams.TransTab == 'transaction') {
+$('.customerTab').removeClass('active');
+$('.connectionTab').removeClass('active');
+$('.transactionPanelTab').trigger('click');
 } else {
 $('.connectionTab').removeClass('active');
+$('.transactionPanelTab').removeClass('active');
 $('.customerTab').trigger('click');
 }
 
@@ -3218,7 +3225,7 @@ fetch(`/api/WooCommerceByID`, {
 
                       // Getting Wocommerce token
                       let url = tempConnectionSoftware.base_url;
-                      let username = tempConnectionSoftware.key;
+                      let username = tempConnectionSoftware.emailkey;
                       let password = tempConnectionSoftware.secret;
 
                       const axios = require('axios');

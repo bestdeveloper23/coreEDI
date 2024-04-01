@@ -63,7 +63,7 @@ await templateObject.customerdetails.set(resultCustomer);
 }).catch(error => console.log(error));
 
 const postData = {
-id: FlowRouter.current().queryParams.id
+id: FlowRouter.current().queryParams.id||0
 }
 
 fetch('/api/transfertypesByID', {
@@ -209,9 +209,43 @@ const templateObject = Template.instance();
 
   templateObject.setLogFunction = async function(logitem) {
     await templateObject.testNote.set(logitem);
-    var textarea = $('#testNotes');
+    var textarea = $('.testNotes');
     textarea.scrollTop(textarea[0].scrollHeight);
   };
+
+  templateObject.saveTransferType2Func = async function() {
+    let transfer_type = [];
+    let transferTypes = templateObject.transferTypes2.get();
+    $('.chkTransferType2').each(function(event){
+          let statusChecked = false;
+          let transTypeID =0;
+          let connectionID =FlowRouter.current()?.queryParams?.id||FlowRouter.current().queryParams.connsoftwareid||0;
+          let transTypeValue = $(this).val()||'';
+          if (this.checked) {
+              statusChecked = true;
+          };
+          $.grep(transferTypes, function (n) {
+            if ((n.transfer_type == transTypeValue) && (n.tab_id == 2)) {
+              transTypeID = n.id||0;
+              connectionID = n.connection_id||FlowRouter.current()?.queryParams?.id||0;
+            }
+          });
+          transfer_type.push({ id: transTypeID, transfer_type:transTypeValue||'', connection_id:connectionID, tab_id:2, checked: statusChecked});
+
+    });
+
+    //Update TransType
+    fetch("/api/updatetransfertypes", {
+    method: "POST",
+    headers: {
+    "Content-Type": "application/json",
+    },
+    body: JSON.stringify(transfer_type),
+    }).then((response) => response.json()).then(async (result) => {
+    }).catch(error => console.log(error));
+
+};
+
 });
 
 Template.connectionscard.rendered = () => {
@@ -542,10 +576,10 @@ testNOtes = 'Connecting to TrueERP.........................\n'
 await sleep(300)
 templateObject.setLogFunction(testNOtes)
 
-testNOtes += "Get TrueERP Customers ..................\n";
+// testNOtes += "Get TrueERP Customers ..................\n";
 await sleep(1000)
 templateObject.setLogFunction(testNOtes)
-HTTP.call('GET', jQuery('#trueerp_base_url').val() + '/TCustomer', {
+HTTP.call('GET', jQuery('#trueerp_base_url').val() + '/TUser', {
 headers: {
 'Username': jQuery('#trueerp_user_name').val(),
 'Password': jQuery('#trueerp_password').val(),
@@ -555,11 +589,14 @@ headers: {
  responseCount++;
 if (error) {
 console.error('Error:', error);
-testNOtes += `An Error Occurred While Adding a Customer to TrueERP\n`
+testNOtes += `An Error Occurred While connecting to TrueERP\n`;
 templateObject.setLogFunction(testNOtes);
-}
-else {
-  let formatting = response.data.tcustomer.length > 1 ? "Customers" : "Customer";
+//templateObject.setLogFunction(error);
+}else {
+  testNOtes = 'Successfully Connected to TrueERP\n';
+  templateObject.setLogFunction(testNOtes);
+  /*
+let formatting = response.data.tcustomer.length > 1 ? "Customers" : "Customer";
 testNOtes = `Received ` + `${response.data.tcustomer.length}` + ` ${formatting} from TrueERP.\n`
 templateObject.setLogFunction(testNOtes);
 
@@ -574,9 +611,7 @@ await fetch(`${jQuery('#trueerp_base_url').val()}/TCustomer/${simpleCustomer?.Id
 method: 'GET',
 headers: myHeaders,
 redirect: 'follow'
-})
-.then(response => response.json())
-.then(async result => {
+}).then(response => response.json()).then(async result => {
 count++
 const timeStamp = result?.fields?.MsTimeStamp
 const id = result?.fields?.ID
@@ -587,7 +622,9 @@ testNOtes += `Customer ${id} "${globalRef}", "${keyValue}"\n`
 templateObject.setLogFunction(testNOtes);
 })
 }
+*/
 }
+/*
 if (responseCount == customerCount) {
 let tempDate = new Date();
 let dateString =
@@ -614,6 +651,7 @@ body: JSON.stringify(args)
 .catch((err) => console.log(err))
 fetchProduct(templateObject, lstUpdateTime, tempConnectionSoftware.base_api_url, tempAccount, token, selConnectionId, text);
 }
+*/
 });
 
 },
@@ -687,6 +725,8 @@ magentoData.customer_identified_by = jQuery("#magento_cIdentify").val();
 magentoData.product_name = jQuery("#magento_pName").val();
 magentoData.print_name_to_short_description = jQuery("#magento_pName").val();
 
+let templateObject = Template.instance();
+templateObject.saveTransferType2Func();
 
 fetch('/api/updateMagento', {
 method: 'POST',
@@ -702,7 +742,7 @@ swal("", 'Magento Successfully Updated', "success");
 }).catch(error => console.log(error));
 },
 
-// 'click #saveMagento': function () {
+// 'click #saveMagentodUPLICATE': function () {
 // let zohoData = {};
 // zohoData.id = FlowRouter.current().queryParams.customerId;
 // magentoData.client_id = jQuery('#zoho_client_id').val();
@@ -783,6 +823,9 @@ woocommerceData.password = jQuery('#woocommerce_password').val();
 woocommerceData.enabled = jQuery('#woocommerce_enabled').is(':Checked');
 woocommerceData.url = jQuery('#woocommerce_base_url').val();
 
+let templateObject = Template.instance();
+templateObject.saveTransferType2Func();
+
 fetch('/api/updateWooCommerce', {
 method: 'POST',
 headers: {
@@ -802,7 +845,7 @@ swal({
 }).then((resultData) => {
   if (resultData.value) {
   if (window.localStorage.super == 'false'){
-    FlowRouter.go('/customerscard?id=' + window.localStorage.customerId);
+    FlowRouter.go(`/customerscard?id=${window.localStorage.customerId}&TransTab=connection`);
   }else {
     FlowRouter.go('/connectionlist');
   };
@@ -828,6 +871,9 @@ austpostData.products = jQuery('#austpost_products').val();
 austpostData.accountNumber = jQuery('#austpost_name').val();
 //["2015438937", "3015438937", "05438937"][austpostData.products]
 
+let templateObject = Template.instance();
+templateObject.saveTransferType2Func();
+
 fetch('/api/updateAustpost', {
 method: 'POST',
 headers: {
@@ -847,7 +893,7 @@ swal({
 }).then((resultData) => {
   if (resultData.value) {
   if (window.localStorage.super == 'false'){
-    FlowRouter.go('/customerscard?id=' + window.localStorage.customerId);
+    FlowRouter.go(`/customerscard?id=${window.localStorage.customerId}&TransTab=connection`);
   }else {
     FlowRouter.go('/connectionlist');
   };
@@ -867,8 +913,8 @@ trueERPData.database = jQuery('#trueerp_database').val();
 trueERPData.base_url = jQuery('#trueerp_base_url').val();
 trueERPData.id = jQuery('#trueerp_id').val();
 trueERPData.enabled = jQuery('#trueerp_enabled').is(':Checked');
-trueERPData.invoice_template = parseInt($("#magento_cIdentify").val());
-trueERPData.customer_type = parseInt($("#magento_pName").val());
+trueERPData.invoice_template = parseInt($("#magento_cIdentify").val())||0;
+trueERPData.customer_type = parseInt($("#magento_pName").val())||0;
 fetch("/api/updateTrueERP", {
 method: "POST",
 headers: {
@@ -889,7 +935,7 @@ if (result == 'success'){
   }).then((resultData) => {
     if (resultData.value) {
     if (window.localStorage.super == 'false'){
-      FlowRouter.go('/customerscard?id=' + window.localStorage.customerId);
+      FlowRouter.go(`/customerscard?id=${window.localStorage.customerId}&TransTab=connection`);
     }else {
       FlowRouter.go('/connectionlist');
     };
@@ -902,12 +948,25 @@ if (result == 'success'){
 
 let transfer_type = [];
 let transferTypes = templateObject.transferTypes1.get();
-for (let i = 0; i < transferTypes.length; i++) {
-let id = 'account_transfertype_' + String(transferTypes[i].id);
-let status = transferTypes[i].status;
-if ($("#" + id)) status = $('#' + id).prop('checked') ? 1 : 0;
-transfer_type.push({ id: transferTypes[i].id||0, checked: status||'' });
-}
+$('.chkTransferType').each(function(event){
+      let statusChecked = false;
+      let transTypeID =0;
+      let connectionID =FlowRouter.current()?.queryParams?.id||FlowRouter.current().queryParams.connsoftwareid||0;
+      let transTypeValue = $(this).val()||'';
+      if (this.checked) {
+          statusChecked = true;
+      };
+
+      $.grep(transferTypes, function (n) {
+        if ((n.transfer_type == transTypeValue) && (n.tab_id == 1)) {
+          transTypeID = n.id||0;
+          connectionID = n.connection_id||FlowRouter.current()?.queryParams?.id||0;
+        }
+      });
+      transfer_type.push({ id: transTypeID, transfer_type:transTypeValue||'', connection_id:connectionID, tab_id:1, checked: statusChecked});
+
+});
+//Update TransType
 fetch("/api/updatetransfertypes", {
 method: "POST",
 headers: {
@@ -939,9 +998,9 @@ console.log(result);
 
 }else{
   if (window.localStorage.super == 'false'){
-    FlowRouter.go('/customerscard?id=' + window.localStorage.customerId);
+    //FlowRouter.go('/customerscard?id=' + window.localStorage.customerId);
   }else {
-    FlowRouter.go('/connectionlist');
+    //FlowRouter.go('/connectionlist');
   };
 };
 },
@@ -964,6 +1023,9 @@ console.log(result);
   zohoData.transfer_type_quotes = jQuery("#erp_quotoes2zoho").is(":Checked");
   zohoData.username = jQuery("#zoho_username").val();
   zohoData.password = jQuery("#zoho_password").val();
+
+  let templateObject = Template.instance();
+  templateObject.saveTransferType2Func();
 
   fetch("/api/updateZoho", {
     method: "POST",
@@ -988,7 +1050,7 @@ console.log(result);
           }).then((resultData) => {
             if (resultData.value) {
             if (window.localStorage.super == 'false'){
-              FlowRouter.go('/customerscard?id=' + window.localStorage.customerId);
+              FlowRouter.go(`/customerscard?id=${window.localStorage.customerId}&TransTab=connection`);
             }else {
               FlowRouter.go('/connectionlist');
             };
@@ -1038,17 +1100,37 @@ console.log(result);
   zohoData.clientid = jQuery('#zoho_client_id').val()||'';
   zohoData.clientsecret = jQuery('#zoho_client_secret').val()||'';
   zohoData.refresh_token = jQuery('#zoho_refresh_token').val()||"";
-
+  let ZOHO_REFRESH_TOKEN = jQuery('#zoho_refresh_token').val()||"";
   const tokenPromise = await new Promise((resolve, reject) => {
     Meteor.call("getZohoTokenByRefreshToken", zohoData, datacenter, (error, result) => {
       if (error) {
         console.log(error);
+        testNOtes += `An Error Occurred While connecting to ZOHO\n`;
+        templateObject.setLogFunction(testNOtes);
         //reject(error);
       } else {
 
-        jQuery('#zoho_access_token').val(result);
         testNOtes = 'Successfully Connected to Zoho\n';
         templateObject.setLogFunction(testNOtes);
+
+        jQuery('#zoho_access_token').val(result);
+
+        let token = result;//GET Token
+        const zohoSaveData = {
+        access_token: token,
+        refresh_token: ZOHO_REFRESH_TOKEN
+        };
+
+        fetch('/api/updateZohoToken', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(zohoSaveData)
+        }).then(response => response.json()).then(async (result) => {
+        }).catch(error => console.log(error));
+
+
         resolve(result);
       }
     });
@@ -1056,7 +1138,7 @@ console.log(result);
   console.log(tokenPromise);
 },
 
-"click #runNowZoho": async function () {
+"click #runNowZohoNOTNEEDED": async function () {
   TrueERP2Zoho(
     jQuery("#erp_sales_orders2zoho").is(":checked"),
     jQuery("#erp_customers2zoho").is(":checked"),
@@ -1856,7 +1938,7 @@ tempAccount = result[0];
 
 // Getting Wocommerce token
 let url = tempConnectionSoftware.base_url;
-let username = tempConnectionSoftware.key;
+let username = tempConnectionSoftware.emailkey;
 let password = tempConnectionSoftware.secret;
 
 const axios = require('axios');
@@ -3186,7 +3268,7 @@ fetch("/api/MagentoByID", {
                           firstname: newCustomerFromERP?.fields?.FirstName,
                           lastname: newCustomerFromERP?.fields?.LastName,
                           prefix: "TrueERP",
-                          dob: "1990-01-01",
+                          dob: moment().format("YYYY-MM-DD"),
 
                         };
 
@@ -3792,7 +3874,7 @@ myHeaders.append("Password", `${tempAccount.password}`);
 
 // Getting Wocommerce token
 let url = tempConnectionSoftware.base_url;
-let username = tempConnectionSoftware.key;
+let username = tempConnectionSoftware.emailkey;
 let password = tempConnectionSoftware.secret;
 
 const axios = require('axios');
@@ -6630,8 +6712,7 @@ async function Zoho2TrueERP(
                                     type: "TCustomer",
                                     fields: {
                                       ClientName: resultData[i].Account_Name.name,
-                                      Country:
-                                        resultData[i].Billing_Country || "",
+                                      Country:resultData[i].Billing_Country || "",
                                       State: resultData[i].Billing_State || "",
                                       Street: resultData[i].Billing_Street || "",
                                       Postcode: resultData[i].Billing_Code || "",

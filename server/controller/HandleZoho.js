@@ -194,7 +194,7 @@ Meteor.methods({
         return response;
       } catch (error) {
         // Handle any errors that occur during the automation process
-        throw new Error('An error occurred');
+        console.log(error);
       }
     },
 
@@ -228,10 +228,11 @@ Meteor.methods({
         return allProducts;
 
       } catch (error) {
-        throw new Meteor.Error('api-error', 'Error fetching products');
+        console.log(error);
       }
     },
     'getDatafromZohoByDate': async function (reqData) {
+      /*
       try {
         console.log(reqData.data.lstTime);
         let uncodedURLForSearch = encodeURIComponent(`(Modified_Time:greater_than:${reqData.data.lstTime})`);
@@ -245,27 +246,66 @@ Meteor.methods({
         return response.data;
 
       } catch (error) {
-        // console.log(error);
-        // throw new Meteor.Error("api-error", error.response.data);
+
       }
+      */
+
+      let uncodedURLForSearch = encodeURIComponent(`(Modified_Time:greater_than:${reqData.data.lstTime})`);
+      console.log(`https://www.zohoapis.${reqData.datacenter}/crm/v5/${reqData.data.module}/search?criteria=${uncodedURLForSearch}`);
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${reqData.datacenter}/crm/v5/${reqData.data.module}/search?criteria=${uncodedURLForSearch}`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            console.log(result);
+            resolve(result.data);
+          } else {
+            console.log(error);
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
+
     },
     'getZohoCurrentUser': async function (reqData) {
-      try {
-        const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/users?type=CurrentUser`, {
-          headers: {
-            Authorization: `Zoho-oauthtoken ${reqData.auth}`,
-            "Content-Type": "application/json",
-          },
-        });
+      // try {
+      //   const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/users?type=CurrentUser`, {
+      //     headers: {
+      //       Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+      //       "Content-Type": "application/json",
+      //     },
+      //   });
+      //
+      //   return response.data;
+      //
+      // } catch (error) {
+      //   console.log(error);
+      // }
 
-        return response.data;
+      let promisePOST = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/users?type=CurrentUser`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+                resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promisePOST;
 
-      } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
-      }
     },
 
     'updateZohoCustomers': async function(reqData) {
+      /*
       try {
         const response = await axios.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Contacts/upsert`,
           {
@@ -280,12 +320,32 @@ Meteor.methods({
         return response.data;
 
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+
+      let promisePOST = new Promise(function (resolve, reject) {
+        let postData = {data: reqData.data};
+        HTTP.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Contacts/upsert`, {
+           data:postData,
+            headers: {
+              Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+              "Content-Type": "application/json",
+            }
+        }, function(error, result) {
+            if (!error) {
+                resolve(result.data);
+            } else {
+                reject(error);
+            }
+        });
+      });
+      return promisePOST;
 
     },
 
     'getzohoDatasforLatest': async function(reqData) {
+      /*
       try {
         let uncodedURLForSearch = encodeURIComponent(`(Modified_Time.after:${reqData.data.lastRanDate})`);
         const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/${reqData.data.module}/search?criteria=${uncodedURLForSearch}`, {
@@ -298,10 +358,29 @@ Meteor.methods({
         return response.data;
 
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+      let uncodedURLForSearch = encodeURIComponent(`(Modified_Time.after:${reqData.data.lastRanDate})`);
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/${reqData.data.module}/search?criteria=${uncodedURLForSearch}`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
+
     },
     'getZohoCustomers': async function (reqData) {
+      /*
       try {
         const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Contacts`, {
           headers: {
@@ -313,8 +392,154 @@ Meteor.methods({
         return response.data;
 
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Contacts`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
+
+    },
+    'getZohoContactByIDs': async function (token,datacenter,combinedIds) {
+      /*
+      try {
+        const response = await axios.get(`https://www.zohoapis.${datacenter}/crm/v2/Contacts?${combinedIds}`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        return response.data;
+
+      } catch (error) {
+        console.log(error);
+      }
+      */
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${datacenter}/crm/v2/Contacts?${combinedIds}`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${token}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
+    },
+    'getZohoLeadsByIDs': async function (token,datacenter,combinedIds) {
+      /*
+      try {
+        const response = await axios.get(`https://www.zohoapis.${datacenter}/crm/v2/Leads?${combinedIds}`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        return response.data;
+
+      } catch (error) {
+        console.log(error);
+      }
+      */
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${datacenter}/crm/v2/Leads?${combinedIds}`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${token}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
+    },
+    'getZohoSales_OrdersByIDs': async function (token,datacenter,combinedIds) {
+      /*
+      try {
+        const response = await axios.get(`https://www.zohoapis.${datacenter}/crm/v2/Sales_Orders?${combinedIds}`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        return response.data;
+
+      } catch (error) {
+        console.log(error);
+      }
+      */
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${datacenter}/crm/v2/Sales_Orders?${combinedIds}`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${token}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
+
+    },
+    'getZohoQuotesByIDs': async function (token,datacenter,combinedIds) {
+      /*
+      try {
+        const response = await axios.get(`https://www.zohoapis.${datacenter}/crm/v2/Quotes?${combinedIds}`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        return response.data;
+
+      } catch (error) {
+        console.log(error);
+      }
+      */
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${datacenter}/crm/v2/Quotes?${combinedIds}`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${token}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
     },
     'getZohoContactByIDs': async function (token,datacenter,combinedIds) {
       try {
@@ -373,11 +598,157 @@ Meteor.methods({
         return response.data;
 
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Contacts`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
+
+    },
+    'getZohoContactByIDs': async function (token,datacenter,combinedIds) {
+      /*
+      try {
+        const response = await axios.get(`https://www.zohoapis.${datacenter}/crm/v2/Contacts?${combinedIds}`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        return response.data;
+
+      } catch (error) {
+        console.log(error);
+      }
+      */
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${datacenter}/crm/v2/Contacts?${combinedIds}`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${token}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
+    },
+    'getZohoLeadsByIDs': async function (token,datacenter,combinedIds) {
+      /*
+      try {
+        const response = await axios.get(`https://www.zohoapis.${datacenter}/crm/v2/Leads?${combinedIds}`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        return response.data;
+
+      } catch (error) {
+        console.log(error);
+      }
+      */
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${datacenter}/crm/v2/Leads?${combinedIds}`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${token}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
+    },
+    'getZohoSales_OrdersByIDs': async function (token,datacenter,combinedIds) {
+      /*
+      try {
+        const response = await axios.get(`https://www.zohoapis.${datacenter}/crm/v2/Sales_Orders?${combinedIds}`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        return response.data;
+
+      } catch (error) {
+        console.log(error);
+      }
+      */
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${datacenter}/crm/v2/Sales_Orders?${combinedIds}`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${token}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
+
+    },
+    'getZohoQuotesByIDs': async function (token,datacenter,combinedIds) {
+      /*
+      try {
+        const response = await axios.get(`https://www.zohoapis.${datacenter}/crm/v2/Quotes?${combinedIds}`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        return response.data;
+
+      } catch (error) {
+        console.log(error);
+      }
+      */
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${datacenter}/crm/v2/Quotes?${combinedIds}`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${token}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
     },
 
     'updateZohoAccounts': async function (reqData) {
+      /*
       try {
         const response = await axios.post(
           `https://www.zohoapis.${reqData.datacenter}/crm/v2/Accounts/upsert`,
@@ -394,12 +765,33 @@ Meteor.methods({
         return response.data;
 
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+
+      let promisePOST = new Promise(function (resolve, reject) {
+        let postData = {data: reqData.data};
+        HTTP.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Accounts/upsert`, {
+           data:postData,
+            headers: {
+              Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+              "Content-Type": "application/json",
+            }
+        }, function(error, result) {
+            if (!error) {
+                resolve(result.data);
+            } else {
+                reject(error);
+            }
+        });
+      });
+      return promisePOST;
+
     },
 
     'getZohoAccount': async function (reqData) {
       const accountName = reqData.Account_Name;
+      /*
       try {
         const response = await axios.get(
           `https://www.zohoapis.${reqData.datacenter}/crm/v2/Accounts/search?criteria=Account_Name:equals:${accountName}`,
@@ -412,11 +804,28 @@ Meteor.methods({
         );
         return response.data;
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Accounts/search?criteria=Account_Name:equals:${accountName}`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
     },
 
     'addZohoAccounts': async function (reqData) {
+      /*
       try {
         const response = await axios.post(
           `https://www.zohoapis.${reqData.datacenter}/crm/v2/Accounts`,
@@ -433,11 +842,32 @@ Meteor.methods({
         return response.data;
 
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+
+      let promisePOST = new Promise(function (resolve, reject) {
+        let postData = {data: reqData.data};
+        HTTP.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Accounts`, {
+           data:postData,
+            headers: {
+              Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+              "Content-Type": "application/json",
+            }
+        }, function(error, result) {
+            if (!error) {
+                resolve(result.data);
+            } else {
+                reject(error);
+            }
+        });
+      });
+      return promisePOST;
+
     },
 
     'addZohoProduct': async function (reqData) {
+      /*
       try {
         const response = await axios.post(
           `https://www.zohoapis.${reqData.datacenter}/crm/v2/Products`,
@@ -454,11 +884,32 @@ Meteor.methods({
         return response.data;
 
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+
+      let promisePOST = new Promise(function (resolve, reject) {
+        let postData = {data: reqData.data};
+        HTTP.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Products`, {
+           data:postData,
+            headers: {
+              Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+              "Content-Type": "application/json",
+            }
+        }, function(error, result) {
+            if (!error) {
+                resolve(result.data);
+            } else {
+                reject(error);
+            }
+        });
+      });
+      return promisePOST;
+
     },
 
     'getZohoProduct': async function (reqData) {
+      /*
       try {
         const productName = reqData.productName;
         const response = await axios.get(
@@ -472,11 +923,31 @@ Meteor.methods({
         );
         return response.data;
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+      const productName = reqData.productName;
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Products/search?criteria=Product_Name:equals:${productName}`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            console.log(result);
+            resolve(result.data);
+          } else {
+            console.log(error);
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
     },
 
     'getZohoProductByID': async function (reqData) {
+      /*
       try {
         const productID = reqData.productID;
         const response = await axios.get(
@@ -490,11 +961,29 @@ Meteor.methods({
         );
         return response.data;
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+      const productID = reqData.productID;
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Products/search?criteria=id:equals:${productID}`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
     },
 
     'updateZohoProducts': async function (reqData) {
+      /*
       try {
         const response = await axios.post(
           `https://www.zohoapis.${reqData.datacenter}/crm/v2/Products/upsert`,
@@ -509,11 +998,30 @@ Meteor.methods({
         );
         return response.data;
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+      let promisePOST = new Promise(function (resolve, reject) {
+        let postData = {data: reqData.data};
+        HTTP.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Products/upsert`, {
+           data:postData,
+            headers: {
+              Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+              "Content-Type": "application/json",
+            }
+        }, function(error, result) {
+            if (!error) {
+                resolve(result.data);
+            } else {
+                reject(error);
+            }
+        });
+      });
+      return promisePOST;
     },
 
     'getZohoOrders': async function (reqData) {
+      /*
       try {
         const response = await axios.get(
           `https://www.zohoapis.${reqData.datacenter}/crm/v2/Sales_Orders`,
@@ -526,11 +1034,28 @@ Meteor.methods({
         );
         return response.data;
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Sales_Orders`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
     },
 
     'updateZohoOrders': async function (reqData) {
+      /*
       try {
         const response = await axios.post(
           `https://www.zohoapis.${reqData.datacenter}/crm/v2/Sales_Orders/upsert`,
@@ -545,11 +1070,31 @@ Meteor.methods({
         );
         return response.data;
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+
+      let promisePOST = new Promise(function (resolve, reject) {
+        let postData = {data: reqData.data};
+        HTTP.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Sales_Orders/upsert`, {
+           data:postData,
+            headers: {
+              Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+              "Content-Type": "application/json",
+            }
+        }, function(error, result) {
+            if (!error) {
+                resolve(result.data);
+            } else {
+                reject(error);
+            }
+        });
+      });
+      return promisePOST;
     },
 
     'getZohoQuotes': async function (reqData) {
+      /*
       try {
         const response = await axios.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Quotes`, {
           headers: {
@@ -559,11 +1104,28 @@ Meteor.methods({
         });
         return response.data;
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+      let promiseGET = new Promise(function (resolve, reject) {
+      HTTP.get(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Quotes`, {
+        headers: {
+          Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+          "Content-Type": "application/json",
+        }
+      }, function(error, result) {
+          if (!error) {
+            resolve(result.data);
+          } else {
+            reject(error);
+          }
+      });
+      });
+      return promiseGET;
     },
 
     'updateZohoQuotes': async function (reqData) {
+      /*
       try {
         const response = await axios.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Quotes/upsert`,
           {
@@ -576,8 +1138,28 @@ Meteor.methods({
         });
         return response.data;
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+
+      let promisePOST = new Promise(function (resolve, reject) {
+        let postData = {data: reqData.data};
+        HTTP.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Quotes/upsert`, {
+           data:postData,
+            headers: {
+              Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+              "Content-Type": "application/json",
+            }
+        }, function(error, result) {
+            if (!error) {
+                resolve(result.data);
+            } else {
+                reject(error);
+            }
+        });
+      });
+      return promisePOST;
+
     },
 
     'checkFieldExistence': async function (reqData) {
@@ -595,7 +1177,6 @@ Meteor.methods({
       //   return fieldnameExists;
       // } catch (error) {
       //   console.log(error);
-      //   throw new Meteor.Error("api-error", error.response.data);
       // }
 
       let promisePOST = new Promise(function (resolve, reject) {
@@ -646,6 +1227,7 @@ Meteor.methods({
     },
 
     'addcustomFields': async function (reqData) {
+      /*
       try {
         const response = await axios.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/settings/fields?module=${reqData.module}`, reqData.data, {
           headers: {
@@ -655,8 +1237,27 @@ Meteor.methods({
         });
         return response.data;
       } catch (error) {
-        throw new Meteor.Error("api-error", error.response.data);
+        console.log(error);
       }
+      */
+      let promisePOST = new Promise(function (resolve, reject) {
+        HTTP.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/settings/fields?module=${reqData.module}`, reqData.data, {
+            headers: {
+              Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+              "Content-Type": "application/json",
+            }
+        }, function(error, result) {
+            if (!error) {
+              console.log(result);
+                resolve(result.data);
+            } else {
+              console.log(error);
+                reject(error);
+            }
+        });
+      });
+      return promisePOST;
+
     },
     'getZohoOauthToken': async function(jsonData, reqDataCenter) {
       let promisePOST = new Promise(function (resolve, reject) {

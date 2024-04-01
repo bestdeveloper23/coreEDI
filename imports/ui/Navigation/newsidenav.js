@@ -43,6 +43,11 @@ Template.newsidenav.events({
     }
 
   },
+ 'click #transactionlist': function (event) {
+    event.preventDefault();
+    FlowRouter.go(`/customerscard?id=${window.localStorage.customerId}&TransTab=transaction`);
+      $('.transactionPanelTab').trigger('click');
+  },
   'click #employeelist': function (event) {
     event.preventDefault();
     FlowRouter.go('/employeelist');

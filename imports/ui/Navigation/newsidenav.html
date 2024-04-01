@@ -426,6 +426,13 @@
                     class="dropdown-toggle liHeader customerLiHeader"><i class="fas fa-user-friends faHeader"></i>
                     Customers </a>
             </li>
+            {{#if equals isSuperUSer 'false'}}
+            <li class="TransactionLi opacityActive" id="sidetransactionss">
+                <a id="transactionlist" data-toggle="collapse" aria-expanded="false"
+                    class="dropdown-toggle liHeader transactionLiHeader"><i class="fas fa-list-ol faHeader"></i>
+                    Transactions </a>
+            </li>
+            {{/if}}
             {{#if equals isSuperUSer 'true'}}
             <li class="employeeLi" id="sidenavemployees">
                 <a id="employeelist" data-toggle="collapse" aria-expanded="false"

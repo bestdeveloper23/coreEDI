@@ -15,10 +15,9 @@ let cancelBtnFlag = false;
 
 Template.woocommercecard.onCreated(function () {
     const templateObject = Template.instance();
-    templateObject.transferTypes = new ReactiveVar([]);
-
+    templateObject.transferTypes2 = new ReactiveVar([]);
     const postData = {
-    id: FlowRouter.current().queryParams.id
+    id: FlowRouter.current().queryParams.id||0
     }
 
     fetch('/api/transfertypesByID', {
@@ -35,8 +34,9 @@ Template.woocommercecard.onCreated(function () {
         }
     });
 
-    await templateObject.transferTypes.set(transferTypes);
+    await templateObject.transferTypes2.set(transferTypes);
     }).catch(error => console.log(error));
+
 });
 
 Template.woocommercecard.onRendered(function () {
@@ -48,7 +48,7 @@ Template.woocommercecard.rendered = () => {
 }
 
 Template.woocommercecard.events({
-    'click #saveWooCommerce': function () {
+    'click #saveWooCommerce11111': function () {
     let transfer_btns = $('.transfer_tooglebtn');
     let transfer_types = [];
     for (let i = 0; i< transfer_btns.length; i++){
@@ -88,9 +88,9 @@ Template.woocommercecard.events({
 });
 
 Template.woocommercecard.helpers({
-    transfertypes: () => {
+    transferTypes2: () => {
         let templateObject = Template.instance();
-        return templateObject.transferTypes.get();
+        return templateObject.transferTypes2.get();
     }
 });
 
