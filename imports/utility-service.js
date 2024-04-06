@@ -106,7 +106,7 @@ export class UtilityService {
     //lstUpdateTime = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").subtract(1, 'hours').format("YYYY-MM-DD HH:mm:ss");
     // lstUpdateTime = connectionResult[0].last_ran_date !=''? moment(connectionResult[0].last_ran_date).format("YYYY-MM-DD HH:mm:ss"): connectionResult[0].last_ran_date;
     var lstUpdateTimeUTC = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").format("YYYY-MM-DDThh:mm:ss");
-
+    var lstUpdateTimeMagento = moment(connectionResult[0].last_ran_date).format("YYYY-MM-DDThh:mm:ss")
     var lstUpdateTimeZoho = moment(connectionResult[0].last_ran_date).tz("Australia/Brisbane").format("YYYY-MM-DDThh:mm:ssZ");
 
     if (customDate != '') {
@@ -234,7 +234,7 @@ export class UtilityService {
 
                     // fetchMagentoCustomerJob(templateObject, lstUpdateTime, tempConnectionSoftware.base_api_url, tempConnection, tempConnectionSoftware, tempAccount, magentoTokenResponse.data, selConnectionId, transNOtes);
 
-                    transNOtes += `Last Sync Time: ${moment(lstUpdateTime).format("DD/MM/YYYY HH:mm:ss")}\n`;
+                    transNOtes += `Last Sync Time: ${moment(lstUpdateTimeMagento).format("DD/MM/YYYY HH:mm:ss")}\n`;
                     // transNOtes += `Last Sync Time: 01/01/2024\n`;
                     templateObject.setLogFunction(transNOtes);
                     async function runPerFiveMinutes() {
@@ -248,7 +248,8 @@ export class UtilityService {
                         transNOtes += `----------------------------------------------------------\n`;
                         templateObject.setLogFunction(transNOtes);
                         await fetch(
-                          `${tempAccount.base_url}/TCustomer?listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"&limitCount=3`,
+                          // `${tempAccount.base_url}/TCustomer?listtype=detail&select=[MsTimeStamp]>"${lstUpdateTimeMagento}"`,
+                          `${tempAccount.base_url}/TCustomer?Propertylist=Companyname,Street,City,Title,ClientName,Phone,Mobile,Country,Postcode,Email,FirstName,LastName&select=[MsTimeStamp]>"${lstUpdateTimeMagento}"`,
                           {
                             method: "GET",
                             headers: myHeaders,
@@ -258,6 +259,7 @@ export class UtilityService {
                           .then((response) => response.json())
                           .then(async (result) => {
                             const newCustomersFromERP = result.tcustomer;
+                            console.log(result)
                             if (newCustomersFromERP.length === 0) {
                               transNOtes += `There is no newly added Customer in TrueERP.\n`;
                               templateObject.setLogFunction(transNOtes);
@@ -270,18 +272,18 @@ export class UtilityService {
                               for (const newCustomerFromERP of newCustomersFromERP) {
 
                                 transNOtes += `Got ${++newCustomersFromERPCount} Customer data with Id: ${
-                                  newCustomerFromERP.fields?.ID
+                                  newCustomerFromERP?.Id
                                 } and MsTimeStamp: ${
                                   newCustomerFromERP.MsTimeStamp
                                 } from TrueERP.\n`;
                                 templateObject.setLogFunction(transNOtes);
                                 const bodyToAddMagento = {
                                   email:
-                                    newCustomerFromERP?.fields?.Email ||
-                                    newCustomerFromERP?.fields?.FirstName + "@email.com" ||
+                                    newCustomerFromERP?.Email ||
+                                    newCustomerFromERP?.FirstName + "@email.com" ||
                                     "",
-                                  firstname: newCustomerFromERP?.fields?.FirstName,
-                                  lastname: newCustomerFromERP?.fields?.LastName,
+                                  firstname: newCustomerFromERP?.FirstName,
+                                  lastname: newCustomerFromERP?.LastName,
                                   prefix: "TrueERP",
                                   dob: moment().format("YYYY-MM-DD"),
 
@@ -323,7 +325,7 @@ export class UtilityService {
                                       if (customerResult) {
                                         upload_transaction_count ++;
                                         upload_num ++;
-                                        transNOtes += `Successfully updated ${newCustomersFromERPCount} Customer to Magento with ID: ${newCustomerFromERP.fields?.ID}.\n`;
+                                        transNOtes += `Successfully updated ${newCustomersFromERPCount} Customer to Magento with ID: ${newCustomerFromERP?.Id}.\n\n`;
                                         templateObject.setLogFunction(transNOtes);
                                       } else {
                                         transNOtes += `[Error] Failed to update customer.\n`;
@@ -350,7 +352,7 @@ export class UtilityService {
                                       if (customerResult) {
                                         upload_transaction_count ++;
                                         upload_num ++;
-                                        transNOtes += `Successfully added ${newCustomersFromERPCount} Customer to Magento with ID: ${newCustomerFromERP.fields?.ID}.\n\n`;
+                                        transNOtes += `Successfully added ${newCustomersFromERPCount} Customer to Magento with ID: ${newCustomerFromERP?.Id}.\n\n`;
                                         templateObject.setLogFunction(transNOtes);
                                       } else {
                                         transNOtes += `[Error] Failed to add customer.\n\n`;
@@ -386,7 +388,8 @@ export class UtilityService {
                         transNOtes += `----------------------------------------------------------\n`;
                         templateObject.setLogFunction(transNOtes);
                         await fetch(
-                          `${tempAccount.base_url}/TProduct?listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}"&[PublishOnWeb]=true&limitCount=3`,
+                          // `${tempAccount.base_url}/TProduct?listtype=detail&select=[MsTimeStamp]>"${lstUpdateTimeMagento}"&[PublishOnWeb]=true`,
+                          `${tempAccount.base_url}/TProduct?PropertyList=ProductName,PRODUCTCODE,ProductDescription,Active,SalesDescription,TotalQtyonOrder,TotalQtyInStock,SellQty1PriceInc,WHOLESALEPRICE&select=[MsTimeStamp]>"${lstUpdateTimeMagento}" AND [PublishOnWeb]=true AND [Active]=true`,
                           {
                             method: "GET",
                             headers: myHeaders,
@@ -395,6 +398,7 @@ export class UtilityService {
                         )
                           .then((response) => response.json())
                           .then(async (result) => {
+                            console.log(result)
                             const newProductsFromERP = result.tproduct;
                             if (newProductsFromERP.length === 0) {
                               transNOtes += `There is no newly added Product in TrueERP.\n`;
@@ -408,16 +412,16 @@ export class UtilityService {
                               for (const newProductFromERP of newProductsFromERP) {
 
                                 transNOtes += `Got ${++newProductsFromERPCount} Product data with Id: ${
-                                  newProductFromERP?.fields?.ID
+                                  newProductFromERP?.Id
                                 } and MsTimeStamp: ${
-                                  newProductFromERP?.fields?.MsTimeStamp
+                                  newProductFromERP?.MsTimeStamp
                                 } from TrueERP.\n`;
                                 templateObject.setLogFunction(transNOtes);
                                 // const uomSalesName = esult?.fields?.UOMSales
                                 const bodyToAddMagento = {
-                                  name: newProductFromERP?.fields?.ProductName,
-                                  sku: newProductFromERP?.fields?.SKU || newProductFromERP?.fields?.GlobalRef,
-                                  price: newProductFromERP?.fields?.WHOLESALEPRICE,
+                                  name: newProductFromERP?.ProductName,
+                                  sku: newProductFromERP?.SKU || newProductFromERP?.GlobalRef,
+                                  price: newProductFromERP?.WHOLESALEPRICE,
                                   attribute_set_id: 4,
                                 };
                                 transNOtes += `(Detail) Product name: ${bodyToAddMagento?.name}, Price: ${bodyToAddMagento?.price}\n`;
@@ -443,7 +447,7 @@ export class UtilityService {
                                   if (productResult) {
                                     upload_transaction_count ++;
                                     upload_num ++;
-                                    transNOtes += `Successfully added ${newProductsFromERPCount} Product to Magento with ID: ${newProductFromERP?.fields?.ID}.\n\n`;
+                                    transNOtes += `Successfully added ${newProductsFromERPCount} Product to Magento with ID: ${newProductFromERP?.Id}.\n\n`;
                                     templateObject.setLogFunction(transNOtes);
                                   } else {
                                     transNOtes += `[Error] Failed to add product.\n\n`;
@@ -479,7 +483,7 @@ export class UtilityService {
 
                         try {
                           const customers = await new Promise((resolve, reject) => {
-                            Meteor.call("getMagentoUpdatedCustomers", url, token, lstUpdateTime, (error, result) => {
+                            Meteor.call("getMagentoUpdatedCustomers", url, token, lstUpdateTimeMagento, (error, result) => {
                               if (error) {
                                 reject(error);
                               } else {
@@ -598,8 +602,268 @@ export class UtilityService {
                         }
                       }
 
-                      if ( Magento2TrueERP_Invoices ){
-                        //Magento Invoice
+                      if ( Magento2TrueERP_Invoices ) {
+                        //Getting newly added Invoices from Magento
+                          transNOtes += `-----------------------------------------------------------\n`;
+                          templateObject.setLogFunction(transNOtes);
+                          
+                          try {
+                            const invoices = await new Promise((resolve, reject) => {
+                              Meteor.call("getMagentoUpdatedInvoices", url, token, lstUpdateTimeMagento, (error, result) => {
+                                if (error) {
+                                  reject(error);
+                                } else {
+                                  resolve(result);
+                                }
+                              });
+                            });
+                          
+                            // Process the invoices as needed
+    
+                            if (invoices) {
+                              if (invoices.items.length === 0) {
+                                transNOtes += `There is no newly added Invoice in Magento.\n`;
+                                templateObject.setLogFunction(transNOtes);
+                              } else {
+                                responseCount = invoices.items.length;
+                                var resultData = invoices.items;
+                                let formatting =
+                                  responseCount > 1 ? "Invoices" : "Invoice";
+                                transNOtes +=
+                                  `Received ` +
+                                  responseCount +
+                                  ` ${formatting} from Magento.\n`;
+      
+                                transNOtes += `Adding ${formatting} to TrueERP \n`;
+                                templateObject.setLogFunction(transNOtes);
+                                let download_num = 0;
+      
+                                for (let i = 0; i < responseCount; i++) {
+                                  let tempCount = i % 10;
+                                  let count = tempCount === 0 ? `${i + 1}st` : tempCount === 1 ? `${i + 1}nd` : tempCount === 2 ? `${i + 1}rd` : `${i + 1}th`;
+                                  transNOtes += `Adding ${count} Invoice to ERP database.\n`;
+                                  templateObject.setLogFunction(transNOtes);
+                                  let orderID = resultData[i].order_id;
+                                  let OrderData;
+                                  console.log(resultData[i]?.order_id)
+                                  try {
+                                    const orderDetail = await new Promise((resolve, reject) => {
+                                      Meteor.call("getMagentoOrderByID", url, token, orderID, (error, result) => {
+                                        if (error) {
+                                          reject(error);
+                                        } else {
+                                          resolve(result);
+                                        }
+                                      });
+                                    })
+    
+                                    if (orderDetail) {
+                                      OrderData = orderDetail;
+                                      console.log(orderDetail)
+                                      let postData = {};
+                                      postData.type = "TCustomer";
+                                      postData.fields = {};
+                                      postData.fields.Email = OrderData.customer_email || "";
+          
+                                      postData.fields.FirstName =
+                                        OrderData.customer_firstname || "";
+          
+                                      postData.fields.LastName =
+                                        OrderData.customer_lastname || "";
+          
+                                      const clientName = OrderData.customer_lastname + " " + OrderData.customer_firstname;
+                                      let clientId;
+    
+                                      await fetch(
+                                        `${tempAccount.base_url}/TCustomer?select=[ClientName]="${clientName}"`,
+                                        {
+                                          method: "GET",
+                                          headers: {
+                                            Username: tempAccount.user_name,
+                                            Password: tempAccount.password,
+                                            Database: tempAccount.database,
+                                            "Content-Type": "application/json",
+                                          },
+                                          redirect: "follow",
+                                        }
+                                      )
+                                        .then((response) => response.json())
+                                        .then(async (result) => {
+                                          if (result?.tcustomer.length > 0) {
+                                            clientId = result?.tcustomer[0]?.Id;
+                                            transNOtes += `Found the Customer as ID : ${clientId}\n`;
+                                            templateObject.setLogFunction(transNOtes);
+                                          } else {
+                                            transNOtes += `Not Existing Customer, creating...\n`;
+                                            templateObject.setLogFunction(transNOtes);
+                                            const tempCustomerDetailtoERP = {
+                                              type: "TCustomer",
+                                              fields: {
+                                                ClientName: clientName || "",
+                                                Country:OrderData.billing_address.country_id || "",
+                                                State: OrderData.billing_address.region || "",
+                                                Street: OrderData.billing_address.street[0] || "",
+                                                Postcode: OrderData.billing_address.postcode || "",
+                                              },
+                                            };
+                                            console.log(
+                                              tempCustomerDetailtoERP,
+                                              "tempCustomer"
+                                            );
+                                            await fetch(`${tempAccount.base_url}/TCustomer`, {
+                                              method: "POST",
+                                              headers: {
+                                                Username: tempAccount.user_name,
+                                                Password: tempAccount.password,
+                                                Database: tempAccount.database,
+                                                "Content-Type": "application/json",
+                                              },
+                                              redirect: "follow",
+                                              body: JSON.stringify(tempCustomerDetailtoERP),
+                                            })
+                                              .then((response) => {
+                                                console.log(response);
+                                                response.json();
+                                              })
+                                              .then(async (result) => {
+                                                clientId = result?.fields?.ID;
+                                                transNOtes += `Added a new customer to TrueERP database with ID : ${clientId}.\n`;
+                                                templateObject.setLogFunction(transNOtes);
+                                              })
+                                              .catch((error) =>
+                                                console.log("error", error)
+                                              );
+                                          }
+                                        })
+                                        .catch(() => {
+                                          transNOtes += `Error while getting client Id from the TrueERP database.\n`;
+                                          templateObject.setLogFunction(transNOtes);
+                                        });
+          
+                                      //check if the product exists and add if not
+                                      const productList = OrderData?.items;
+                                      const productIdList = [];
+                                      const productQtyList = [];
+                                      transNOtes += `There are ${productList.length} products in the items.\n`;
+                                      templateObject.setLogFunction(transNOtes);
+          
+                                      for (const product of productList) {
+                                        transNOtes += `Checking Product in the TrueERP database for ProductName : ${product?.name}...\n`;
+                                        templateObject.setLogFunction(transNOtes);
+                                        await fetch(
+                                          `${tempAccount.base_url}/TProduct?select=[ProductName]="${product?.name}"`,
+                                          {
+                                            method: "GET",
+                                            headers: {
+                                              Username: tempAccount.user_name,
+                                              Password: tempAccount.password,
+                                              Database: tempAccount.database,
+                                              "Content-Type": "application/json",
+                                            },
+                                            redirect: "follow",
+                                          }
+                                        )
+                                          .then((response) => response.json())
+                                          .then(async (result) => {
+                                            if (result?.tproduct.length > 0) {
+                                              const productId = result?.tproduct[0]?.Id;
+                                              transNOtes += `Found the Product as ID : ${productId}\n`;
+                                              templateObject.setLogFunction(transNOtes);
+                                              productIdList.push(productId);
+                                              productQtyList.push(product?.qty_invoiced);
+                                            }
+                                            
+                                          })
+                                          .catch(() => {
+                                            transNOtes += `Error while getting Product Id from the TrueERP database.\n`;
+                                            templateObject.setLogFunction(transNOtes);
+                                          });
+                                      }
+          
+                                      // create a new Qutoes in ERP.
+          
+                                      const InvoiceItems = [];
+          
+                                      productIdList.forEach((item, index) => {
+                                        InvoiceItems.push({
+                                          type: "TInvoiceLine",
+                                          fields: {
+                                            ProductID: item,
+                                            OrderQty: productQtyList[index],
+                                          },
+                                        });
+                                      });
+                                      if (InvoiceItems.length === 0) {
+                                        continue;
+                                      }
+                                      const InvoiceData = {
+                                        type: "TInvoiceEx",
+                                        fields: {
+                                          CustomerID: clientId,
+                                          Lines: InvoiceItems,
+                                          IsBackOrder: true,
+                                          Comments: "Invoice Produced in Magento",
+                                          ShipCountry: OrderData.billing_address.country_id || "",
+                                          ShipState: OrderData.billing_address.region || "",
+                                          ShipStreet1: OrderData.billing_address.street[0] || "",
+                                          ShipPostcode: OrderData.billing_address.postcode || "",
+                                          TotalTax: OrderData.base_tax_amount || 0,
+                                        },
+                                      };
+          
+                                      if(resultData[i]?.GlobalRef) {
+                                        InvoiceData.fields.GlobalRef = resultData[i]?.GlobalRef
+                                      }
+          
+                                      await fetch("/api/updateTrueERP2", {
+                                        method: "POST",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                          data: InvoiceData,
+                                          Username: tempAccount.user_name,
+                                          Password: tempAccount.password,
+                                          Database: tempAccount.database,
+                                          url: tempAccount.base_url + "/TInvoiceEx",
+                                        }),
+                                      })
+                                        .then((response) => response.json())
+                                        .then(async (result) => {
+                                          console.log(result);
+                                          download_transaction_count += 1;
+                                          download_num += 1;
+                                          transNOtes += `Invoice ${i+1} with ID:${resultData[i].entity_id} transfer Success!\n\n`;
+                                          templateObject.setLogFunction(transNOtes);
+                                        })
+                                        .catch((error) => {
+                                          console.log(error);
+                                          transNOtes += `Invoice transfer Failed!\n\n`;
+                                          templateObject.setLogFunction(transNOtes);
+                                        });
+                                    
+                                    }
+                                  } catch (error) {
+                                    console.error('Failed to get Order:', error);
+                                  }
+      
+                                }
+      
+                                transaction_details.push({
+                                  detail_string:
+                                    "Downloaded Invoices from Magento to TrueERP",
+                                  count: download_num,
+                                });
+                              }
+                            } else {
+                              transNOtes += `[Error] Failed to add Invoices.\n`;
+                              templateObject.setLogFunction(transNOtes);
+                            }
+    
+                          } catch (error) {
+                            console.error('Failed to get invoices:', error);
+                          }
+    
                       }
 
                       //update the last sync time
@@ -2260,6 +2524,11 @@ export class UtilityService {
                               GlobalRef: resultData[i]?.fields?.GlobalRef,
                               // Subject: resultData[i]?.fields?.ShipToDesc,
                               Subject: resultData[i]?.fields?.GlobalRef,
+                              Billing_Country: resultData[i]?.ShipCountry,
+                              Billing_State: resultData[i]?.ShipState,
+                              Billing_Street: resultData[i]?.ShipStreet1,
+                              Billing_Code: resultData[i]?.ShipPostcode,
+                              Tax: resultData[i]?.LineTaxTotal
                             });
 
                             let tempNote = transNOtes;
@@ -2554,7 +2823,7 @@ export class UtilityService {
                     templateObject.setLogFunction(transNOtes);
                     //await fetch(erpObject.base_url + `/TProduct?Listtype=detail&select=[MsTimeStamp]>"${lstUpdateTime}" AND [PublishOnWeb]=true AND [Active]=true`,
                     await fetch(erpObject.base_url + `/TProduct?PropertyList=ProductName,PRODUCTCODE,ProductDescription,Active,SalesDescription,TotalQtyonOrder,TotalQtyInStock,SellQty1PriceInc,WHOLESALEPRICE&select=[MsTimeStamp]>"${lstUpdateTime}" AND [PublishOnWeb]=true AND [Active]=true`,
-                      // `/TProduct?PropertyList=ProductName,PRODUCTCODE,ProductDescription,Active,SalesDescription,TotalQtyonOrder,TotalQtyInStock,WHOLESALEPRICE&limitCount=3`,
+                      // `/TProduct?PropertyList=ProductName,PRODUCTCODE,ProductDescription,Active,SalesDescription,TotalQtyonOrder,TotalQtyInStock,WHOLESALEPRICE`,
                       {
                         method: "GET",
                         headers: {
@@ -3132,6 +3401,11 @@ export class UtilityService {
                               GlobalRef: resultData[i]?.fields?.GlobalRef,
                               // Subject: resultData[i]?.fields?.ShipToDesc,
                               Subject: resultData[i]?.fields?.GlobalRef,
+                              Billing_Country: resultData[i]?.ShipCountry,
+                              Billing_State: resultData[i]?.ShipState,
+                              Billing_Street: resultData[i]?.ShipStreet1,
+                              Billing_Code: resultData[i]?.ShipPostcode,
+                              Tax: resultData[i]?.TotalTax
                             });
                           }
 
@@ -3519,6 +3793,11 @@ export class UtilityService {
                                 Lines: QuoteLines,
                                 IsBackOrder: true,
                                 Comments: "Quote Produced in ZOHO",
+                                ShipCountry: resultData[i]?.Billing_Country,
+                                ShipState: resultData[i]?.Billing_State,
+                                ShipStreet1: resultData[i]?.Billing_Street,
+                                ShipPostcode: resultData[i]?.Billing_Code,
+                                TotalTax: resultData[i]?.Tax
                               },
                             };
 
@@ -3773,6 +4052,11 @@ export class UtilityService {
                                 Lines: OrderLines,
                                 IsBackOrder: true,
                                 Comments: "Sales Order Produced in ZOHO",
+                                ShipCountry: resultData[i]?.Billing_Country,
+                                ShipState: resultData[i]?.Billing_State,
+                                ShipStreet1: resultData[i]?.Billing_Street,
+                                ShipPostcode: resultData[i]?.Billing_Code,
+                                LineTaxTotal: resultData[i]?.Tax
                               },
                             };
 

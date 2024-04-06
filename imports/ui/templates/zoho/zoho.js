@@ -11,7 +11,7 @@ import './zoho.html';
 const axios = require('axios');
 import moment from 'moment';
 let cancelBtnFlag = false;
-let datacenter = 'com'; //CHange this to your country code. I believe your account is .com right? yes.
+let datacenter = 'com';
 Template.zohocard.onCreated(function () {
   const templateObject = Template.instance();
 });

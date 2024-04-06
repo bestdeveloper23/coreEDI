@@ -302,11 +302,11 @@ window.location.href = window.location.href + `?customerId=${selectedCustomerid}
   testNOtes = 'Connecting.........................\n'
   await sleep(300)
   templateObject.setLogFunction(testNOtes)
-  
+
   const username = jQuery('#magento_admin_user_name').val();
   const password = jQuery('#magento_admin_user_password').val();
   const baseUrl = jQuery('#magento_base_api_url').val();
-  
+
   const arg = {
     url: baseUrl,
     username: username,
@@ -1176,7 +1176,45 @@ if(listData != ''){
   //   jQuery("#zoho_contacts_customers2trueerp").is(":checked")
   // );
 },
+'click .importAgain': function () {
+var templateObject = Template.instance();
+var tempCustomDate = $('.edtDailyStartDate').val()||'';
 
+const parts = tempCustomDate.split('/');
+const day = parts[0];
+const month = parts[1];
+const year = parts[2];
+
+// Create a Date object
+const parsedDate = new Date(`${year}-${month}-${day}`);
+
+// Extract the components of the parsed date
+const newYear = parsedDate.getFullYear();
+const newMonth = String(parsedDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+const newDay = String(parsedDate.getDate()).padStart(2, '0');
+
+// Create the output date string in "yyyy-mm-dd" format
+const customDate = `${newYear}-${newMonth}-${newDay}`;
+
+let listData = FlowRouter.current().queryParams.id || '';
+let connectionType = templateObject.connection.get() || '';
+if(listData != ''){
+ utilityService.runNowFunction(customDate,listData, Template.instance());
+}else{
+  swal({
+    title: 'Oooops...',
+    text: "This connection has not been saved yet, please save it first and then try again",
+    type: 'error',
+    showCancelButton: false,
+    confirmButtonText: 'Ok'
+  }).then((result) => {
+    if (result.value) {
+    } else if (result.dismiss === 'cancel') {
+      return;
+    }
+  });
+}
+},
 'click .btnBack': function (event) {
 event.preventDefault();
 history.back(1);
@@ -3251,9 +3289,9 @@ fetch("/api/MagentoByID", {
                       transNOtes += `Found ${newCustomersFromERP.length} newly added customer(s) in TrueERP database.\n`;
                       templateObject.setLogFunction(transNOtes);
                       let newCustomersFromERPCount = 0;
-  
+
                       for (const newCustomerFromERP of newCustomersFromERP) {
-                    
+
                         transNOtes += `Got ${++newCustomersFromERPCount} Customer data with Id: ${
                           newCustomerFromERP.fields?.ID
                         } and MsTimeStamp: ${
@@ -3275,7 +3313,7 @@ fetch("/api/MagentoByID", {
                         transNOtes += `(Detail) First name: ${bodyToAddMagento?.firstname}, Last name: ${bodyToAddMagento?.lastname}, Email: ${bodyToAddMagento?.email}.\n`;
                         transNOtes += `Adding ${newCustomersFromERPCount} Customer to Magento.\n`;
                         templateObject.setLogFunction(transNOtes);
-                        
+
                         let jsonCustomerData = {
                           customer: bodyToAddMagento,
                         };
@@ -3304,7 +3342,7 @@ fetch("/api/MagentoByID", {
                                   }
                                 });
                               });
-                            
+
                               if (customerResult) {
                                 upload_transaction_count ++;
                                 upload_num ++;
@@ -3318,7 +3356,7 @@ fetch("/api/MagentoByID", {
                               transNOtes += `[Error] ${error}\n`;
                               templateObject.setLogFunction(transNOtes);
                               }
-                            
+
                           } else {
                             // Customer does not exist, add the new customer
                             try {
@@ -3331,7 +3369,7 @@ fetch("/api/MagentoByID", {
                                   }
                                 });
                               });
-                            
+
                               if (customerResult) {
                                 upload_transaction_count ++;
                                 upload_num ++;
@@ -3391,7 +3429,7 @@ fetch("/api/MagentoByID", {
                       let newProductsFromERPCount = 0;
 
                       for (const newProductFromERP of newProductsFromERP) {
-                        
+
                         transNOtes += `Got ${++newProductsFromERPCount} Product data with Id: ${
                           newProductFromERP?.fields?.ID
                         } and MsTimeStamp: ${
@@ -3424,7 +3462,7 @@ fetch("/api/MagentoByID", {
                               }
                             });
                           });
-                        
+
                           if (productResult) {
                             upload_transaction_count ++;
                             upload_num ++;
@@ -3439,7 +3477,7 @@ fetch("/api/MagentoByID", {
                           templateObject.setLogFunction(transNOtes);
                         }
                       }
-                      
+
                       transaction_details.push({
                         detail_string:
                           "Uploaded Products from TrueERP to Magento",
@@ -3706,7 +3744,7 @@ templateObject.setLogFunction(transNOtes);
                 })
                 .catch((err) => console.log(err));
 
-                
+
               let account_id = 7;
               let connection_id = 3;
               let today = moment(new Date()).format("YYYY-MM-DD HH:mm:ss");
@@ -7921,5 +7959,5 @@ async function Magento2TrueERP(InvoiceState = false, CustomerState = false) {
   if(InvoiceState === false && CustomerState === false) {
     return;
   }
-  
+
 }
