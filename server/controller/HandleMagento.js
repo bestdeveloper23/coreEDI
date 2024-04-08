@@ -226,8 +226,10 @@ Meteor.methods({
             },
           });
     
+          console.log(response)
           return response.data;
         } catch (error) {
+          console.log(error)
           throw new Meteor.Error("api-error", error.response.data.message);
         }
       },

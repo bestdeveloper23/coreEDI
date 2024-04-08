@@ -43,7 +43,7 @@ export class UtilityService {
       let ZOHO_SalesState = true;
       let ZOHO_LeadsState = true;
       let ZOHO_CustomerState = true;
-      
+
       let Magento2TrueERP_Customers = true;
       let Magento2TrueERP_Invoices = true;
 
@@ -808,6 +808,7 @@ export class UtilityService {
                                           ShipStreet1: OrderData.billing_address.street[0] || "",
                                           ShipPostcode: OrderData.billing_address.postcode || "",
                                           TotalTax: OrderData.base_tax_amount || 0,
+                                          InvoiceState: OrderData.state || "",
                                         },
                                       };
           
@@ -2225,31 +2226,31 @@ export class UtilityService {
                           );
 
                           // Process the resultPromise
-                          if (resultPromise) {
-                            if (!resultPromise) {
-                              const resultPromise = await new Promise(
-                                (resolve, reject) => {
-                                  Meteor.call("addcustomFields", reqData,(error, result) => {
-                                      if (error) {
-                                        reject(error);
-                                      } else {
-                                        resolve(result);
-                                      }
+                          
+                          if (!resultPromise) {
+                            const resultPromise2 = await new Promise(
+                              (resolve, reject) => {
+                                Meteor.call("addcustomFields", reqData,(error, result) => {
+                                    if (error) {
+                                      reject(error);
+                                    } else {
+                                      resolve(result);
                                     }
-                                  );
-                                }
-                              );
-
-                              if (resultPromise.data) {
-                                transNOtes += `${reqData.module} field has been added in Sales_Orders module!\n`;
-                                templateObject.setLogFunction(transNOtes);
-                              } else {
-                                console.log(resultPromise);
-                                transNOtes += `${reqData.module} field adding Failed!\n`;
-                                templateObject.setLogFunction(transNOtes);
+                                  }
+                                );
                               }
+                            );
+
+                            if (resultPromise2.data) {
+                              transNOtes += `${reqData.module} field has been added in Sales_Orders module!\n`;
+                              templateObject.setLogFunction(transNOtes);
+                            } else {
+                              console.log(resultPromise2);
+                              transNOtes += `${reqData.module} field adding Failed!\n`;
+                              templateObject.setLogFunction(transNOtes);
                             }
-                          } else if (!resultPromise) {
+                        
+                          } else if (resultPromise) {
                             transNOtes += `${reqData.fieldName} field already exists!\n`;
                             templateObject.setLogFunction(transNOtes);
                           } else {
@@ -2662,36 +2663,99 @@ export class UtilityService {
                           );
                           console.log(resultPromise);
                           // Process the resultPromise
-                          if (resultPromise) {
-                            if (!resultPromise) {
-                              const resultPromise = await new Promise((resolve, reject) => {
-                                  Meteor.call("addcustomFields",reqData,(error, result) => {
-                                      if (error) {
-                                        console.log(error);
-                                        reject(error);
-                                      } else {
-                                        console.log(result);
-                                        resolve(result);
-                                      }
+
+                          if (!resultPromise) {
+                            const resultPromise2 = await new Promise((resolve, reject) => {
+                                Meteor.call("addcustomFields",reqData,(error, result) => {
+                                    if (error) {
+                                      console.log(error);
+                                      reject(error);
+                                    } else {
+                                      console.log(result);
+                                      resolve(result);
                                     }
-                                  );
-                                }
-                              );
-                              console.log(resultPromise);
-                              if (resultPromise.data) {
-                                transNOtes += `${reqData.module} field has been added in Contacts module!\n`;
-                                templateObject.setLogFunction(transNOtes);
-                              } else {
-                                console.log(resultPromise);
-                                transNOtes += `${reqData.module} field adding Failed!\n`;
-                                templateObject.setLogFunction(transNOtes);
+                                  }
+                                );
                               }
+                            );
+                            if (resultPromise2.data) {
+                              transNOtes += `${reqData.module} field has been added in Contacts module!\n`;
+                              templateObject.setLogFunction(transNOtes);
+                            } else {
+                              console.log(resultPromise2);
+                              transNOtes += `${reqData.module} field adding Failed!\n`;
+                              templateObject.setLogFunction(transNOtes);
                             }
-                          } else if (!resultPromise) {
+                          } else if (resultPromise) {
                             transNOtes += `${reqData.fieldName} field already exists!\n`;
                             templateObject.setLogFunction(transNOtes);
                           } else {
                             console.error("Error:", resultPromise);
+                            transNOtes += `Checking Field existing Failed!\n`;
+                            transNOtes += `Failed!!!\n`;
+                            templateObject.setLogFunction(transNOtes);
+                          }
+
+                          
+                          const reqDataCustomerID = {
+                            auth: token,
+                            module: "Accounts",
+                            datacenter: datacenter,
+                            fieldName: "Customer_ID",
+                            data: {
+                              fields: [
+                                {
+                                  field_label: "Customer_ID",
+                                  data_type: "text",
+                                },
+                              ],
+                            },
+                          };
+
+                          //Check GlobalRef existence
+                          const resultPromiseCustomerID = await new Promise((resolve, reject) => {
+                              Meteor.call("checkFieldExistence",reqDataCustomerID,(error, result) => {
+                                  if (error) {
+                                    console.log(error);
+                                    reject(error);
+                                  } else {
+                                    console.log(result);
+                                    resolve(result);
+                                  }
+                                }
+                              );
+                            }
+                          );
+                          console.log(resultPromiseCustomerID);
+                          // Process the resultPromiseCustomerID
+
+                          if (!resultPromiseCustomerID) {
+                            const resultPromise2 = await new Promise((resolve, reject) => {
+                                Meteor.call("addcustomFields",reqDataCustomerID,(error, result) => {
+                                    if (error) {
+                                      console.log(error);
+                                      reject(error);
+                                    } else {
+                                      console.log(result);
+                                      resolve(result);
+                                    }
+                                  }
+                                );
+                              }
+                            );
+                            if (resultPromise2.data) {
+                              transNOtes += `${reqDataCustomerID.module} field has been added in Contacts module!\n`;
+                              templateObject.setLogFunction(transNOtes);
+                            } else {
+                              console.log(resultPromise2);
+                              transNOtes += `${reqDataCustomerID.module} field adding Failed!\n`;
+                              templateObject.setLogFunction(transNOtes);
+                            }
+                          } else if (resultPromiseCustomerID) {
+                            transNOtes += `${reqDataCustomerID.fieldName} field already exists!\n`;
+                            templateObject.setLogFunction(transNOtes);
+                          } else {
+                            console.error("Error:", resultPromiseCustomerID);
                             transNOtes += `Checking Field existing Failed!\n`;
                             transNOtes += `Failed!!!\n`;
                             templateObject.setLogFunction(transNOtes);
@@ -2735,6 +2799,8 @@ export class UtilityService {
                             tempData.Mailing_Country = resultData[i].Country || "";
 
                             tempData.GlobalRef = resultData[i].GlobalRef;
+                            
+                            tempData.Customer_ID = resultData[i].Id;
 
                             // City converting
                             tempData.Mailing_City = resultData[i].City || "";
@@ -2892,34 +2958,33 @@ export class UtilityService {
                           );
 
                           // Process the resultPromise
-                          if (resultPromise) {
-                            if (!resultPromise) {
-                              const resultPromise = await new Promise(
-                                (resolve, reject) => {
-                                  Meteor.call(
-                                    "addcustomFields",
-                                    reqData,
-                                    (error, result) => {
-                                      if (error) {
-                                        reject(error);
-                                      } else {
-                                        resolve(result);
-                                      }
+                          
+                          if (!resultPromise) {
+                            const resultPromise2 = await new Promise(
+                              (resolve, reject) => {
+                                Meteor.call(
+                                  "addcustomFields",
+                                  reqData,
+                                  (error, result) => {
+                                    if (error) {
+                                      reject(error);
+                                    } else {
+                                      resolve(result);
                                     }
-                                  );
-                                }
-                              );
-
-                              if (resultPromise.data) {
-                                transNOtes += `${reqData.module} field has been added in Products module!\n`;
-                                templateObject.setLogFunction(transNOtes);
-                              } else {
-                                console.log(resultPromise);
-                                transNOtes += `${reqData.module} field adding Failed!\n`;
-                                templateObject.setLogFunction(transNOtes);
+                                  }
+                                );
                               }
+                            );
+
+                            if (resultPromise2.data) {
+                              transNOtes += `${reqData.module} field has been added in Products module!\n`;
+                              templateObject.setLogFunction(transNOtes);
+                            } else {
+                              console.log(resultPromise2);
+                              transNOtes += `${reqData.module} field adding Failed!\n`;
+                              templateObject.setLogFunction(transNOtes);
                             }
-                          } else if (!resultPromise) {
+                          } else if (resultPromise) {
                             transNOtes += `${reqData.fieldName} field already exists!\n`;
                             templateObject.setLogFunction(transNOtes);
                           } else {
@@ -3086,34 +3151,32 @@ export class UtilityService {
                           );
 
                           // Process the resultPromise
-                          if (resultPromise) {
-                            if (!resultPromise) {
-                              const resultPromise = await new Promise(
-                                (resolve, reject) => {
-                                  Meteor.call(
-                                    "addcustomFields",
-                                    reqData,
-                                    (error, result) => {
-                                      if (error) {
-                                        reject(error);
-                                      } else {
-                                        resolve(result);
-                                      }
+                          if (!resultPromise) {
+                            const resultPromise2 = await new Promise(
+                              (resolve, reject) => {
+                                Meteor.call(
+                                  "addcustomFields",
+                                  reqData,
+                                  (error, result) => {
+                                    if (error) {
+                                      reject(error);
+                                    } else {
+                                      resolve(result);
                                     }
-                                  );
-                                }
-                              );
-
-                              if (resultPromise.data) {
-                                transNOtes += `${reqData.module} field has been added in Quotes module!\n`;
-                                templateObject.setLogFunction(transNOtes);
-                              } else {
-                                console.log(resultPromise);
-                                transNOtes += `${reqData.module} field adding Failed!\n`;
-                                templateObject.setLogFunction(transNOtes);
+                                  }
+                                );
                               }
+                            );
+
+                            if (resultPromise2.data) {
+                              transNOtes += `${reqData.module} field has been added in Quotes module!\n`;
+                              templateObject.setLogFunction(transNOtes);
+                            } else {
+                              console.log(resultPromise2);
+                              transNOtes += `${reqData.module} field adding Failed!\n`;
+                              templateObject.setLogFunction(transNOtes);
                             }
-                          } else if (!resultPromise) {
+                          } else if (resultPromise) {
                             transNOtes += `${reqData.fieldName} field already exists!\n`;
                             templateObject.setLogFunction(transNOtes);
                           } else {

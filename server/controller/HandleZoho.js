@@ -326,7 +326,7 @@ Meteor.methods({
 
       let promisePOST = new Promise(function (resolve, reject) {
         let postData = {data: reqData.data};
-        HTTP.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Contacts/upsert`, {
+        HTTP.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/Accounts/upsert`, {
            data:postData,
             headers: {
               Authorization: `Zoho-oauthtoken ${reqData.auth}`,
@@ -1036,11 +1036,12 @@ Meteor.methods({
       }
       */
       let promisePOST = new Promise(function (resolve, reject) {
-        HTTP.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/settings/fields?module=${reqData.module}`, reqData.data, {
-            headers: {
-              Authorization: `Zoho-oauthtoken ${reqData.auth}`,
-              "Content-Type": "application/json",
-            }
+        HTTP.post(`https://www.zohoapis.${reqData.datacenter}/crm/v2/settings/fields?module=${reqData.module}`, {
+          headers: {
+            Authorization: `Zoho-oauthtoken ${reqData.auth}`,
+            "Content-Type": "application/json",
+          },
+          data: reqData.data,
         }, function(error, result) {
             if (!error) {
               console.log(result);
