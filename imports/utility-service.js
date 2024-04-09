@@ -2241,7 +2241,7 @@ export class UtilityService {
                               }
                             );
 
-                            if (resultPromise2.data) {
+                            if (resultPromise2.fields[0].code === "SUCCESS") {
                               transNOtes += `${reqData.module} field has been added in Sales_Orders module!\n`;
                               templateObject.setLogFunction(transNOtes);
                             } else {
@@ -2604,7 +2604,8 @@ export class UtilityService {
                     transNOtes += `-----------------------------------------------------------\n`;
                     templateObject.setLogFunction(transNOtes);
                     await fetch(
-                      erpObject.base_url +`/TCustomer?PropertyList=ClientName,Email,FirstName,LastName,Phone,Mobile,SkypeName,Title,Faxnumber,Country,State,Street,Postcode,Billcountry,BillState,BillPostcode,BillStreet&select=[MsTimeStamp]>"${lstUpdateTime}" and [Active]=true`,
+                      // erpObject.base_url +`/TCustomer?PropertyList=ClientName,Email,FirstName,LastName,Phone,Mobile,SkypeName,Title,Faxnumber,Country,State,Street,Postcode,Billcountry,BillState,BillPostcode,BillStreet&select=[MsTimeStamp]>"${lstUpdateTime}" and [Active]=true`,
+                      erpObject.base_url +`/TCustomer?PropertyList=ClientName,Email,FirstName,LastName,Phone,Country,State,Street,Postcode,Billcountry,BillState,BillPostcode,BillStreet&select=[MsTimeStamp]>"${lstUpdateTime}" and [Active]=true`,
                       {
                         method: "GET",
                         headers: {
@@ -2634,7 +2635,7 @@ export class UtilityService {
                           // fields existence checking
                           const reqData = {
                             auth: token,
-                            module: "Contacts",
+                            module: "Accounts",
                             datacenter: datacenter,
                             fieldName: "GlobalRef",
                             data: {
@@ -2678,7 +2679,7 @@ export class UtilityService {
                                 );
                               }
                             );
-                            if (resultPromise2.data) {
+                            if (resultPromise2.fields[0].code === "SUCCESS") {
                               transNOtes += `${reqData.module} field has been added in Contacts module!\n`;
                               templateObject.setLogFunction(transNOtes);
                             } else {
@@ -2706,7 +2707,7 @@ export class UtilityService {
                               fields: [
                                 {
                                   field_label: "Customer_ID",
-                                  data_type: "text",
+                                  data_type: "integer",
                                 },
                               ],
                             },
@@ -2743,7 +2744,7 @@ export class UtilityService {
                                 );
                               }
                             );
-                            if (resultPromise2.data) {
+                            if (resultPromise2) {
                               transNOtes += `${reqDataCustomerID.module} field has been added in Contacts module!\n`;
                               templateObject.setLogFunction(transNOtes);
                             } else {
@@ -2772,11 +2773,12 @@ export class UtilityService {
 
                             let tempNote = transNOtes;
                             //Email converting
-                            tempData.Email = resultData[i].Email || "";
+                            // tempData.Email = resultData[i].Email || "";
 
                             // Customer Name converting
-                            tempData.First_Name = resultData[i].FirstName == '.'? resultData[i].ClientName : resultData[i].FirstName ||'',
-                            tempData.Last_Name = resultData[i].LastName == '.'? resultData[i].ClientName : resultData[i].LastName ||'',
+                            // tempData.First_Name = resultData[i].FirstName == '.'? resultData[i].ClientName : resultData[i].FirstName ||'',
+                            // tempData.Last_Name = resultData[i].LastName == '.'? resultData[i].ClientName : resultData[i].LastName ||'',
+                            tempData.Account_Name = resultData[i].ClientName || "";
                             transNOtes = tempNote + `Customer ${resultData[i]?.LastName} formating.... \n`;
                             templateObject.setLogFunction(transNOtes);
 
@@ -2784,35 +2786,35 @@ export class UtilityService {
                             tempData.Phone = resultData[i].Phone || "";
 
                             // Mobile converting
-                            tempData.Mobile = resultData[i].Mobile || "";
+                            // tempData.Mobile = resultData[i].Mobile || "";
 
                             // Skypenumber converting
-                            tempData.Skype_ID = resultData[i].SkypeName || "";
+                            // tempData.Skype_ID = resultData[i].SkypeName || "";
 
                             // Title converting
-                            tempData.Title = resultData[i].Title || "";
+                            // tempData.Title = resultData[i].Title || "";
 
-                            // Fax converting
-                            tempData.Fax = resultData[i].Faxnumber || "";
+                            // // Fax converting
+                            // tempData.Fax = resultData[i].Faxnumber || "";
 
-                            // Country converting
-                            tempData.Mailing_Country = resultData[i].Country || "";
+                            // // Country converting
+                            tempData.Billing_Country = resultData[i].Country || "";
 
                             tempData.GlobalRef = resultData[i].GlobalRef;
-                            
+
                             tempData.Customer_ID = resultData[i].Id;
 
                             // City converting
-                            tempData.Mailing_City = resultData[i].City || "";
+                            tempData.Billing_City = resultData[i].City || "";
 
                             // State converting
-                            tempData.Mailing_State = resultData[i].State || "";
+                            tempData.Billing_State = resultData[i].State || "";
 
                             // Street converting
-                            tempData.Mailing_Street = resultData[i].Street || "";
+                            tempData.Billing_Street = resultData[i].Street || "";
 
                             // Postcode converting
-                            tempData.Mailing_Zip = resultData[i].Postcode || "";
+                            tempData.Billing_Code = resultData[i].Postcode || "";
 
                             if ((!resultData[i].LastName)) {
                               transNOtes += `Customer ID ${resultData[i].Id} not imported as no Last name\n`;
@@ -2859,11 +2861,11 @@ export class UtilityService {
                             if (resultPromise.data) {
                               upload_transaction_count += resultPromise.data.length;
                               upload_num = resultPromise.data.length;
-                              transNOtes += `Customers transfer Success!\n`;
+                              transNOtes += `Customers transfer Success!\n\n`;
                               templateObject.setLogFunction(transNOtes);
                             } else {
                               console.log(resultPromise);
-                              transNOtes += `Customers transfer Failed!\n`;
+                              transNOtes += `Customers transfer Failed!\n\n`;
                               transNOtes += `Failed!!!\n`;
                               templateObject.setLogFunction(transNOtes);
                             }
@@ -2976,7 +2978,7 @@ export class UtilityService {
                               }
                             );
 
-                            if (resultPromise2.data) {
+                            if (resultPromise2.fields[0].code === "SUCCESS") {
                               transNOtes += `${reqData.module} field has been added in Products module!\n`;
                               templateObject.setLogFunction(transNOtes);
                             } else {
@@ -3168,7 +3170,7 @@ export class UtilityService {
                               }
                             );
 
-                            if (resultPromise2.data) {
+                            if (resultPromise2.fields[0].code === "SUCCESS") {
                               transNOtes += `${reqData.module} field has been added in Quotes module!\n`;
                               templateObject.setLogFunction(transNOtes);
                             } else {
@@ -3539,118 +3541,119 @@ export class UtilityService {
 
                   // let account_id = 7;
                   // let connection_id = 13;
-                  let account_id = tempConnection.account_id;
-                  let connection_id = tempConnection.connection_id;
-                  let today = moment(new Date()).format("YYYY-MM-DD hh:mm:ss");
+                  // let account_id = tempConnection.account_id;
+                  // let connection_id = tempConnection.connection_id;
+                  // let today = moment(new Date()).format("YYYY-MM-DD hh:mm:ss");
 
-                  // let year = today.getFullYear();
-                  // let month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
-                  // let day = String(today.getDate()).padStart(2, "0");
+                  // // let year = today.getFullYear();
+                  // // let month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+                  // // let day = String(today.getDate()).padStart(2, "0");
 
-                  // let formattedDate = `${year}-${month}-${day}`;
-                  let formattedDate = moment(today).format("YYYY-MM-DD");
+                  // // let formattedDate = `${year}-${month}-${day}`;
+                  // let formattedDate = moment(today).format("YYYY-MM-DD");
 
-                  let products_num =
-                    upload_transaction_count + download_transaction_count;
-                  let transaction_data = {
-                    accounting_soft: account_id,
-                    connection_soft: connection_id,
-                    date: formattedDate,
-                    order_num: products_num,
-                    products: products,
-                    products_num: products_num,
-                    uploaded_num: upload_transaction_count,
-                    downloaded_num: download_transaction_count,
-                    connection_id: selConnectionId,
-                  };
+                  // let products_num =
+                  //   upload_transaction_count + download_transaction_count;
+                  // let transaction_data = {
+                  //   accounting_soft: account_id,
+                  //   connection_soft: connection_id,
+                  //   date: formattedDate,
+                  //   order_num: products_num,
+                  //   products: products,
+                  //   products_num: products_num,
+                  //   uploaded_num: upload_transaction_count,
+                  //   downloaded_num: download_transaction_count,
+                  //   connection_id: selConnectionId,
+                  // };
 
-                  let insertedTransactionID = 0;
-                  fetch("/api/transactionByDate", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                      date: moment().format("YYYY-MM-DD"),
-                      connection_id: selConnectionId,
-                      accounting_soft: account_id,
-                      connection_soft: connection_id,
-                    }),
-                  }).then((response) => response.json()).then(async (result) => {
-                      if (result != "No Result") {
-                        transaction_data.order_num =
-                          transaction_data.order_num + result.order_num;
-                        transaction_data.products_num =
-                          transaction_data.products_num + result.products_num;
-                        transaction_data.uploaded_num =
-                          transaction_data.uploaded_num + result.uploaded_num;
-                        transaction_data.downloaded_num =
-                          transaction_data.downloaded_num + result.downloaded_num;
-                        let resultId = result.id;
-                        fetch("/api/addtransaction", {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify({
-                            id: resultId,
-                            transaction_data: transaction_data,
-                          }),
-                        })
-                          .then((response) => response.json())
-                          .then(async (result) => {
-                            insertedTransactionID = resultId;
-                            let postData = {
-                              transaction_details: transaction_details,
-                              transactionId: insertedTransactionID,
-                              date: today,
-                            };
-                            fetch("/api/inserttransactionDetails", {
-                              method: "POST",
-                              headers: {
-                                "Content-Type": "application/json",
-                              },
-                              body: JSON.stringify(postData),
-                            })
-                              .then((response) => response.json())
-                              .then(async (result) => {})
-                              .catch((error) => console.log(error));
-                          })
-                          .catch((error) => console.log(error));
-                      } else {
-                        fetch("/api/inserttransaction", {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify(transaction_data),
-                        })
-                          .then((response) => response.json())
-                          .then(async (result) => {
-                            insertedTransactionID = result;
-                            let postData = {
-                              transaction_details: transaction_details,
-                              transactionId: insertedTransactionID,
-                              date: today,
-                            };
-                            fetch("/api/inserttransactionDetails", {
-                              method: "POST",
-                              headers: {
-                                "Content-Type": "application/json",
-                              },
-                              body: JSON.stringify(postData),
-                            })
-                              .then((response) => response.json())
-                              .then(async (result) => {})
-                              .catch((error) => console.log(error));
-                          })
-                          .catch((error) => console.log(error));
-                      }
-                    });
+                  // console.log(transaction_data);
+                  // let insertedTransactionID = 0;
+                  // fetch("/api/transactionByDate", {
+                  //   method: "POST",
+                  //   headers: {
+                  //     "Content-Type": "application/json",
+                  //   },
+                  //   body: JSON.stringify({
+                  //     date: moment().format("YYYY-MM-DD"),
+                  //     connection_id: selConnectionId,
+                  //     accounting_soft: account_id,
+                  //     connection_soft: connection_id,
+                  //   }),
+                  // }).then((response) => response.json()).then(async (result) => {
+                  //     if (result != "No Result") {
+                  //       transaction_data.order_num =
+                  //         transaction_data.order_num + result.order_num;
+                  //       transaction_data.products_num =
+                  //         transaction_data.products_num + result.products_num;
+                  //       transaction_data.uploaded_num =
+                  //         transaction_data.uploaded_num + result.uploaded_num;
+                  //       transaction_data.downloaded_num =
+                  //         transaction_data.downloaded_num + result.downloaded_num;
+                  //       let resultId = result.id;
+                  //       fetch("/api/addtransaction", {
+                  //         method: "POST",
+                  //         headers: {
+                  //           "Content-Type": "application/json",
+                  //         },
+                  //         body: JSON.stringify({
+                  //           id: resultId,
+                  //           transaction_data: transaction_data,
+                  //         }),
+                  //       })
+                  //         .then((response) => response.json())
+                  //         .then(async (result) => {
+                  //           insertedTransactionID = resultId;
+                  //           let postData = {
+                  //             transaction_details: transaction_details,
+                  //             transactionId: insertedTransactionID,
+                  //             date: today,
+                  //           };
+                  //           fetch("/api/inserttransactionDetails", {
+                  //             method: "POST",
+                  //             headers: {
+                  //               "Content-Type": "application/json",
+                  //             },
+                  //             body: JSON.stringify(postData),
+                  //           })
+                  //             .then((response) => response.json())
+                  //             .then(async (result) => {})
+                  //             .catch((error) => console.log(error));
+                  //         })
+                  //         .catch((error) => console.log(error));
+                  //     } else {
+                  //       fetch("/api/inserttransaction", {
+                  //         method: "POST",
+                  //         headers: {
+                  //           "Content-Type": "application/json",
+                  //         },
+                  //         body: JSON.stringify(transaction_data),
+                  //       })
+                  //         .then((response) => response.json())
+                  //         .then(async (result) => {
+                  //           insertedTransactionID = result;
+                  //           let postData = {
+                  //             transaction_details: transaction_details,
+                  //             transactionId: insertedTransactionID,
+                  //             date: today,
+                  //           };
+                  //           fetch("/api/inserttransactionDetails", {
+                  //             method: "POST",
+                  //             headers: {
+                  //               "Content-Type": "application/json",
+                  //             },
+                  //             body: JSON.stringify(postData),
+                  //           })
+                  //             .then((response) => response.json())
+                  //             .then(async (result) => {})
+                  //             .catch((error) => console.log(error));
+                  //         })
+                  //         .catch((error) => console.log(error));
+                  //     }
+                  //   });
 
-                  upload_transaction_count = 0;
-                  download_transaction_count = 0;
-                  transaction_details = [];
+                  // upload_transaction_count = 0;
+                  // download_transaction_count = 0;
+                  // transaction_details = [];
 
                   if (ZOHO_QuotesState) {
                     transNOtes += `-----------------------------------------------------------\n`;
@@ -4549,25 +4552,33 @@ export class UtilityService {
 
                   // account_id = 13;
                   // connection_id = 7;
-                  account_id = tempConnection.account_id;
-                  connection_id = tempConnection.connection_id;
-                  today = moment(new Date()).format("YYYY-MM-DD hh:mm:ss");
+                  let account_id = tempConnection.account_id;
+                  let connection_id = tempConnection.connection_id;
+                  let today = moment(new Date()).format("YYYY-MM-DD hh:mm:ss");
 
-                  formattedDate = moment(today).format("YYYY-MM-DD");
+                  // let year = today.getFullYear();
+                  // let month = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+                  // let day = String(today.getDate()).padStart(2, "0");
 
-                  products_num =upload_transaction_count + download_transaction_count;
+                  // let formattedDate = `${year}-${month}-${day}`;
+                  let formattedDate = moment(today).format("YYYY-MM-DD");
 
-                  transaction_data.accounting_soft = account_id;
-                  transaction_data.connection_soft = connection_id;
-                  transaction_data.date = formattedDate;
-                  transaction_data.order_num = products_num;
-                  transaction_data.products = products_num;
-                  transaction_data.products_num = products_num;
-                  transaction_data.uploaded_num = upload_transaction_count;
-                  transaction_data.downloaded_num = download_transaction_count;
-                  transaction_data.connection_id = selConnectionId;
+                  let products_num =
+                    upload_transaction_count + download_transaction_count;
+                  let transaction_data = {
+                    accounting_soft: account_id,
+                    connection_soft: connection_id,
+                    date: formattedDate,
+                    order_num: products_num,
+                    products: products,
+                    products_num: products_num,
+                    uploaded_num: upload_transaction_count,
+                    downloaded_num: download_transaction_count,
+                    connection_id: selConnectionId,
+                  };
 
-                  insertedTransactionID = 0;
+                  console.log(transaction_data);
+                  let insertedTransactionID = 0;
                   fetch("/api/transactionByDate", {
                     method: "POST",
                     headers: {
@@ -4581,10 +4592,14 @@ export class UtilityService {
                     }),
                   }).then((response) => response.json()).then(async (result) => {
                       if (result != "No Result") {
-                        transaction_data.order_num = transaction_data.order_num + result.order_num;
-                        transaction_data.products_num = transaction_data.products_num + result.products_num;
-                        transaction_data.uploaded_num = transaction_data.uploaded_num + result.uploaded_num;
-                        transaction_data.downloaded_num = transaction_data.downloaded_num + result.downloaded_num;
+                        transaction_data.order_num =
+                          transaction_data.order_num + result.order_num;
+                        transaction_data.products_num =
+                          transaction_data.products_num + result.products_num;
+                        transaction_data.uploaded_num =
+                          transaction_data.uploaded_num + result.uploaded_num;
+                        transaction_data.downloaded_num =
+                          transaction_data.downloaded_num + result.downloaded_num;
                         let resultId = result.id;
                         fetch("/api/addtransaction", {
                           method: "POST",
